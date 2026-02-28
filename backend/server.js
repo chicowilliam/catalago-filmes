@@ -12,7 +12,7 @@ app.use(express.json());
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: "super-secret-key",
     resave: false,
     saveUninitialized: false
   })

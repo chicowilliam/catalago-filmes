@@ -4,7 +4,7 @@ const router = express.Router();
 // ADMIN FIXO (por enquanto)
 const ADMIN_USER = {
   username: "admin",
-  password: "123456"
+  password: "$2b$10$KQ9"
 };
 
 // LOGIN

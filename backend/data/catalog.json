@@ -104,11 +104,19 @@
     "synopsis": "Os sobreviventes de um acidente aéreo ficam presos em uma ilha misteriosa cheia de segredos, perigos e fenômenos inexplicáveis."
   },
   {
-    "id": 1772251091565,
-    "title": "Filme de Teste",
-    "type": "movie",
-    "image": "assets/images/batman-dark-night.jpeg",
-    "trailerId": "bdlQ8oxacY8",
-    "synopsis": "Esse filme foi adicionado via POST."
+    "id": 14,
+    "title": "Stranger Things",
+    "type": "series",
+    "image": "assets/images/stranger-things.png",
+    "trailerId": "b9EkMc79ZSU",
+    "synopsis": "Na década de 1980, um grupo de crianças enfrenta forças sobrenaturais e conspirações governamentais para encontrar seu amigo desaparecido."
+  },
+  {
+    "id": 15,
+    "title": "The Crown",
+    "type": "series",
+    "image": "assets/images/the-crown.png",
+    "trailerId": "JWtnJ3YFz9w",
+    "synopsis": "A série retrata a vida da Rainha Elizabeth II desde sua ascensão ao trono até os desafios pessoais e políticos que enfrentou ao longo dos anos."
   }
 ]

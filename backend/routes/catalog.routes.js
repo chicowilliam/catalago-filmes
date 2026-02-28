@@ -11,6 +11,13 @@ function readDB() {
   return JSON.parse(fs.readFileSync(dbPath, "utf-8"));
 }
 
+function saveDB(data) {
+  fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
+}
+
+/* =========================
+   GET — LISTAR
+========================= */
 router.get("/", (req, res) => {
   const { type, search } = req.query;
   let catalog = readDB();
@@ -28,6 +35,9 @@ router.get("/", (req, res) => {
   res.json(catalog);
 });
 
+/* =========================
+   POST — CRIAR
+========================= */
 router.post("/", isAdmin, (req, res) => {
   const catalog = readDB();
 
@@ -41,10 +51,52 @@ router.post("/", isAdmin, (req, res) => {
   };
 
   catalog.push(newItem);
-
-  fs.writeFileSync(dbPath, JSON.stringify(catalog, null, 2));
+  saveDB(catalog);
 
   res.status(201).json(newItem);
+});
+
+/* =========================
+   PUT — EDITAR
+========================= */
+router.put("/:id", isAdmin, (req, res) => {
+  const catalog = readDB();
+  const id = Number(req.params.id);
+
+  const index = catalog.findIndex(item => item.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ message: "Item não encontrado" });
+  }
+
+  catalog[index] = {
+    ...catalog[index],
+    title: req.body.title,
+    type: req.body.type,
+    image: req.body.image,
+    trailerId: req.body.trailerId,
+    synopsis: req.body.synopsis
+  };
+
+  saveDB(catalog);
+  res.json(catalog[index]);
+});
+
+/* =========================
+   DELETE — REMOVER
+========================= */
+router.delete("/:id", isAdmin, (req, res) => {
+  const catalog = readDB();
+  const id = Number(req.params.id);
+
+  const newCatalog = catalog.filter(item => item.id !== id);
+
+  if (newCatalog.length === catalog.length) {
+    return res.status(404).json({ message: "Item não encontrado" });
+  }
+
+  saveDB(newCatalog);
+  res.status(204).end();
 });
 
 module.exports = router;

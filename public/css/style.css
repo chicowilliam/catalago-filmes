@@ -180,7 +180,7 @@ backface-visibility: hidden;
 
 .movie-card:hover .play-btn {
   transform: scale(1);
-  background: #fff;
+  background: none;
 }
 
 .movie-card:hover {
@@ -213,21 +213,22 @@ backface-visibility: hidden;
 }
 
 .play-btn {
-  width: 64px;
-  height: 64px;
-  background: rgba(255,255,255,0.9);
-  color: #000;
-  border-radius: 50%;
+  width: 0;
+  height: 0;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-left: 22px solid rgba(255, 255, 255, 0.9);
+  border-top: 14px solid transparent;
+  border-bottom: 14px solid transparent;
 
-  font-size: 22px;
-  padding-left: 3px;
+  transition: 
+    transform 0.3s ease,
+    border-left-color 0.3s ease;
+}
 
-  transform: scale(0.8);
-  transition: transform 0.3s ease, background 0.3s ease;
+/* Hover no card */
+.movie-card:hover .play-btn {
+  transform: scale(1.15);
+  border-left-color: rgba(229, 9, 20, 0.75); /* vermelho Netflix translúcido */
 }
 
 .movie-image {
@@ -392,4 +393,23 @@ backface-visibility: hidden;
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.admin-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #e50914;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
 }

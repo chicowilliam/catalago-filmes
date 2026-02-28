@@ -1,4 +1,4 @@
-"<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -48,6 +48,8 @@
   <!-- HEADER -->
   <header class="header">
     <div class="header-container">
+
+<button id="adminBtn" class="admin-btn">Admin</button>
 
       <h1 class="logo">Catálogo de Filmes</h1>
 
@@ -112,6 +114,25 @@
 
   <!-- SCRIPT -->
   <script src="js/script.js" defer></script>
+
+<div id="adminModal" class="modal">
+  <div class="modal-content">
+    <h2>Admin Panel</h2>
+
+    <form id="adminForm">
+      <input placeholder="Título" id="title" required />
+      <input placeholder="Imagem URL" id="image" required />
+      <input placeholder="Trailer ID" id="trailerId" />
+      <select id="type">
+        <option value="movie">Filme</option>
+        <option value="series">Série</option>
+      </select>
+      <textarea placeholder="Sinopse" id="synopsis"></textarea>
+
+      <button type="submit">Salvar</button>
+    </form>
+  </div>
+</div>
 
 </body>
 </html>
