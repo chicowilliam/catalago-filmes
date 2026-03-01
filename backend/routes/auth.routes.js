@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
-// ADMIN FIXO (por enquanto)
+// ✅ AGORA USA VARIÁVEIS DE AMBIENTE!
 const ADMIN_USER = {
-  username: "admin",
-  password: "123456"
+  username: process.env.ADMIN_USERNAME || "admin",
+  password: process.env.ADMIN_PASSWORD || "admin123"
 };
 
 // LOGIN
@@ -13,7 +13,7 @@ router.post("/login", (req, res) => {
 
   if (
     username === ADMIN_USER.username &&
-    password === "123456"
+    password === ADMIN_USER.password // ← MUDOU!
   ) {
     req.session.user = {
       username,

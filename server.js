@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
@@ -14,7 +16,7 @@ app.use(express.json());
 
 app.use(
   session({
-    secret: "super-secret-key",
+    secret: process.env.SESSION_SECRET || "super-secret-key",
     resave: false,
     saveUninitialized: false
   })
@@ -34,7 +36,8 @@ app.use(express.static(path.join(__dirname, "public")));
 /* =========================
    SERVER
 ========================= */
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server rodando em http://localhost:${PORT}`);
+  console.log(`🔐 Modo: ${process.env.NODE_ENV || "production"}`);
 });
