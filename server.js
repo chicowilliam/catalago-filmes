@@ -6,6 +6,7 @@ const path = require("path");
 
 const authRoutes = require("./backend/routes/auth.routes");
 const catalogRoutes = require("./backend/routes/catalog.routes");
+const errorHandler = require("./backend/middlewares/errorHandler"); // ← ADICIONE
 
 const app = express();
 
@@ -16,7 +17,7 @@ app.use(express.json());
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "super-secret-key",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false
   })
@@ -34,10 +35,15 @@ app.use("/api/catalog", catalogRoutes);
 app.use(express.static(path.join(__dirname, "public")));
 
 /* =========================
+   TRATAMENTO DE ERROS (DEVE SER POR ÚLTIMO!)
+========================= */
+app.use(errorHandler);
+
+/* =========================
    SERVER
 ========================= */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server rodando em http://localhost:${PORT}`);
-  console.log(`🔐 Modo: ${process.env.NODE_ENV || "production"}`);
+  console.log(`🔐 Modo: ${process.env.NODE_ENV}`);
 });
