@@ -4,7 +4,7 @@ const router = express.Router();
 // ADMIN FIXO (por enquanto)
 const ADMIN_USER = {
   username: "admin",
-  password: "$2b$10$KQ9"
+  password: "123456"
 };
 
 // LOGIN
@@ -13,7 +13,7 @@ router.post("/login", (req, res) => {
 
   if (
     username === ADMIN_USER.username &&
-    password === ADMIN_USER.password
+    password === "123456"
   ) {
     req.session.user = {
       username,
