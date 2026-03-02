@@ -6,13 +6,26 @@ const modalContent = document.getElementById("modalContent");
 
 // ================== CATÁLOGO ==================
 async function loadCatalog(type = "all", search = "") {
-  const res = await fetch(`/api/catalog?type=${type}&search=${search}`);
-  const data = await res.json();
-
-  renderCatalog(data);
-
-  // ✅ ESCONDE O LOADER
-  loader.classList.add("hide");
+  try {
+    const res = await fetch(`/api/catalog?type=${type}&search=${search}`);
+    
+    if (!res.ok) {
+      throw new Error(`Erro ao carregar catálogo: ${res.status}`);
+    }
+    
+    const data = await res.json();
+    renderCatalog(data);
+  } catch (err) {
+    console.error("❌ Erro ao carregar catálogo:", err);
+    moviesGrid.innerHTML = `
+      <p style="color: #e50914; text-align: center; grid-column: 1/-1;">
+        Erro ao carregar filmes. Tente recarregar a página.
+      </p>
+    `;
+  } finally {
+    // ✅ SEMPRE esconde o loader (sucesso ou erro)
+    loader.classList.add("hide");
+  }
 }
 
 // ✅ FUNÇÃO SEGURA PARA CRIAR CARD
@@ -49,14 +62,24 @@ function createMovieCard(item) {
   card.appendChild(title);
 
   // Adiciona evento de clique
-  card.onclick = () => openModal(item);
+  card.addEventListener("click", () => openModal(item));
 
   return card;
 }
 
 function renderCatalog(items) {
-  // ✅ Limpa o grid (isso é seguro)
+  // ✅ Limpa o grid
   moviesGrid.innerHTML = "";
+
+  // Verifica se há filmes
+  if (!items || items.length === 0) {
+    moviesGrid.innerHTML = `
+      <p style="color: #999; text-align: center; grid-column: 1/-1;">
+        Nenhum filme encontrado.
+      </p>
+    `;
+    return;
+  }
 
   // ✅ Cria e insere os cards de forma segura
   items.forEach(item => {
@@ -75,13 +98,20 @@ function createModalContent(item) {
   const closeBtn = document.createElement("button");
   closeBtn.className = "modal-close";
   closeBtn.textContent = "×";
-  closeBtn.onclick = closeModal;
+  closeBtn.type = "button";
+  closeBtn.addEventListener("click", closeModal);
 
   // Cria o iframe (seguro pois YouTube ID é controlado)
   const iframe = document.createElement("iframe");
   iframe.src = `https://www.youtube.com/embed/${item.trailerId}`;
   iframe.allowFullscreen = true;
   iframe.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture");
+  iframe.style.width = "100%";
+  iframe.style.maxWidth = "720px";
+  iframe.style.aspectRatio = "16 / 9";
+  iframe.style.borderRadius = "14px";
+  iframe.style.display = "block";
+  iframe.style.margin = "0 auto 16px";
 
   // Cria o título
   const title = document.createElement("h3");
@@ -108,7 +138,7 @@ function closeModal() {
 }
 
 // =========================
-// LOGIN
+// LOGIN - VERSÃO MELHORADA
 // =========================
 const loginForm = document.getElementById("loginForm");
 const loginScreen = document.getElementById("loginScreen");
@@ -117,10 +147,18 @@ const loginError = document.getElementById("loginError");
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const username = document.getElementById("username").value;
+  const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value;
 
+  // Validação básica no frontend
+  if (!username || !password) {
+    loginError.textContent = "Username e senha são obrigatórios";
+    return;
+  }
+
   try {
+    console.log("🔄 Tentando fazer login...");
+
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: {
@@ -129,19 +167,31 @@ loginForm.addEventListener("submit", async (e) => {
       body: JSON.stringify({ username, password })
     });
 
+    // Tenta fazer parsing da resposta
+    let data;
+    try {
+      data = await response.json();
+    } catch (parseErr) {
+      console.error("❌ Erro ao fazer parse da resposta:", parseErr);
+      loginError.textContent = "Erro do servidor. Tente novamente.";
+      return;
+    }
+
+    // Verifica se o login foi bem-sucedido
     if (!response.ok) {
-      const data = await response.json();
-      loginError.textContent = data.message || "Erro no login";
+      const errorMsg = data?.message || "Erro ao fazer login";
+      console.error("❌ Login falhou:", errorMsg);
+      loginError.textContent = errorMsg;
       return;
     }
 
     // ✅ LOGIN OK
+    console.log("✅ Login bem-sucedido!");
     loginScreen.style.display = "none";
     loadCatalog();
 
-    console.log("✅ Logado como admin");
-
   } catch (err) {
-    loginError.textContent = "Erro ao conectar com o servidor";
+    console.error("❌ Erro de conexão:", err);
+    loginError.textContent = "Erro ao conectar com o servidor. Verifique sua conexão.";
   }
 });
