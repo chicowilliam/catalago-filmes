@@ -643,3 +643,61 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(229, 9, 20, 0.9);
 }
+
+/* ... SEU CSS ANTERIOR FICA AQUI ... */
+
+/* =========================
+   SKELETON LOADING
+========================= */
+.skeleton-card {
+  background: #111;
+  border-radius: 12px;
+  overflow: hidden;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@media (min-width: 768px) {
+  .skeleton-card {
+    border-radius: 18px;
+  }
+}
+
+.skeleton-media {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  background: #222;
+}
+
+.skeleton-title {
+  height: 16px;
+  background: #222;
+  margin: 12px;
+  border-radius: 4px;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* =========================
+   LAZY LOADING
+========================= */
+.movie-image {
+  /* Já estava aqui, só adicionando: */
+  background: #0a0a0a;
+}
+
+.movie-image[data-src] {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.movie-image.loaded {
+  opacity: 1;
+}

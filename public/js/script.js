@@ -5,16 +5,87 @@ const modal = document.getElementById("modal");
 const modalContent = document.getElementById("modalContent");
 
 // ================== ESTADO GLOBAL ==================
-// Armazenam o filtro/busca atual (estado da aplicação)
 let currentType = "all";
 let currentSearch = "";
 let debounceTimer = null;
+let imageObserver = null; // Para lazy loading
+
+// ================== LAZY LOADING - INTERSECTION OBSERVER ==================
+/**
+ * EXPLICAÇÃO: Intersection Observer
+ * 
+ * Detecta quando uma imagem entra na viewport (tela do usuário)
+ * 
+ * Vantagens:
+ * - Eficiente (não precisa de scroll listeners)
+ * - Nativo do navegador
+ * - Melhor performance
+ */
+function initLazyLoading() {
+  const options = {
+    root: null,           // Usa viewport como raiz
+    rootMargin: "50px",   // Começa a carregar 50px antes de aparecer
+    threshold: 0.01       // Carrega quando 1% visível
+  };
+
+  imageObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        
+        // ✅ Pega a URL real guardada em data-src
+        const realSrc = img.getAttribute("data-src");
+        
+        if (realSrc) {
+          console.log(`📷 Carregando imagem: ${realSrc}`);
+          
+          // ✅ Carrega a imagem
+          img.src = realSrc;
+          
+          // ✅ Remove o placeholder
+          img.removeAttribute("data-src");
+          
+          // ✅ Adiciona classe para fade-in
+          img.classList.add("loaded");
+          
+          // ✅ Para de observar (já foi carregada)
+          imageObserver.unobserve(img);
+        }
+      }
+    });
+  }, options);
+}
+
+// ================== SKELETON LOADING ==================
+/**
+ * EXPLICAÇÃO: Skeleton Card
+ * 
+ * Cria um "esqueleto" do card que mostra enquanto carrega
+ * Mantém o layout estável (sem jumping)
+ */
+function createSkeletonCard() {
+  const skeleton = document.createElement("div");
+  skeleton.className = "skeleton-card";
+  
+  skeleton.innerHTML = `
+    <div class="skeleton-media"></div>
+    <div class="skeleton-title"></div>
+  `;
+  
+  return skeleton;
+}
 
 // ================== CATÁLOGO ==================
 async function loadCatalog(type = "all", search = "") {
   try {
-    // Mostra loader
+    // ✅ Mostra loader e skeletons
     loader.classList.remove("hide");
+    
+    // ✅ Mostra 6 skeletons enquanto carrega
+    moviesGrid.innerHTML = "";
+    for (let i = 0; i < 6; i++) {
+      moviesGrid.appendChild(createSkeletonCard());
+    }
     
     const res = await fetch(`/api/catalog?type=${type}&search=${search}`);
     
@@ -38,7 +109,7 @@ async function loadCatalog(type = "all", search = "") {
   }
 }
 
-// ✅ FUNÇÃO SEGURA PARA CRIAR CARD
+// ✅ FUNÇÃO SEGURA PARA CRIAR CARD COM LAZY LOADING
 function createMovieCard(item) {
   const card = document.createElement("article");
   card.className = "movie-card";
@@ -50,10 +121,17 @@ function createMovieCard(item) {
   badge.className = "badge";
   badge.textContent = item.type;
 
+  // ✅ LAZY LOADING: Usa data-src em vez de src
   const img = document.createElement("img");
   img.className = "movie-image";
-  img.src = item.image;
+  img.setAttribute("data-src", item.image); // Guarda a URL real aqui
+  img.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 600'%3E%3Crect fill='%23222' width='400' height='600'/%3E%3C/svg%3E"; // Placeholder SVG
   img.alt = item.title;
+  
+  // ✅ Observa essa imagem para lazy loading
+  if (imageObserver) {
+    imageObserver.observe(img);
+  }
 
   mediaDiv.appendChild(badge);
   mediaDiv.appendChild(img);
@@ -82,90 +160,52 @@ function renderCatalog(items) {
     return;
   }
 
+  // ✅ Cria e insere os cards
   items.forEach(item => {
     const card = createMovieCard(item);
     moviesGrid.appendChild(card);
   });
 }
 
-// ================== FILTRO POR TIPO (Filmes/Séries) ==================
-/**
- * EXPLICAÇÃO: Event Delegation
- * 
- * Em vez de adicionar um listener em CADA botão de filtro,
- * adicionamos UMA VEZ no container pai (.filter-group)
- * e deixamos as cliques "borbulharem" até lá.
- * 
- * Vantagem: Menos código, melhor performance
- */
-
-// Pega o container que contém todos os botões
+// ================== FILTRO POR TIPO ==================
 const filterGroup = document.querySelector(".filter-group");
 
 filterGroup.addEventListener("click", (event) => {
-  // Verifica se foi clicado em um botão
   if (event.target.classList.contains("filter-btn")) {
     const filterBtn = event.target;
-    
-    // ✅ Pega o tipo selecionado (all, movie, series)
     const selectedType = filterBtn.getAttribute("data-type");
     
     console.log(`🎬 Filtrando por: ${selectedType}`);
     
-    // ✅ Atualiza o estado global
     currentType = selectedType;
     
-    // ✅ Remove classe "active" de todos os botões
     document.querySelectorAll(".filter-btn").forEach(btn => {
       btn.classList.remove("active");
     });
     
-    // ✅ Adiciona classe "active" ao botão clicado
     filterBtn.classList.add("active");
     
-    // ✅ Carrega o catálogo com o novo filtro
     loadCatalog(currentType, currentSearch);
   }
 });
 
-// ================== BUSCA DINÂMICA (Debounce) ==================
-/**
- * EXPLICAÇÃO: Debounce (Anti-spam)
- * 
- * Problema: A cada caractere digitado, envia uma requisição à API
- * Solução: Aguardar o usuário parar de digitar por 500ms
- * 
- * Fluxo:
- * 1. Usuário digita "M"      → aguarda 500ms
- * 2. Usuário digita "Ma"     → cancela timer anterior, aguarda 500ms
- * 3. Usuário digita "Mat"    → cancela timer anterior, aguarda 500ms
- * 4. Usuário para de digitar → Após 500ms: faz a requisição com "Mat"
- * 
- * Resultado: 1 requisição em vez de 3!
- */
-
+// ================== BUSCA DINÂMICA ==================
 searchInput.addEventListener("input", (event) => {
-  // ✅ Pega o valor digitado
   const searchValue = event.target.value.trim();
   
   console.log(`🔍 Digitou: "${searchValue}"`);
   
-  // ✅ Cancela o timer anterior (se existir)
   if (debounceTimer) {
     clearTimeout(debounceTimer);
   }
   
-  // ✅ Cria um novo timer
   debounceTimer = setTimeout(() => {
     console.log(`🔍 Buscando por: "${searchValue}"`);
     
-    // ✅ Atualiza o estado global
     currentSearch = searchValue;
-    
-    // ✅ Carrega o catálogo com a nova busca
     loadCatalog(currentType, currentSearch);
     
-  }, 500); // Aguarda 500ms
+  }, 500);
 });
 
 // ================== MODAL ==================
@@ -271,6 +311,10 @@ loginForm.addEventListener("submit", async (e) => {
 
     console.log("✅ Login bem-sucedido!");
     loginScreen.style.display = "none";
+    
+    // ✅ Inicializa lazy loading APÓS login
+    initLazyLoading();
+    
     loadCatalog();
 
   } catch (err) {
