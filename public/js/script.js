@@ -13,9 +13,9 @@ async function loadCatalog(type = "all", search = "") {
       throw new Error(`Erro ao carregar catálogo: ${res.status}`);
     }
     
-    const data = await res.json();
-    renderCatalog(data);
-  } catch (err) {
+    const response = await res.json();
+    renderCatalog(response.data);
+  } catch (err) { 
     console.error("❌ Erro ao carregar catálogo:", err);
     moviesGrid.innerHTML = `
       <p style="color: #e50914; text-align: center; grid-column: 1/-1;">
