@@ -15,37 +15,92 @@ async function loadCatalog(type = "all", search = "") {
   loader.classList.add("hide");
 }
 
+// ✅ FUNÇÃO SEGURA PARA CRIAR CARD
+function createMovieCard(item) {
+  const card = document.createElement("article");
+  card.className = "movie-card";
+
+  // Cria a div do media
+  const mediaDiv = document.createElement("div");
+  mediaDiv.className = "movie-media";
+
+  // Cria o badge (tipo de filme/série)
+  const badge = document.createElement("span");
+  badge.className = "badge";
+  badge.textContent = item.type; // ✅ SEGURO - textContent
+
+  // Cria a imagem
+  const img = document.createElement("img");
+  img.className = "movie-image";
+  img.src = item.image;
+  img.alt = item.title; // ✅ Melhora acessibilidade
+
+  // Monta o media div
+  mediaDiv.appendChild(badge);
+  mediaDiv.appendChild(img);
+
+  // Cria o título
+  const title = document.createElement("h3");
+  title.className = "movie-title";
+  title.textContent = item.title; // ✅ SEGURO - textContent
+
+  // Monta o card
+  card.appendChild(mediaDiv);
+  card.appendChild(title);
+
+  // Adiciona evento de clique
+  card.onclick = () => openModal(item);
+
+  return card;
+}
+
 function renderCatalog(items) {
+  // ✅ Limpa o grid (isso é seguro)
   moviesGrid.innerHTML = "";
 
+  // ✅ Cria e insere os cards de forma segura
   items.forEach(item => {
-    const card = document.createElement("article");
-    card.className = "movie-card";
-
-    card.innerHTML = `
-      <div class="movie-media">
-        <span class="badge">${item.type}</span>
-        <img src="${item.image}" class="movie-image">
-      </div>
-      <h3 class="movie-title">${item.title}</h3>
-    `;
-
-    card.onclick = () => openModal(item);
+    const card = createMovieCard(item);
     moviesGrid.appendChild(card);
   });
 }
 
 // ================== MODAL ==================
-function openModal(item) {
-  modalContent.innerHTML = `
-    <button class="modal-close">&times;</button>
-    <iframe src="https://www.youtube.com/embed/${item.trailerId}" allowfullscreen></iframe>
-    <h3>${item.title}</h3>
-    <p>${item.synopsis}</p>
-  `;
+// ✅ FUNÇÃO SEGURA PARA CRIAR MODAL
+function createModalContent(item) {
+  // Limpa o modal
+  modalContent.innerHTML = "";
 
+  // Cria o botão de fechar
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "modal-close";
+  closeBtn.textContent = "×";
+  closeBtn.onclick = closeModal;
+
+  // Cria o iframe (seguro pois YouTube ID é controlado)
+  const iframe = document.createElement("iframe");
+  iframe.src = `https://www.youtube.com/embed/${item.trailerId}`;
+  iframe.allowFullscreen = true;
+  iframe.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture");
+
+  // Cria o título
+  const title = document.createElement("h3");
+  title.textContent = item.title; // ✅ SEGURO
+
+  // Cria a sinopse
+  const synopsis = document.createElement("p");
+  synopsis.textContent = item.synopsis; // ✅ SEGURO
+
+  // Monta tudo
+  modalContent.appendChild(closeBtn);
+  modalContent.appendChild(iframe);
+  modalContent.appendChild(title);
+  modalContent.appendChild(synopsis);
+}
+
+function openModal(item) {
+  createModalContent(item);
   modal.classList.add("show");
-  document.querySelector(".modal-close").onclick = closeModal;
 }
 
 function closeModal() {
