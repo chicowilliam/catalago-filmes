@@ -322,3 +322,78 @@ loginForm.addEventListener("submit", async (e) => {
     loginError.textContent = "Erro ao conectar com o servidor. Verifique sua conexão.";
   }
 });
+
+// ... SEU CÓDIGO ANTERIOR FICA AQUI ...
+
+// =========================
+// DARK/LIGHT MODE THEME
+// =========================
+/**
+ * EXPLICAÇÃO: Dark Mode com localStorage
+ * 
+ * 1. Detecta tema do sistema (preferência do usuário)
+ * 2. Salva no localStorage
+ * 3. Aplica ao recarregar página
+ * 4. Toggle troca entre os temas
+ */
+
+const themeToggle = document.getElementById("themeToggle");
+const htmlElement = document.documentElement;
+
+// ✅ Pega o tema salvo ou detecta do sistema
+function getInitialTheme() {
+  // Verifica localStorage primeiro
+  const savedTheme = localStorage.getItem("theme");
+  if (savedTheme) {
+    console.log(`🎨 Tema salvo: ${savedTheme}`);
+    return savedTheme;
+  }
+  
+  // Detecta preferência do sistema
+  if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    console.log("🌙 Preferência do sistema: Dark Mode");
+    return "dark";
+  }
+  
+  console.log("☀️ Preferência do sistema: Light Mode");
+  return "light";
+}
+
+// ✅ Aplica o tema
+function applyTheme(theme) {
+  if (theme === "dark") {
+    htmlElement.setAttribute("data-theme", "dark");
+    themeToggle.querySelector(".theme-icon").textContent = "☀️";
+    localStorage.setItem("theme", "dark");
+  } else {
+    htmlElement.removeAttribute("data-theme");
+    themeToggle.querySelector(".theme-icon").textContent = "🌙";
+    localStorage.setItem("theme", "light");
+  }
+  
+  console.log(`🎨 Tema aplicado: ${theme}`);
+}
+
+// ✅ Toggle entre temas
+function toggleTheme() {
+  const currentTheme = htmlElement.getAttribute("data-theme") || "light";
+  const newTheme = currentTheme === "dark" ? "light" : "dark";
+  applyTheme(newTheme);
+}
+
+// ✅ Event Listener do botão
+themeToggle.addEventListener("click", toggleTheme);
+
+// ✅ Aplica tema inicial na página
+window.addEventListener("load", () => {
+  const initialTheme = getInitialTheme();
+  applyTheme(initialTheme);
+});
+
+// ✅ Detecta mudança do sistema (se usuário trocar no SO)
+if (window.matchMedia) {
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+    const newTheme = e.matches ? "dark" : "light";
+    applyTheme(newTheme);
+  });
+}
