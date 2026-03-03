@@ -8,7 +8,80 @@ const modalContent = document.getElementById("modalContent");
 let currentType = "all";
 let currentSearch = "";
 let debounceTimer = null;
-let imageObserver = null; // Para lazy loading
+let imageObserver = null;
+
+// ✅ NOVO: Gerenciador de Ratings
+class RatingManager {
+  constructor() {
+    // ✅ Pega ratings salvos no localStorage
+    this.ratings = JSON.parse(localStorage.getItem("ratings")) || {};
+  }
+
+  // ✅ Salvar avaliação de um filme
+  setRating(movieId, rating) {
+    if (rating >= 1 && rating <= 5) {
+      this.ratings[movieId] = rating;
+      localStorage.setItem("ratings", JSON.stringify(this.ratings));
+      console.log(`⭐ Você avaliou ${rating}/5`);
+      return true;
+    }
+    return false;
+  }
+
+  // ✅ Pegar avaliação de um filme
+  getRating(movieId) {
+    return this.ratings[movieId] || 0;
+  }
+}
+
+// ✅ Cria uma instância global
+const ratingManager = new RatingManager();
+
+// ✅ NOVO: Gerenciador de Favoritos
+class FavoritesManager {
+  constructor() {
+    // ✅ Pega favoritos salvos no localStorage ou começa com array vazio
+    this.favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+  }
+
+  // ✅ Adicionar um filme aos favoritos
+  addFavorite(movie) {
+    // Verifica se já não está na lista
+    if (!this.isFavorite(movie.id)) {
+      this.favorites.push(movie);
+      this.save();
+      console.log(`❤️ Adicionado aos favoritos: ${movie.title}`);
+      return true; // Retorna true se foi adicionado
+    }
+    return false;
+  }
+
+  // ✅ Remover um filme dos favoritos
+  removeFavorite(movieId) {
+    // Filter remove o filme com esse ID
+    this.favorites = this.favorites.filter(fav => fav.id !== movieId);
+    this.save();
+    console.log(`💔 Removido dos favoritos (ID: ${movieId})`);
+  }
+
+  // ✅ Verificar se um filme já está nos favoritos
+  isFavorite(movieId) {
+    return this.favorites.some(fav => fav.id === movieId);
+  }
+
+  // ✅ Salvar favoritos no localStorage
+  save() {
+    localStorage.setItem("favorites", JSON.stringify(this.favorites));
+  }
+
+  // ✅ Pegar todos os favoritos
+  getFavorites() {
+    return this.favorites;
+  }
+}
+
+// ✅ Cria uma instância global
+const favoritesManager = new FavoritesManager();
 
 // ================== LAZY LOADING - INTERSECTION OBSERVER ==================
 /**
@@ -75,6 +148,54 @@ function createSkeletonCard() {
   return skeleton;
 }
 
+// ================== TOAST NOTIFICATIONS ==================
+/**
+ * EXPLICAÇÃO: Toast é uma mensagem que aparece e some automaticamente
+ * 
+ * Exemplos:
+ * - "Filme adicionado aos favoritos ❤️"
+ * - "Erro ao buscar filmes 🚨"
+ * 
+ * Por que importa:
+ * - Feedback visual para o usuário
+ * - Muito usado em apps profissionais (Uber, Spotify, etc)
+ * - Recrutadores adoram ver
+ */
+
+function showToast(message, type = "info") {
+  // ✅ Cria um container pra cada toast
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${type}`;
+  
+  // ✅ Define o ícone baseado no tipo
+  const icons = {
+    success: "✅",
+    error: "🚨",
+    info: "ℹ️",
+    warning: "⚠️"
+  };
+  
+  toast.textContent = `${icons[type]} ${message}`;
+  
+  // ✅ Adiciona o toast ao topo da página
+  document.body.appendChild(toast);
+  
+  console.log(`[${type.toUpperCase()}] ${message}`);
+  
+  // ✅ Anima a entrada
+  setTimeout(() => {
+    toast.classList.add("show");
+  }, 10);
+  
+  // ✅ Remove depois de 3 segundos
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 3000);
+}
+
 // ================== CATÁLOGO ==================
 async function loadCatalog(type = "all", search = "") {
   try {
@@ -121,19 +242,46 @@ function createMovieCard(item) {
   badge.className = "badge";
   badge.textContent = item.type;
 
-  // ✅ LAZY LOADING: Usa data-src em vez de src
-  const img = document.createElement("img");
-  img.className = "movie-image";
-  img.setAttribute("data-src", item.image); // Guarda a URL real aqui
-  img.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 600'%3E%3Crect fill='%23222' width='400' height='600'/%3E%3C/svg%3E"; // Placeholder SVG
-  img.alt = item.title;
+  // ✅ NOVO: Botão de favoritar (coração)
+  const favoriteBtn = document.createElement("button");
+  favoriteBtn.className = "favorite-btn";
+  favoriteBtn.type = "button";
   
-  // ✅ Observa essa imagem para lazy loading
-  if (imageObserver) {
-    imageObserver.observe(img);
-  }
+  // ✅ Verifica se já está nos favoritos para colocar o ícone correto
+  const isFav = favoritesManager.isFavorite(item.id);
+  favoriteBtn.classList.add(isFav ? "favorited" : "not-favorited");
+  favoriteBtn.title = isFav ? "Remover dos favoritos" : "Adicionar aos favoritos";
+  
+  // ✅ Ícone do coração (SVG)
+  favoriteBtn.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="currentColor" class="heart-icon">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+    </svg>
+  `;
+
+  // ✅ Evento: Clica no coração para favoritar/desfavoritar
+  favoriteBtn.addEventListener("click", (e) => {
+    e.stopPropagation(); // ✅ Para não abrir o modal
+    
+    if (favoritesManager.isFavorite(item.id)) {
+      // ✅ Já está favorito, então remove
+      favoritesManager.removeFavorite(item.id);
+      favoriteBtn.classList.remove("favorited");
+      favoriteBtn.classList.add("not-favorited");
+      favoriteBtn.title = "Adicionar aos favoritos";
+      showToast("Removido dos favoritos 💔", "info");
+    } else {
+      // ✅ Não está favorito, então adiciona
+      favoritesManager.addFavorite(item);
+      favoriteBtn.classList.remove("not-favorited");
+      favoriteBtn.classList.add("favorited");
+      favoriteBtn.title = "Remover dos favoritos";
+      showToast("Adicionado aos favoritos ❤️", "success");
+    }
+  });
 
   mediaDiv.appendChild(badge);
+  mediaDiv.appendChild(favoriteBtn); // ✅ Adiciona o botão
   mediaDiv.appendChild(img);
 
   const title = document.createElement("h3");
@@ -185,7 +333,14 @@ filterGroup.addEventListener("click", (event) => {
     
     filterBtn.classList.add("active");
     
-    loadCatalog(currentType, currentSearch);
+    // ✅ Se é favoritos, mostra apenas favoritos
+    if (selectedType === "favorites") {
+      console.log(`❤️ Mostrando favoritos (${favoritesManager.getFavorites().length})`);
+      renderCatalog(favoritesManager.getFavorites());
+    } else {
+      // ✅ Senão, faz a busca normal
+      loadCatalog(currentType, currentSearch);
+    }
   }
 });
 
@@ -235,34 +390,59 @@ function createModalContent(item) {
   const synopsis = document.createElement("p");
   synopsis.textContent = item.synopsis;
 
+  // ✅ NOVO: Sistema de Rating
+  const ratingDiv = document.createElement("div");
+  ratingDiv.className = "rating-container";
+  
+  const ratingLabel = document.createElement("p");
+  ratingLabel.className = "rating-label";
+  ratingLabel.textContent = "Sua avaliação:";
+  
+  const starsContainer = document.createElement("div");
+  starsContainer.className = "stars-container";
+  
+  // ✅ Cria 5 estrelas
+  const currentRating = ratingManager.getRating(item.id);
+  for (let i = 1; i <= 5; i++) {
+    const star = document.createElement("button");
+    star.className = "star";
+    star.type = "button";
+    
+    // ✅ Se foi avaliado, preenche as estrelas
+    if (i <= currentRating) {
+      star.classList.add("filled");
+    }
+    
+    star.textContent = "⭐";
+    
+    // ✅ Evento: Clica na estrela para salvar rating
+    star.addEventListener("click", () => {
+      ratingManager.setRating(item.id, i);
+      
+      // ✅ Atualiza o visual das estrelas
+      document.querySelectorAll(".star").forEach((s, index) => {
+        if (index < i) {
+          s.classList.add("filled");
+        } else {
+          s.classList.remove("filled");
+        }
+      });
+      
+      showToast(`Você avaliou ${i}/5 ⭐`, "success");
+    });
+    
+    starsContainer.appendChild(star);
+  }
+  
+  ratingDiv.appendChild(ratingLabel);
+  ratingDiv.appendChild(starsContainer);
+
   modalContent.appendChild(closeBtn);
   modalContent.appendChild(iframe);
   modalContent.appendChild(title);
   modalContent.appendChild(synopsis);
+  modalContent.appendChild(ratingDiv); // ✅ Adiciona o rating
 }
-
-function openModal(item) {
-  createModalContent(item);
-  modal.classList.add("show");
-}
-
-function closeModal() {
-  modal.classList.remove("show");
-}
-
-// ✅ Fechar modal ao clicar fora
-modal.addEventListener("click", (event) => {
-  if (event.target === modal) {
-    closeModal();
-  }
-});
-
-// ✅ Fechar modal com tecla ESC
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    closeModal();
-  }
-});
 
 // =========================
 // LOGIN
