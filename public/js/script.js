@@ -363,11 +363,11 @@ function getInitialTheme() {
 function applyTheme(theme) {
   if (theme === "dark") {
     htmlElement.setAttribute("data-theme", "dark");
-    themeToggle.querySelector(".theme-icon").textContent = "☀️";
+    // ✅ Removeu emoji, agora usa SVG que muda automaticamente
     localStorage.setItem("theme", "dark");
   } else {
     htmlElement.removeAttribute("data-theme");
-    themeToggle.querySelector(".theme-icon").textContent = "🌙";
+    // ✅ Removeu emoji
     localStorage.setItem("theme", "light");
   }
   
