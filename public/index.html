@@ -71,14 +71,16 @@
       <!-- FILTROS + BUSCA -->
       <div class="header-center">
 
-        <nav class="nav">
+                <nav class="nav">
           <ul class="nav-list filter-group">
             <li><button class="filter-btn active" data-type="all">Todos</button></li>
             <li><button class="filter-btn" data-type="movie">Filmes</button></li>
             <li><button class="filter-btn" data-type="series">Séries</button></li>
+            <!-- ✅ NOVO: Botão de Favoritos -->
+            <li><button class="filter-btn" id="favoritesBtn" data-type="favorites">❤️ Favoritos</button></li>
           </ul>
         </nav>
-
+        
         <div class="search-box">
           <input
             type="text"
