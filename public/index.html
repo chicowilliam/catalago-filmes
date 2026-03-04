@@ -3,10 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Catálogo de Filmes</title>
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Catálogo de filmes fictício para portfólio">
-
+  <meta name="description" content="Catálogo de filmes - Portfólio">
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -15,24 +13,24 @@
 <!-- LOGIN SCREEN -->
 <div id="loginScreen" class="login-screen">
   <form class="login-box" id="loginForm">
-    <h2 class="login-title">Admin Access</h2>
+    <h2 class="login-title">🎬 Acesso</h2>
 
     <input
       type="text"
       id="username"
-      placeholder="Username"
+      placeholder="Usuário"
       required
     />
 
     <input
       type="password"
       id="password"
-      placeholder="Password"
+      placeholder="Senha"
       required
     />
 
     <button type="submit" class="login-btn">
-      <span class="login-text">Login</span>
+      <span class="login-text">Entrar</span>
       <span class="login-spinner"></span>
     </button>
 
@@ -40,115 +38,78 @@
   </form>
 </div>
 
-  <!-- LOADER -->
-  <div id="loader">
-    <div class="spinner"></div>
-  </div>
+<!-- LOADER -->
+<div id="loader">
+  <div class="spinner"></div>
+</div>
 
-   <!-- HEADER -->
-  <header class="header">
-    <div class="header-container">
+<!-- HEADER -->
+<header class="header">
+  <div class="header-container">
+    <h1 class="logo">FilmFlix</h1>
 
-      <button id="adminBtn" class="admin-btn">Admin</button>
+    <div class="header-center">
+      <nav class="nav">
+        <ul class="nav-list filter-group">
+          <li><button class="filter-btn active" data-type="all">Todos</button></li>
+          <li><button class="filter-btn" data-type="movie">Filmes</button></li>
+          <li><button class="filter-btn" data-type="series">Séries</button></li>
+          <li><button class="filter-btn" id="favoritesBtn" data-type="favorites">❤️ Favoritos</button></li>
+        </ul>
+      </nav>
 
-            <!-- ✅ Botão Toggle Minimalista -->
-      <button id="themeToggle" class="theme-toggle" title="Alternar tema" aria-label="Alternar tema claro/escuro">
-        <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="5"></circle>
-          <line x1="12" y1="1" x2="12" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="23"></line>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-          <line x1="1" y1="12" x2="3" y2="12"></line>
-          <line x1="21" y1="12" x2="23" y2="12"></line>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
-      </button>
-
-      <h1 class="logo">Catálogo de Filmes</h1>
-
-      <!-- FILTROS + BUSCA -->
-      <div class="header-center">
-
-                <nav class="nav">
-          <ul class="nav-list filter-group">
-            <li><button class="filter-btn active" data-type="all">Todos</button></li>
-            <li><button class="filter-btn" data-type="movie">Filmes</button></li>
-            <li><button class="filter-btn" data-type="series">Séries</button></li>
-            <!-- ✅ NOVO: Botão de Favoritos -->
-            <li><button class="filter-btn" id="favoritesBtn" data-type="favorites">❤️ Favoritos</button></li>
-          </ul>
-        </nav>
-        
-        <div class="search-box">
-          <input
-            type="text"
-            id="searchInput"
-            class="search-input"
-            placeholder="Buscar filme..."
-          >
-        </div>
-
+      <div class="search-box">
+        <input
+          type="text"
+          id="searchInput"
+          class="search-input"
+          placeholder="Buscar filme..."
+        >
       </div>
     </div>
-  </header>
-  <!-- MAIN -->
-  <main class="main">
 
-    <section class="section">
-      <h2 class="section-title">Filmes & Séries</h2>
-
-      <!-- CARROSSEL -->
-      <div class="carousel">
-
-        <button class="carousel-btn left">‹</button>
-
-        <!-- GRID GERADO PELO JS -->
-        <div class="movies-row" id="moviesGrid">
-          <!-- JS insere os cards aqui -->
-        </div>
-
-        <button class="carousel-btn right">›</button>
-
-      </div>
-    </section>
-
-  </main>
-
-  <!-- MODAL (ESTRUTURA CORRETA PRO JS) -->
-  <div id="modal" class="modal">
-    <div class="modal-content" id="modalContent">
-      <!-- JS injeta imagem / vídeo / sinopse aqui -->
-    </div>
+    <button id="themeToggle" class="theme-toggle" title="Alternar tema" aria-label="Alternar tema claro/escuro">
+      <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+    </button>
   </div>
+</header>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <p class="footer-text">Projeto desenvolvido para portfólio</p>
-  </footer>
+<!-- MAIN -->
+<main class="main">
+  <section class="section">
+    <h2 class="section-title">Filmes & Séries</h2>
 
-  <!-- SCRIPT -->
-  <script src="js/script.js" defer></script>
+    <!-- GRID GERADO PELO JS -->
+    <div class="movies-grid" id="moviesGrid">
+      <!-- JS insere os cards aqui -->
+    </div>
+  </section>
+</main>
 
-<div id="adminModal" class="modal">
-  <div class="modal-content">
-    <h2>Admin Panel</h2>
-
-    <form id="adminForm">
-      <input placeholder="Título" id="title" required />
-      <input placeholder="Imagem URL" id="image" required />
-      <input placeholder="Trailer ID" id="trailerId" />
-      <select id="type">
-        <option value="movie">Filme</option>
-        <option value="series">Série</option>
-      </select>
-      <textarea placeholder="Sinopse" id="synopsis"></textarea>
-
-      <button type="submit">Salvar</button>
-    </form>
+<!-- MODAL -->
+<div id="modal" class="modal">
+  <div class="modal-content" id="modalContent">
+    <!-- JS injeta conteúdo aqui -->
   </div>
 </div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>Desenvolvido com ❤️ por @chicolindo</p>
+</footer>
+
+<!-- SCRIPT -->
+<script src="js/script.js" defer></script>
 
 </body>
 </html>
