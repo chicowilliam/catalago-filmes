@@ -1,42 +1,65 @@
 # 🎬 Catálogo de Filmes
 
-Projeto de catálogo de filmes e séries desenvolvido para fins de estudo e portfólio, com arquitetura **Front-end + Back-end em Node.js**.
+> Um projeto de portfólio com arquitetura **Front-end + Back-end em Node.js**, inspirado em serviços de streaming como Netflix.
 
-## 🚀 Tecnologias Utilizadas
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-16%2B-green.svg)](https://nodejs.org)
+[![Express](https://img.shields.io/badge/Express-4.18%2B-lightgrey.svg)](https://expressjs.com)
+
+## 📋 Sumário
+
+- [Características](#características)
+- [Tecnologias](#tecnologias)
+- [Instalação](#instalação)
+- [Como Usar](#como-usar)
+- [Variáveis de Ambiente](#variáveis-de-ambiente)
+- [API Endpoints](#api-endpoints)
+- [Testes](#testes)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Contribuindo](#contribuindo)
+- [Autor](#autor)
+
+## ✨ Características
+
+- ✅ **Autenticação com Sessão** - Login seguro com credenciais
+- ✅ **Catálogo Dinâmico** - CRUD completo de filmes e séries
+- ✅ **Validação de Dados** - Validação robusta com Joi
+- ✅ **Tratamento de Erros** - Sistema centralizado de erro handling
+- ✅ **Testes Automatizados** - 30+ testes com Jest e Supertest
+- ✅ **Variáveis de Ambiente** - Segurança com .env
+- ✅ **UI Responsiva** - Design inspirado em Netflix
+- ✅ **Modal Interativa** - Exibição de trailers com YouTube
+- ✅ **Busca e Filtros** - Buscar por título e filtrar por tipo
+
+## 🚀 Tecnologias
 
 ### Front-end
-- HTML
-- CSS
-- JavaScript (Vanilla)
+- **HTML5** - Estrutura semântica
+- **CSS3** - Animations e Grid layout
+- **JavaScript Vanilla** - Sem frameworks
 
 ### Back-end
-- Node.js
-- Express
+- **Node.js** - Runtime JavaScript
+- **Express.js** - Framework web
+- **express-session** - Gerenciamento de sessão
+- **Joi** - Validação de dados
 
-## 📌 Funcionalidades
+### Desenvolvimento
+- **Jest** - Testes unitários e integração
+- **Supertest** - Testes de API
+- **dotenv** - Variáveis de ambiente
 
-- Listagem de filmes e séries
-- Exibição de sinopse e trailer em modal
-- Busca por título
-- Filtro por tipo (filmes / séries)
-- Layout inspirado em serviços de streaming
-- Catálogo servido via API REST (`/api/catalog`)
+## 💻 Instalação
 
-## 🧠 Sobre o uso do Node.js
+### Pré-requisitos
 
-O projeto utiliza **Node.js com Express** para simular uma API real.
+- Node.js 16+ instalado
+- Git instalado
+- Terminal/PowerShell aberto na pasta do projeto
 
-- O catálogo de filmes é armazenado no servidor
-- O front-end consome os dados via `fetch`
-- Estrutura preparada para futuras expansões (login, banco de dados, etc.)
+### Passos
 
-Essa abordagem simula como aplicações reais funcionam em produção.
-
-## 📷 Preview
-(Em breve)
-
-## 📁 Como Executar o Projeto
-
-### 1️⃣ Instalar dependências
-```bash
-npm install
+1. **Clone o repositório**
+   ```bash
+   git clone https://github.com/chicolindo/catalago-filmes.git
+   cd catalago-filmes
