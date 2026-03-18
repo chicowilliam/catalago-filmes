@@ -164,116 +164,86 @@ body {
 }
 
 /* =========================
-   NAVIGATION
+   NAVIGATION - Dashboard
 ========================= */
-.nav-list {
-  list-style: none;
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
+.nav {
+  min-width: 0;
 }
 
 .filter-group {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  background: var(--bg-tertiary);
-  border-radius: 10px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  padding: 6px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+:root[data-theme="dark"] .filter-group {
+box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
 }
 
 .filter-btn {
+  position: relative;
   background: transparent;
-  border: none;
-  color: var(--text-primary);
-  padding: 8px 14px;
-  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 10px 14px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--text-secondary);
+  
 }
 
 .filter-btn:hover {
-  background: var(--bg-secondary);
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  border-color: var(--card-border);
   transform: translateY(-1px);
 }
 
 .filter-btn.active {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  border-color: var(--card-border);
+  transform: translateY(-1px);
+}
+
+.filter-btn.active::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right:14px;
+  bottom:6px;
   background: var(--accent);
-  color: white;
-  box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3);
+  border-radius: 999px;
 }
 
 /* =========================
-   SEARCH BOX
+mobile/tablet
 ========================= */
-.search-box {
-  flex: 1;
-  min-width: 200px;
-  max-width: 300px;
+@media (max-width: 900px) {
+  .header-center {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    border-radius: 12px;
+  }
+
+  .filter-btn {
+    flex: 0 0 auto;
+  }
 }
 
-.search-box input {
-  width: 100%;
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  padding: 10px 14px;
-  border-radius: 10px;
-  color: var(--text-primary);
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-}
-
-.search-box input:focus {
-  outline: none;
-  border-color: var(--accent);
-  background: var(--card-bg);
-  box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.1);
-}
-
-.search-box input::placeholder {
-  color: var(--text-tertiary);
-}
-
-/* =========================
-   TEMA TOGGLE (TRANSLÚCIDO)
-========================= */
-.theme-toggle {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  color: var(--text-primary);
-}
-
-:root[data-theme="dark"] .theme-toggle {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.theme-toggle:hover {
-  border-color: var(--accent);
-  background: rgba(229, 9, 20, 0.1);
-  transform: scale(1.05);
-}
-
-.theme-icon {
-  width: 20px;
-  height: 20px;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.theme-toggle:hover .theme-icon {
-  transform: rotate(20deg);
-}
 
 /* =========================
    MAIN CONTENT

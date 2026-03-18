@@ -232,26 +232,46 @@ function renderCatalog(items) {
 
 // ================== FILTROS ==================
 const filterGroup = document.querySelector(".filter-group");
+const filterButtons = Array.from(document.querySelectorAll(".filter-btn"));
+
+function setActiveFilter(selectedBtn) {
+  filterButtons.forEach(btn => {
+    const isActive = btn === selectedBtn;
+    btn.classList.toggle("active", isActive);
+    btn.setAttribute("aria-selected", String(isActive));
+    btn.setAttribute("tabindex", isActive ? "0" : "-1");
+  });
+}
+
 
 filterGroup.addEventListener("click", (event) => {
-  if (event.target.classList.contains("filter-btn")) {
-    const filterBtn = event.target;
-    const selectedType = filterBtn.getAttribute("data-type");
-    
-    currentType = selectedType;
-    
-    document.querySelectorAll(".filter-btn").forEach(btn => {
-      btn.classList.remove("active");
-    });
-    
-    filterBtn.classList.add("active");
-    
-    if (selectedType === "favorites") {
-      renderCatalog(favoritesManager.getFavorites());
-    } else {
-      loadCatalog(currentType, currentSearch);
-    }
+  const filterBtn = event.target.closest(".filter-btn");
+  if (!filterBtn) return;
+
+  const selectedType = filterBtn.getAttribute("data-type");
+  currentType = selectedType;
+
+  setActiveFilterButton(filterBtn);
+
+  if (selectedType === "favorites") {
+    renderCatalog(favoritesManager.getFavorites());
+  } else {
+    loadCatalog(currentType, currentSearch);
   }
+});
+
+// Navegção por teclado entre tabs (setinhas esquerda/direita)
+filterGroup.addEventListener ("keydown", (event) => {
+  const currentIndex = filterButtons.indexOf(document.activeElement)
+  if (currentIndex === -1) return;
+
+  if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+  event.preventDefault();
+
+  const direction = event.key === "ArrowRight" ? 1 : -1;
+  const nxtIndex =(currentIndex + direction + filterButtons.length) % filterButtons.lenght;
+  filterButtons[nextIndex].focus()
+  filterButtons[nextIndex].click()
 });
 
 // ================== BUSCA ==================
