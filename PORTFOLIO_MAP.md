@@ -1,10 +1,31 @@
 # Portfolio Map - Site Inspirado em Servico de Streaming
 
-## 0) Atualizacoes Recentes (18/03/2026)
-- Criado guia de contexto para assistente em `.github/copilot-instructions.md`.
-- Criado este arquivo `PORTFOLIO_MAP.md` para consolidar arquitetura, fluxos e backlog.
-- Definida direcao de UI para o dashboard: visual mais profissional, menos arcade, com foco em responsividade no seletor `Todos/Filmes/Series/Favoritos`.
-- Estrategia de implementacao para hoje: aplicar repaginacao no frontend sem remover funcionalidades existentes.
+## 0) Historico de Sessoes
+
+### 18/03/2026 - Sessao de hoje
+**Bugs corrigidos:**
+- HTML malformado na `<nav>` (tags sem `>`, `<button` sem `<`) travava o `script.js` inteiro,
+  impedindo o evento de submit do login de ser registrado. Corrigido em `public/index.html`.
+- Senha no `.env` estava diferente da senha usada no login (`minha_senha_super_segura_123` → `admin123`).
+- Remote do git apontava para `chicolindo/catalago-filmes` (nome antigo); atualizado para `chicowilliam/catalago-filmes`.
+- Email do git local estava como `vini_9256@outlook.com.br`; corrigido para `viniciuswilliam91@gmail.com`
+  para que contribuicoes apareçam no grafico do GitHub.
+
+**Melhorias aplicadas:**
+- Nav de filtros (`Todos/Filmes/Series/Favoritos`) repaginada com HTML semantico:
+  `role="tablist"`, `role="tab"`, `aria-selected` e `tabindex` corretos para acessibilidade.
+- Plano de CSS e JS profissional entregue para o usuario aplicar manualmente
+  (visual dashboard, sublinhado ativo, scroll horizontal no mobile, navegacao por teclado).
+
+**Arquivos de contexto criados:**
+- `.github/copilot-instructions.md` — regras permanentes de stack, padrao de codigo e idioma para o assistente.
+- `PORTFOLIO_MAP.md` (este arquivo) — mapa tecnico vivo do projeto.
+
+**Commits da sessao:**
+- `428c3a2` fix: resolve critical login bug caused by malformed HTML in nav
+- `1f37c73` fix: corrige HTML malformado na nav que travava o script.js e bloqueava o login
+- `514874e` docs: adiciona instrucoes do copilot para o portfolio
+- `b0d5773` docs: atualiza portfolio map com mudancas recentes
 
 ## 1) Visao Geral
 Projeto full stack com autenticacao de sessao para area administrativa, catalogo em JSON e frontend focado em experiencia semelhante a plataformas de streaming.
@@ -48,11 +69,12 @@ Projeto full stack com autenticacao de sessao para area administrativa, catalogo
 - Possivel crescimento de complexidade sem modularizacao no frontend.
 
 ## 6) Backlog Prioritario (Recomendado)
-1. Modularizar `public/js/script.js` por dominio (auth, catalog, ui, storage).
-2. Adicionar testes de regressao para rotas de catalogo e validacoes de erro.
-3. Padronizar respostas da API (campos `status`, `message`, `data` sempre previsiveis).
-4. Evoluir persistencia para banco (SQLite/PostgreSQL) mantendo contratos da API.
-5. Melhorar acessibilidade (foco em teclado, labels/aria em elementos interativos).
+1. Aplicar CSS e JS profissional da nav (entregue em 18/03 — aguardando o usuario codar).
+2. Modularizar `public/js/script.js` por dominio (auth, catalog, ui, storage).
+3. Adicionar testes de regressao para rotas de catalogo e validacoes de erro.
+4. Padronizar respostas da API (campos `status`, `message`, `data` sempre previsiveis).
+5. Evoluir persistencia para banco (SQLite/PostgreSQL) mantendo contratos da API.
+6. ✅ Acessibilidade basica: `role="tablist/tab"`, `aria-selected`, `tabindex` ja aplicados na nav.
 
 ## 7) Como Rodar e Validar
 - Instalar: `npm install`
