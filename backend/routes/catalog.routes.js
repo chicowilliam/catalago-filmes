@@ -37,7 +37,18 @@ const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
 const CATALOG_CACHE_TTL_MS = 5 * 60 * 1000;
 const DEFAULT_TMDB_AUTO_PAGES = 3;
+const DEFAULT_TMDB_TIMEOUT_MS = 8000;
 const catalogCache = new Map();
+
+function getTmdbTimeoutMs() {
+  const parsed = Number(process.env.TMDB_TIMEOUT_MS || DEFAULT_TMDB_TIMEOUT_MS);
+
+  if (!Number.isInteger(parsed) || parsed < 1000) {
+    return DEFAULT_TMDB_TIMEOUT_MS;
+  }
+
+  return Math.min(parsed, 15000);
+}
 
 function getTmdbAutoPages() {
   const parsed = Number(process.env.TMDB_AUTO_PAGES || DEFAULT_TMDB_AUTO_PAGES);
@@ -75,6 +86,7 @@ function withTmdbApiKey(urlString) {
 
 function httpGetJson(url) {
   return new Promise((resolve, reject) => {
+    const timeoutMs = getTmdbTimeoutMs();
     const req = https.get(
       withTmdbApiKey(url),
       {
@@ -101,7 +113,16 @@ function httpGetJson(url) {
       }
     );
 
-    req.on("error", () => {
+    req.setTimeout(timeoutMs, () => {
+      req.destroy(new Error("TMDB request timeout"));
+    });
+
+    req.on("error", (error) => {
+      if (error && error.message === "TMDB request timeout") {
+        reject(new AppError("Tempo limite excedido ao consultar TMDB", 504, "TMDB_TIMEOUT"));
+        return;
+      }
+
       reject(new AppError("Falha de rede ao consultar TMDB", 502, "TMDB_NETWORK_ERROR"));
     });
 

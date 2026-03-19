@@ -70,6 +70,15 @@
 - Mais filmes e series aparecem automaticamente sem cadastro manual no JSON local.
 - Catalogo se atualiza sozinho durante uso da aplicacao.
 
+### 19/03/2026 - Estabilidade de consulta TMDB
+**Ajuste aplicado:**
+- `backend/routes/catalog.routes.js`
+  - Adicionado timeout nas chamadas HTTP para TMDB (`TMDB_TIMEOUT_MS`, padrao 8000ms, maximo 15000ms).
+  - Em timeout/rede lenta, a rota retorna fallback local em vez de deixar a resposta pendente.
+
+**Motivo:**
+- Evitar travamento do carregamento quando a TMDB estiver lenta ou indisponivel.
+
 ### 18/03/2026 - Sessao de hoje
 **Bugs corrigidos:**
 - HTML malformado na `<nav>` (tags sem `>`, `<button` sem `<`) travava o `script.js` inteiro,
