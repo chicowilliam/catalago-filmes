@@ -2,6 +2,63 @@
 
 ## 0) Historico de Sessoes
 
+### 19/03/2026 - Pacote de animacoes otimizadas no frontend
+**Objetivo:**
+- Aumentar percepcao de fluidez e sofisticacao visual com animacoes leves e performaticas, mantendo boa experiencia em mobile.
+
+**Ajustes aplicados:**
+- `public/js/script.js`
+  - Adicionado sistema de reveal on scroll com `IntersectionObserver` para hero, secoes, cards e footer.
+  - Adicionada barra de progresso de leitura da pagina (scroll progress) atualizada com `requestAnimationFrame`.
+  - Adicionado parallax sutil no card de destaque com eventos de ponteiro e renderizacao otimizada.
+  - Integracao das animacoes no fluxo de login e re-renderizacao do catalogo.
+- `public/css/style.css`
+  - Criadas classes de reveal (`.reveal` e `.reveal-visible`) para entrada suave com blur/translate.
+  - `featured-card` passou a suportar deslocamento parallax via variaveis CSS.
+  - Cards ganharam delay dinamico de entrada e efeito de luz sutil no hover.
+  - Adicionada barra de progresso no topo (`body::before`) com gradiente de destaque.
+  - Ajustes especificos para mobile e reforco de acessibilidade em `prefers-reduced-motion`.
+
+**Resultado esperado:**
+- Interface com sensacao mais premium, transicoes naturais e sem travamentos perceptiveis.
+- Comportamento adaptado para usuarios que preferem menos movimento.
+
+### 19/03/2026 - Transicao de filtros e Modo Performance
+**Objetivo:**
+- Atender pedido de transicao mais premium entre filtros e oferecer controle manual para reduzir efeitos em dispositivos mais fracos.
+
+**Ajustes aplicados:**
+- `public/index.html`
+  - Adicionado botao `Performance: On/Off` no header.
+- `public/js/script.js`
+  - Filtro (`Todos/Filmes/Series/Favoritos`) agora usa transicao com `document.startViewTransition` quando disponivel.
+  - Fallback de transicao leve quando a API de view transitions nao existe.
+  - Criado Modo Performance com persistencia em `localStorage` (`performanceMode`).
+  - Em Modo Performance: reduce/desliga efeitos mais custosos (parallax/reveal/stagger), preservando funcionalidade.
+- `public/css/style.css`
+  - Estilo visual do botao de performance.
+  - Estados de transicao para troca de filtros.
+  - Regras CSS condicionais para `:root[data-performance="on"]` com menos animacao e menor custo de render.
+
+**Resultado esperado:**
+- Troca de filtro com percepcao de continuidade visual.
+- Usuario pode priorizar FPS e estabilidade via botao de performance sem perder recursos do sistema.
+
+### 19/03/2026 - Loader circular e nova paleta Netflix-like
+**Objetivo:**
+- Substituir a barra de carregamento por um loader mais discreto e alinhar a identidade visual para uma direcao mais proxima de plataformas de streaming como Netflix.
+
+**Ajustes aplicados:**
+- `public/css/style.css`
+  - Loader principal (`.spinner`) trocado de barra horizontal para spinner circular minimalista em tons de cinza.
+  - Paleta base revisada para preto/carvao/vermelho com contraste mais cinematografico.
+  - Tema alternativo tambem ajustado para uma variacao escura mais consistente com a nova identidade.
+  - Backgrounds, hero, cards e tela de login receberam refinamento visual para combinar com a nova paleta.
+
+**Resultado esperado:**
+- Carregamento inicial com visual mais limpo e menos chamativo.
+- Interface com leitura mais proxima de um produto streaming premium e menos "colorida demais".
+
 ### 18/03/2026 - Integracao segura com API externa (TMDB)
 **Contexto:**
 - Usuario quer substituir imagens/catalogo local por API de filmes, mas sem expor API key para recrutadores.

@@ -25,7 +25,16 @@ const REQUEST_TIMEOUT_MS = 12000;
 const AUTO_REFRESH_MS = 5 * 60 * 1000;
 const LOGIN_MIN_LOADING_MS = 120;
 const LOGIN_TRANSITION_MS = 320;
+const FILTER_TRANSITION_MS = 200;
+const PERFORMANCE_STORAGE_KEY = "performanceMode";
+const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 let autoRefreshTimer = null;
+let revealObserver = null;
+let heroParallaxRaf = null;
+let heroParallax = { x: 0, y: 0 };
+let scrollProgressReady = false;
+let isPerformanceMode = false;
+let filterTransitionTimer = null;
 
 class FavoritesManager {
   constructor() {
@@ -180,6 +189,210 @@ function wait(ms) {
   });
 }
 
+function updateScrollProgress() {
+  const root = document.documentElement;
+  const scrollTop = root.scrollTop || document.body.scrollTop;
+  const scrollHeight = root.scrollHeight - root.clientHeight;
+  const progress = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
+  root.style.setProperty("--scroll-progress", progress.toFixed(4));
+}
+
+function loadPerformancePreference() {
+  return localStorage.getItem(PERFORMANCE_STORAGE_KEY) === "on";
+}
+
+function updatePerformanceToggleLabel() {
+  if (!performanceToggle) {
+    return;
+  }
+
+  performanceToggle.textContent = `Performance: ${isPerformanceMode ? "On" : "Off"}`;
+  performanceToggle.setAttribute("aria-pressed", String(isPerformanceMode));
+}
+
+function resetHeroParallaxState() {
+  heroParallax.x = 0;
+  heroParallax.y = 0;
+
+  if (featuredCard) {
+    featuredCard.style.setProperty("--parallax-x", "0px");
+    featuredCard.style.setProperty("--parallax-y", "0px");
+  }
+}
+
+function applyPerformanceMode(enabled) {
+  isPerformanceMode = Boolean(enabled);
+
+  if (isPerformanceMode) {
+    document.documentElement.setAttribute("data-performance", "on");
+    localStorage.setItem(PERFORMANCE_STORAGE_KEY, "on");
+
+    if (revealObserver) {
+      revealObserver.disconnect();
+      revealObserver = null;
+    }
+
+    resetHeroParallaxState();
+  } else {
+    document.documentElement.removeAttribute("data-performance");
+    localStorage.setItem(PERFORMANCE_STORAGE_KEY, "off");
+  }
+
+  updatePerformanceToggleLabel();
+}
+
+function setupScrollProgress() {
+  if (prefersReducedMotion || isPerformanceMode || scrollProgressReady) {
+    return;
+  }
+
+  scrollProgressReady = true;
+
+  let ticking = false;
+
+  const onScroll = () => {
+    if (ticking) {
+      return;
+    }
+
+    ticking = true;
+    window.requestAnimationFrame(() => {
+      updateScrollProgress();
+      ticking = false;
+    });
+  };
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  updateScrollProgress();
+}
+
+function setupRevealAnimations() {
+  if (prefersReducedMotion || isPerformanceMode) {
+    document.querySelectorAll(".reveal").forEach((el) => {
+      el.classList.add("reveal-visible");
+    });
+
+    return;
+  }
+
+  if (revealObserver) {
+    revealObserver.disconnect();
+  }
+
+  const revealTargets = Array.from(document.querySelectorAll(".hero-copy, .featured-card, .section-block, .movie-card, .footer"));
+
+  revealTargets.forEach((el, index) => {
+    el.classList.add("reveal");
+    el.style.setProperty("--reveal-delay", `${Math.min(index * 28, 240)}ms`);
+  });
+
+  revealObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) {
+          return;
+        }
+
+        entry.target.classList.add("reveal-visible");
+        observer.unobserve(entry.target);
+      });
+    },
+    {
+      root: null,
+      rootMargin: "0px 0px -8% 0px",
+      threshold: 0.14
+    }
+  );
+
+  revealTargets.forEach((el) => revealObserver.observe(el));
+}
+
+function setupHeroParallax() {
+  if (prefersReducedMotion || isPerformanceMode || !featuredCard || featuredCard.dataset.parallaxBound === "true") {
+    return;
+  }
+
+  featuredCard.dataset.parallaxBound = "true";
+
+  const maxMove = 10;
+
+  const animate = () => {
+    featuredCard.style.setProperty("--parallax-x", `${heroParallax.x.toFixed(2)}px`);
+    featuredCard.style.setProperty("--parallax-y", `${heroParallax.y.toFixed(2)}px`);
+    heroParallaxRaf = null;
+  };
+
+  const onMove = (event) => {
+    const rect = featuredCard.getBoundingClientRect();
+    if (!rect.width || !rect.height) {
+      return;
+    }
+
+    const x = (event.clientX - rect.left) / rect.width - 0.5;
+    const y = (event.clientY - rect.top) / rect.height - 0.5;
+
+    heroParallax.x = x * maxMove;
+    heroParallax.y = y * maxMove;
+
+    if (!heroParallaxRaf) {
+      heroParallaxRaf = window.requestAnimationFrame(animate);
+    }
+  };
+
+  const onLeave = () => {
+    heroParallax.x = 0;
+    heroParallax.y = 0;
+
+    if (!heroParallaxRaf) {
+      heroParallaxRaf = window.requestAnimationFrame(animate);
+    }
+  };
+
+  featuredCard.addEventListener("pointermove", onMove);
+  featuredCard.addEventListener("pointerleave", onLeave);
+}
+
+function setupMotionEnhancements() {
+  setupScrollProgress();
+  setupRevealAnimations();
+  setupHeroParallax();
+}
+
+function applyFilterState(nextType) {
+  currentType = nextType;
+  renderCurrentView();
+}
+
+function applyFilterWithTransition(nextType) {
+  if (nextType === currentType) {
+    return;
+  }
+
+  if (prefersReducedMotion || isPerformanceMode) {
+    applyFilterState(nextType);
+    return;
+  }
+
+  if (typeof document.startViewTransition === "function") {
+    document.startViewTransition(() => {
+      applyFilterState(nextType);
+    });
+    return;
+  }
+
+  if (filterTransitionTimer) {
+    clearTimeout(filterTransitionTimer);
+  }
+
+  document.body.classList.add("is-filter-transitioning");
+  filterTransitionTimer = setTimeout(() => {
+    applyFilterState(nextType);
+    document.body.classList.remove("is-filter-transitioning");
+    filterTransitionTimer = null;
+  }, FILTER_TRANSITION_MS);
+}
+
 async function ensureMinimumDelay(startTime, minimumMs) {
   const elapsed = performance.now() - startTime;
   const remaining = minimumMs - elapsed;
@@ -260,6 +473,7 @@ async function loadCatalog(search = "", options = {}) {
 function createMovieCard(item) {
   const card = document.createElement("article");
   card.className = "movie-card";
+  card.style.setProperty("--card-pop-delay", isPerformanceMode ? "0ms" : `${Math.round(Math.random() * 140)}ms`);
 
   const mediaDiv = document.createElement("div");
   mediaDiv.className = "movie-media";
@@ -406,6 +620,8 @@ function renderCurrentView() {
   renderGrid(moviesGrid, movies, "Nenhum filme encontrado.");
   renderGrid(seriesGrid, series, "Nenhuma série encontrada.");
   renderGrid(favoritesGrid, favorites, "Você ainda não adicionou favoritos.");
+
+  setupRevealAnimations();
 }
 
 const filterGroup = document.querySelector(".filter-group");
@@ -426,9 +642,9 @@ filterGroup.addEventListener("click", (event) => {
     return;
   }
 
-  currentType = filterBtn.getAttribute("data-type") || "all";
+  const nextType = filterBtn.getAttribute("data-type") || "all";
   setActiveFilter(filterBtn);
-  renderCurrentView();
+  applyFilterWithTransition(nextType);
 });
 
 filterGroup.addEventListener("keydown", (event) => {
@@ -616,6 +832,7 @@ loginForm.addEventListener("submit", async (event) => {
     await loadCatalog();
     await ensureMinimumDelay(loginStartTime, LOGIN_MIN_LOADING_MS);
     await animateLoginSuccess();
+    setupMotionEnhancements();
     startAutoCatalogRefresh();
     showToast("Login realizado com sucesso", "success");
   } catch (err) {
@@ -627,6 +844,7 @@ loginForm.addEventListener("submit", async (event) => {
 });
 
 const themeToggle = document.getElementById("themeToggle");
+const performanceToggle = document.getElementById("performanceToggle");
 const htmlElement = document.documentElement;
 
 function getInitialTheme() {
@@ -660,11 +878,22 @@ function toggleTheme() {
 
 themeToggle.addEventListener("click", toggleTheme);
 
+if (performanceToggle) {
+  performanceToggle.addEventListener("click", () => {
+    applyPerformanceMode(!isPerformanceMode);
+    setupMotionEnhancements();
+    setupRevealAnimations();
+    renderCurrentView();
+  });
+}
+
 window.addEventListener("load", () => {
+  applyPerformanceMode(loadPerformancePreference());
   applyTheme(getInitialTheme());
   validateRuntimeContext();
   updateCatalogSourceIndicator(currentCatalogSource);
   loader.classList.add("hide");
+  setupMotionEnhancements();
 });
 
 window.addEventListener("beforeunload", stopAutoCatalogRefresh);
