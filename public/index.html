@@ -5,6 +5,9 @@
   <title>Catálogo de Filmes</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Catálogo de filmes">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -63,7 +66,7 @@
           type="text"
           id="searchInput"
           class="search-input"
-          placeholder="Buscar filme..."
+          placeholder="Buscar por titulo..."
         >
       </div>
     </div>
@@ -86,13 +89,57 @@
 
 <!-- MAIN -->
 <main class="main">
-  <section class="section">
-    <h2 class="section-title">Filmes & Séries</h2>
-
-    <!-- GRID GERADO PELO JS -->
-    <div class="movies-grid" id="moviesGrid">
-      <!-- JS insere os cards aqui -->
+  <section class="hero-panel" aria-labelledby="heroTitle">
+    <div class="hero-copy">
+      <p class="hero-kicker">Streaming Portfolio</p>
+      <h2 id="heroTitle" class="hero-title">Explore um catálogo moderno de filmes e series</h2>
+      <p class="hero-description">Interface redesenhada com foco em hierarquia visual, grids consistentes e navegação por categorias em estilo plataforma de streaming.</p>
+      <div class="hero-stats">
+        <div class="stat-chip">
+          <span class="stat-label">Catálogo</span>
+          <strong id="countAll">0</strong>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-label">Filmes</span>
+          <strong id="countMovies">0</strong>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-label">Séries</span>
+          <strong id="countSeries">0</strong>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-label">Favoritos</span>
+          <strong id="countFavorites">0</strong>
+        </div>
+      </div>
     </div>
+    <article class="featured-card" id="featuredCard" aria-live="polite">
+      <p class="featured-empty">Carregando destaque...</p>
+    </article>
+  </section>
+
+  <section class="section-block" id="moviesSection" aria-labelledby="moviesHeading">
+    <div class="section-headline">
+      <h3 id="moviesHeading" class="section-title">Filmes</h3>
+      <span class="section-subtitle">Selecao de longas para maratonar hoje</span>
+    </div>
+    <div class="movies-grid" id="moviesGrid"></div>
+  </section>
+
+  <section class="section-block" id="seriesSection" aria-labelledby="seriesHeading">
+    <div class="section-headline">
+      <h3 id="seriesHeading" class="section-title">Séries</h3>
+      <span class="section-subtitle">Temporadas populares em destaque</span>
+    </div>
+    <div class="movies-grid" id="seriesGrid"></div>
+  </section>
+
+  <section class="section-block" id="favoritesSection" aria-labelledby="favoritesHeading">
+    <div class="section-headline">
+      <h3 id="favoritesHeading" class="section-title">Favoritos</h3>
+      <span class="section-subtitle">Sua lista personalizada sempre acessível</span>
+    </div>
+    <div class="movies-grid" id="favoritesGrid"></div>
   </section>
 </main>
 

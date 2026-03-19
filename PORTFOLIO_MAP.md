@@ -27,6 +27,30 @@
 - `514874e` docs: adiciona instrucoes do copilot para o portfolio
 - `b0d5773` docs: atualiza portfolio map com mudancas recentes
 
+### 18/03/2026 - Redesign visual estilo streaming
+**Objetivo:**
+- Modernizar o visual do frontend com UI limpa, layout mais profissional e organizacao de catalogo por categorias.
+
+**Mudancas aplicadas:**
+- `public/index.html`
+  - Nova secao hero com destaque principal, estatisticas de catalogo e CTA de trailer.
+  - Estrutura separada em blocos para `Filmes`, `Series` e `Favoritos`.
+  - Ajustes de placeholder de busca e preparacao para contadores dinamicos.
+- `public/css/style.css`
+  - Nova direcao visual com tipografia (`Outfit` + `Space Grotesk`), paleta harmonica e superfícies em camadas.
+  - Grid responsivo refinado, espacamentos consistentes e cards com melhor hierarquia visual.
+  - Animacoes suaves em cards, secoes, destaque e feedback visual.
+  - Melhorias de acessibilidade/performance com `prefers-reduced-motion`.
+- `public/js/script.js`
+  - Renderizacao por secoes (movies/series/favorites) em estilo streaming real.
+  - Card de destaque dinamico com dados do catalogo.
+  - Contadores de itens por categoria atualizados em tempo real.
+  - Correcao da navegacao por teclado nos filtros e consolidacao da logica de favoritos.
+  - Preservadas funcionalidades existentes: login, tema, modal, rating e favoritos.
+
+**Validacao tecnica:**
+- Sem erros nos arquivos alterados (`index.html`, `style.css`, `script.js`) na verificacao do editor.
+
 ## 1) Visao Geral
 Projeto full stack com autenticacao de sessao para area administrativa, catalogo em JSON e frontend focado em experiencia semelhante a plataformas de streaming.
 
@@ -69,12 +93,13 @@ Projeto full stack com autenticacao de sessao para area administrativa, catalogo
 - Possivel crescimento de complexidade sem modularizacao no frontend.
 
 ## 6) Backlog Prioritario (Recomendado)
-1. Aplicar CSS e JS profissional da nav (entregue em 18/03 — aguardando o usuario codar).
+1. Refinar microinteracoes (hover/focus/active) com padrao visual unico por componente.
 2. Modularizar `public/js/script.js` por dominio (auth, catalog, ui, storage).
 3. Adicionar testes de regressao para rotas de catalogo e validacoes de erro.
 4. Padronizar respostas da API (campos `status`, `message`, `data` sempre previsiveis).
 5. Evoluir persistencia para banco (SQLite/PostgreSQL) mantendo contratos da API.
 6. ✅ Acessibilidade basica: `role="tablist/tab"`, `aria-selected`, `tabindex` ja aplicados na nav.
+7. ✅ Redesign visual principal (hero, secoes por categoria e nova grade) aplicado em 18/03/2026.
 
 ## 7) Como Rodar e Validar
 - Instalar: `npm install`
