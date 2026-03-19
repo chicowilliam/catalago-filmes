@@ -59,6 +59,20 @@
 - Carregamento inicial com visual mais limpo e menos chamativo.
 - Interface com leitura mais proxima de um produto streaming premium e menos "colorida demais".
 
+### 19/03/2026 - Loader de login com exibicao minima de 1000ms
+**Objetivo:**
+- Deixar o loader de bolinhas do login mais perceptivel, com tempo suficiente para aparecer visualmente antes da transicao para a vitrine.
+
+**Ajustes aplicados:**
+- `public/js/script.js`
+  - `LOGIN_MIN_LOADING_MS` alterado de `120` para `1000`.
+- `public/css/style.css`
+  - Animacao das bolinhas do login ajustada para ciclo de `1s`, com atraso lateral recalibrado para acompanhar o novo ritmo.
+
+**Resultado esperado:**
+- Feedback visual de carregamento mais claro no login.
+- Entrada na aplicacao continua suave, mas agora com loader perceptivel em vez de quase instantaneo.
+
 ### 18/03/2026 - Integracao segura com API externa (TMDB)
 **Contexto:**
 - Usuario quer substituir imagens/catalogo local por API de filmes, mas sem expor API key para recrutadores.

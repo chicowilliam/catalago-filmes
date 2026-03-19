@@ -910,7 +910,7 @@ body.is-filter-transitioning .section-block {
   border-radius: 50%;
   display: none;
   background: #ffffff;
-  animation: loginDotCenter 0.72s ease-in-out infinite;
+  animation: loginDotCenter 1s ease-in-out infinite;
 }
 
 .login-spinner::before,
@@ -926,12 +926,12 @@ body.is-filter-transitioning .section-block {
 
 .login-spinner::before {
   left: -12px;
-  animation: loginDotSide 0.72s ease-in-out infinite;
+  animation: loginDotSide 1s ease-in-out infinite;
 }
 
 .login-spinner::after {
   left: 12px;
-  animation: loginDotSide 0.72s ease-in-out infinite 0.18s;
+  animation: loginDotSide 1s ease-in-out infinite 0.24s;
 }
 
 .login-btn.loading .login-text {
