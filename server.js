@@ -29,6 +29,15 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/catalog", catalogRoutes);
 
+app.get("/api/health", (req, res) => {
+   res.json({
+      status: "success",
+      service: "catalog-api",
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString()
+   });
+});
+
 /* =========================
    FRONTEND (PUBLIC)
 ========================= */
@@ -43,7 +52,17 @@ app.use(errorHandler);
    SERVER
 ========================= */
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Server rodando em http://localhost:${PORT}`);
   console.log(`🔐 Modo: ${process.env.NODE_ENV}`);
+});
+
+server.on("error", (err) => {
+   if (err.code === "EADDRINUSE") {
+      console.error(`❌ Porta ${PORT} já está em uso. Feche a instância anterior ou altere a variável PORT no .env.`);
+      process.exit(1);
+   }
+
+   console.error("❌ Erro ao iniciar servidor:", err.message);
+   process.exit(1);
 });

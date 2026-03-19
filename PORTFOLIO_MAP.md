@@ -51,6 +51,19 @@
 **Validacao tecnica:**
 - Sem erros nos arquivos alterados (`index.html`, `style.css`, `script.js`) na verificacao do editor.
 
+### 18/03/2026 - Diagnostico de boot/backend
+**Causa principal identificada:**
+- Erro `EADDRINUSE` ao iniciar com `node server.js` (porta `3000` ja estava ocupada por outra instancia).
+
+**Acoes aplicadas:**
+- `server.js`
+  - Adicionado endpoint `GET /api/health` para checagem rapida de disponibilidade da API.
+  - Adicionado tratamento de erro no `app.listen` para `EADDRINUSE` com mensagem amigavel de diagnostico.
+
+**Varredura geral:**
+- Rotas backend principais e middlewares sem erros de sintaxe.
+- Suite de testes executada: ha falhas de contrato em testes de rotas (nao bloqueia boot do servidor, mas requer alinhamento entre formato de erro esperado e app de teste).
+
 ## 1) Visao Geral
 Projeto full stack com autenticacao de sessao para area administrativa, catalogo em JSON e frontend focado em experiencia semelhante a plataformas de streaming.
 
