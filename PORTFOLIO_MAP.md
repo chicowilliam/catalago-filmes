@@ -44,6 +44,18 @@
 - Push para `origin/master` concluido com sucesso.
 - `git config user.name` atualizado para `chicowilliam` no repositorio local.
 
+### 19/03/2026 - Visibilidade da fonte TMDB no frontend
+**Ajustes aplicados:**
+- `backend/routes/catalog.routes.js`
+  - Quando `CATALOG_SOURCE=tmdb`, tentativas de leitura na TMDB agora possuem fallback automatico para base local.
+  - Em caso de fallback, a API responde com `source: local-fallback` e `warning` para diagnostico.
+- `public/js/script.js`
+  - Hero mostra a origem ativa do catalogo (`TMDB` ou `Local`).
+  - Toast informativo quando houver fallback local por indisponibilidade da TMDB.
+
+**Motivo:**
+- Evitar tela sem filmes quando a API externa falhar (chave invalida, limite de requicoes ou erro de rede).
+
 ### 18/03/2026 - Sessao de hoje
 **Bugs corrigidos:**
 - HTML malformado na `<nav>` (tags sem `>`, `<button` sem `<`) travava o `script.js` inteiro,

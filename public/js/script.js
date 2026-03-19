@@ -19,6 +19,8 @@ let currentSearch = "";
 let debounceTimer = null;
 let imageObserver = null;
 let allItems = [];
+let currentCatalogSource = "local";
+let hasShownFallbackToast = false;
 const REQUEST_TIMEOUT_MS = 12000;
 
 class FavoritesManager {
@@ -138,6 +140,16 @@ function renderSkeletons() {
   });
 }
 
+function updateCatalogSourceIndicator(source) {
+  const heroKicker = document.querySelector(".hero-kicker");
+  if (!heroKicker) {
+    return;
+  }
+
+  const sourceLabel = source === "tmdb" ? "TMDB" : "Local";
+  heroKicker.textContent = `Streaming Portfolio • Fonte: ${sourceLabel}`;
+}
+
 async function loadCatalog(search = "") {
   const controller = new AbortController();
   const requestTimeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -156,6 +168,18 @@ async function loadCatalog(search = "") {
 
     const response = await res.json();
     allItems = Array.isArray(response.data) ? response.data : [];
+    currentCatalogSource = response.source || "local";
+    updateCatalogSourceIndicator(currentCatalogSource);
+
+    if (currentCatalogSource === "local-fallback" && !hasShownFallbackToast) {
+      showToast("TMDB indisponivel no momento. Carregando catalogo local.", "info");
+      hasShownFallbackToast = true;
+    }
+
+    if (currentCatalogSource === "tmdb") {
+      hasShownFallbackToast = false;
+    }
+
     renderCurrentView();
   } catch (err) {
     if (err.name === "AbortError") {
@@ -570,6 +594,7 @@ themeToggle.addEventListener("click", toggleTheme);
 window.addEventListener("load", () => {
   applyTheme(getInitialTheme());
   validateRuntimeContext();
+  updateCatalogSourceIndicator(currentCatalogSource);
   loader.classList.add("hide");
 });
 

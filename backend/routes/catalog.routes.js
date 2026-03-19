@@ -182,14 +182,37 @@ router.get("/", async (req, res, next) => {
     const { type, search } = req.query;
 
     if (isTmdbEnabled()) {
-      const externalCatalog = await fetchCatalogFromTmdb(type, search);
+      try {
+        const externalCatalog = await fetchCatalogFromTmdb(type, search);
 
-      return res.json({
-        status: "success",
-        source: "tmdb",
-        data: externalCatalog,
-        count: externalCatalog.length
-      });
+        return res.json({
+          status: "success",
+          source: "tmdb",
+          data: externalCatalog,
+          count: externalCatalog.length
+        });
+      } catch (tmdbError) {
+        // Fallback para nao quebrar o frontend quando a API externa estiver indisponivel.
+        let fallbackCatalog = readDB();
+
+        if (type && type !== "all") {
+          fallbackCatalog = fallbackCatalog.filter(item => item.type === type);
+        }
+
+        if (search) {
+          fallbackCatalog = fallbackCatalog.filter(item =>
+            item.title.toLowerCase().includes(search.toLowerCase())
+          );
+        }
+
+        return res.json({
+          status: "success",
+          source: "local-fallback",
+          warning: tmdbError.message,
+          data: fallbackCatalog,
+          count: fallbackCatalog.length
+        });
+      }
     }
 
     let catalog = readDB();
