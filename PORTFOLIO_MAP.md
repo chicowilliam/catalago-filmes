@@ -64,6 +64,17 @@
 - Rotas backend principais e middlewares sem erros de sintaxe.
 - Suite de testes executada: ha falhas de contrato em testes de rotas (nao bloqueia boot do servidor, mas requer alinhamento entre formato de erro esperado e app de teste).
 
+### 18/03/2026 - Diagnostico de tela sem conteudo apos login
+**Resultado da investigacao:**
+- Backend respondeu normalmente nos testes manuais de `health`, `login` e `catalog`.
+- Causa mais provavel para "site sem conteudo" no browser: frontend aberto fora da URL esperada (`http://localhost:3000`), como `file://` ou outra porta local.
+
+**Ajuste aplicado:**
+- `public/js/script.js`
+  - Adicionada validacao de contexto em runtime.
+  - Exibicao de mensagem clara no login quando o frontend nao esta sendo acessado por `http://localhost:3000`.
+  - Mensagem de erro de conexao mais objetiva para orientar subida do backend.
+
 ## 1) Visao Geral
 Projeto full stack com autenticacao de sessao para area administrativa, catalogo em JSON e frontend focado em experiencia semelhante a plataformas de streaming.
 

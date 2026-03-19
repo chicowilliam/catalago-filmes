@@ -454,8 +454,25 @@ const loginScreen = document.getElementById("loginScreen");
 const loginError = document.getElementById("loginError");
 const loginButton = loginForm.querySelector(".login-btn");
 
+function validateRuntimeContext() {
+  const isFileProtocol = window.location.protocol === "file:";
+  const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  const isWrongLocalPort = isLocalhost && window.location.port && window.location.port !== "3000";
+
+  if (isFileProtocol || isWrongLocalPort) {
+    loginError.textContent = "Abra o projeto em http://localhost:3000. Nao use file:// ou outra porta para o frontend.";
+    return false;
+  }
+
+  return true;
+}
+
 loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+
+  if (!validateRuntimeContext()) {
+    return;
+  }
 
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value;
@@ -495,7 +512,7 @@ loginForm.addEventListener("submit", async (event) => {
     await loadCatalog();
     showToast("Login realizado com sucesso", "success");
   } catch (err) {
-    loginError.textContent = "Erro ao conectar com o servidor.";
+    loginError.textContent = "Erro ao conectar com o servidor. Verifique se o backend esta rodando em http://localhost:3000.";
   } finally {
     loginButton.classList.remove("loading");
   }
@@ -537,6 +554,7 @@ themeToggle.addEventListener("click", toggleTheme);
 
 window.addEventListener("load", () => {
   applyTheme(getInitialTheme());
+  validateRuntimeContext();
 });
 
 if (window.matchMedia) {
