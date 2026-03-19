@@ -984,7 +984,6 @@ body.is-filter-transitioning .section-block {
   border-radius: 50%;
   display: none;
   background: #ffffff;
-  animation: loginDotBounce 1s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.2s;
 }
 
 .login-spinner::before,
@@ -1000,12 +999,10 @@ body.is-filter-transitioning .section-block {
 
 .login-spinner::before {
   left: -17px;
-  animation: loginDotBounce 1s cubic-bezier(0.4, 0, 0.2, 1) infinite 0s;
 }
 
 .login-spinner::after {
   left: 17px;
-  animation: loginDotBounce 1s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.4s;
 }
 
 .login-btn.loading .login-text {
@@ -1014,6 +1011,15 @@ body.is-filter-transitioning .section-block {
 
 .login-btn.loading .login-spinner {
   display: inline-block;
+  animation: loginDotBounce 1s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.2s;
+}
+
+.login-btn.loading .login-spinner::before {
+  animation: loginDotBounce 1s cubic-bezier(0.4, 0, 0.2, 1) infinite 0s;
+}
+
+.login-btn.loading .login-spinner::after {
+  animation: loginDotBounce 1s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.4s;
 }
 
 .login-btn.loading {
