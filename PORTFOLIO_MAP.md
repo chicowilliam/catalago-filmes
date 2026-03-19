@@ -28,6 +28,18 @@
 - Frontend continua consumindo `/api/catalog` sem alteracoes.
 - Recrutadores conseguem rodar o projeto sem acesso direto ao segredo no browser.
 
+### 19/03/2026 - Configuracao de chave TMDB e auditoria de GitHub
+**Acoes aplicadas:**
+- `.env` (local e ignorado pelo Git):
+  - `CATALOG_SOURCE=tmdb`
+  - `TMDB_API_KEY` preenchida para uso no backend.
+
+**Diagnostico de Git no terminal:**
+- `user.name`: `viwilliamxz`
+- `user.email`: `viniciuswilliam91@gmail.com`
+- `origin`: `https://github.com/chicowilliam/catalago-filmes.git`
+- Branch `master` estava `ahead 8` (commits locais existentes, faltando push).
+
 ### 18/03/2026 - Sessao de hoje
 **Bugs corrigidos:**
 - HTML malformado na `<nav>` (tags sem `>`, `<button` sem `<`) travava o `script.js` inteiro,
