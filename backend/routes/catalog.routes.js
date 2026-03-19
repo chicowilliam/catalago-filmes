@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const fs = require("fs");
+const https = require("https");
 const path = require("path");
 const { validateCreateMovie } = require("../validators/auth.validator");
 const AppError = require("../utils/AppError"); // ← ADICIONE
@@ -32,12 +33,165 @@ function saveDB(data) {
   }
 }
 
+const TMDB_BASE_URL = "https://api.themoviedb.org/3";
+const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
+const CATALOG_CACHE_TTL_MS = 5 * 60 * 1000;
+const catalogCache = new Map();
+
+function isTmdbEnabled() {
+  return process.env.CATALOG_SOURCE === "tmdb" && !!(process.env.TMDB_BEARER_TOKEN || process.env.TMDB_API_KEY);
+}
+
+function buildTmdbHeaders() {
+  if (!process.env.TMDB_BEARER_TOKEN) {
+    return {};
+  }
+
+  return {
+    Authorization: `Bearer ${process.env.TMDB_BEARER_TOKEN}`
+  };
+}
+
+function withTmdbApiKey(urlString) {
+  if (!process.env.TMDB_API_KEY || process.env.TMDB_BEARER_TOKEN) {
+    return urlString;
+  }
+
+  const url = new URL(urlString);
+  url.searchParams.set("api_key", process.env.TMDB_API_KEY);
+  return url.toString();
+}
+
+function httpGetJson(url) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(
+      withTmdbApiKey(url),
+      {
+        headers: buildTmdbHeaders()
+      },
+      (res) => {
+        let body = "";
+
+        res.on("data", (chunk) => {
+          body += chunk;
+        });
+
+        res.on("end", () => {
+          if (res.statusCode < 200 || res.statusCode >= 300) {
+            return reject(new AppError(`TMDB retornou status ${res.statusCode}`, 502, "TMDB_REQUEST_ERROR"));
+          }
+
+          try {
+            return resolve(JSON.parse(body));
+          } catch (error) {
+            return reject(new AppError("Resposta invalida da TMDB", 502, "TMDB_PARSE_ERROR"));
+          }
+        });
+      }
+    );
+
+    req.on("error", () => {
+      reject(new AppError("Falha de rede ao consultar TMDB", 502, "TMDB_NETWORK_ERROR"));
+    });
+
+    req.end();
+  });
+}
+
+function mapTmdbItemToCatalog(tmdbItem) {
+  const isMovie = tmdbItem.media_type === "movie" || !!tmdbItem.title;
+  const title = tmdbItem.title || tmdbItem.name || "Titulo indisponivel";
+  const synopsis = tmdbItem.overview || "Sinopse indisponivel.";
+  const image = tmdbItem.poster_path ? `${TMDB_IMAGE_BASE}${tmdbItem.poster_path}` : "";
+
+  return {
+    id: `tmdb-${tmdbItem.id}`,
+    title,
+    type: isMovie ? "movie" : "series",
+    image,
+    synopsis,
+    trailerId: ""
+  };
+}
+
+function getCache(cacheKey) {
+  const cached = catalogCache.get(cacheKey);
+
+  if (!cached) {
+    return null;
+  }
+
+  if (Date.now() - cached.timestamp > CATALOG_CACHE_TTL_MS) {
+    catalogCache.delete(cacheKey);
+    return null;
+  }
+
+  return cached.data;
+}
+
+function setCache(cacheKey, data) {
+  catalogCache.set(cacheKey, {
+    timestamp: Date.now(),
+    data
+  });
+}
+
+async function fetchCatalogFromTmdb(type, search) {
+  const safeSearch = (search || "").trim();
+  const cacheKey = `${type || "all"}::${safeSearch.toLowerCase()}`;
+  const cached = getCache(cacheKey);
+
+  if (cached) {
+    return cached;
+  }
+
+  let items = [];
+
+  if (safeSearch) {
+    const multiSearchUrl = `${TMDB_BASE_URL}/search/multi?language=pt-BR&query=${encodeURIComponent(safeSearch)}&include_adult=false&page=1`;
+    const response = await httpGetJson(multiSearchUrl);
+    items = Array.isArray(response.results) ? response.results : [];
+  } else {
+    const movieUrl = `${TMDB_BASE_URL}/trending/movie/week?language=pt-BR&page=1`;
+    const tvUrl = `${TMDB_BASE_URL}/trending/tv/week?language=pt-BR&page=1`;
+    const [movieRes, tvRes] = await Promise.all([httpGetJson(movieUrl), httpGetJson(tvUrl)]);
+    const movies = Array.isArray(movieRes.results) ? movieRes.results.map((item) => ({ ...item, media_type: "movie" })) : [];
+    const series = Array.isArray(tvRes.results) ? tvRes.results.map((item) => ({ ...item, media_type: "tv" })) : [];
+    items = movies.concat(series);
+  }
+
+  let mapped = items
+    .filter((item) => item && (item.media_type === "movie" || item.media_type === "tv" || item.title || item.name))
+    .map(mapTmdbItemToCatalog)
+    .filter((item) => item.image);
+
+  if (type && type !== "all") {
+    const normalizedType = type === "series" ? "series" : "movie";
+    mapped = mapped.filter((item) => item.type === normalizedType);
+  }
+
+  setCache(cacheKey, mapped);
+  return mapped;
+}
+
 /* =========================
    GET — LISTAR
 ========================= */
-router.get("/", (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
     const { type, search } = req.query;
+
+    if (isTmdbEnabled()) {
+      const externalCatalog = await fetchCatalogFromTmdb(type, search);
+
+      return res.json({
+        status: "success",
+        source: "tmdb",
+        data: externalCatalog,
+        count: externalCatalog.length
+      });
+    }
+
     let catalog = readDB();
 
     if (type && type !== "all") {
@@ -52,6 +206,7 @@ router.get("/", (req, res, next) => {
 
     res.json({
       status: "success",
+      source: "local",
       data: catalog,
       count: catalog.length
     });

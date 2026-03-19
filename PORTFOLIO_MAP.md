@@ -2,6 +2,32 @@
 
 ## 0) Historico de Sessoes
 
+### 18/03/2026 - Integracao segura com API externa (TMDB)
+**Contexto:**
+- Usuario quer substituir imagens/catalogo local por API de filmes, mas sem expor API key para recrutadores.
+
+**Ajuste aplicado:**
+- `backend/routes/catalog.routes.js`
+  - `GET /api/catalog` agora suporta fonte externa opcional via TMDB quando `CATALOG_SOURCE=tmdb`.
+  - Integracao feita no backend (server-side), mantendo API key fora do frontend.
+  - Adicionado cache em memoria (TTL de 5 min) para reduzir chamadas e evitar rate limit.
+  - Adicionado fallback implicito para base local (`catalog.json`) quando TMDB nao estiver configurada.
+  - Resposta do endpoint inclui `source` (`tmdb` ou `local`) para facilitar diagnostico.
+
+**Seguranca da chave:**
+- Chave permanece apenas em variavel de ambiente (`TMDB_BEARER_TOKEN` ou `TMDB_API_KEY`).
+- Nao enviar chave para `public/js/script.js`.
+- Nao versionar `.env` no GitHub.
+
+**Como ativar TMDB:**
+- Definir no ambiente:
+  - `CATALOG_SOURCE=tmdb`
+  - `TMDB_BEARER_TOKEN=...` (preferencial) ou `TMDB_API_KEY=...`
+
+**Resultado esperado:**
+- Frontend continua consumindo `/api/catalog` sem alteracoes.
+- Recrutadores conseguem rodar o projeto sem acesso direto ao segredo no browser.
+
 ### 18/03/2026 - Sessao de hoje
 **Bugs corrigidos:**
 - HTML malformado na `<nav>` (tags sem `>`, `<button` sem `<`) travava o `script.js` inteiro,
