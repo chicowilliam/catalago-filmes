@@ -88,6 +88,17 @@
   - Adicionado fail-safe para esconder loader mesmo quando a API demora/trava.
   - Toast de erro para feedback ao usuario quando o catalogo nao carregar.
 
+### 18/03/2026 - Alinhamento de commits/autoria
+**Contexto:**
+- Usuario reportou duvida se os commits estavam sendo gerados corretamente.
+
+**Acoes aplicadas:**
+- Configurado email local do Git no repositorio para `viniciuswilliam91@gmail.com`.
+- Validado que o historico local esta ativo e recebendo commits.
+
+**Observacao de publicacao:**
+- Commits locais so aparecem no GitHub apos `git push` para a branch remota.
+
 ## 1) Visao Geral
 Projeto full stack com autenticacao de sessao para area administrativa, catalogo em JSON e frontend focado em experiencia semelhante a plataformas de streaming.
 
