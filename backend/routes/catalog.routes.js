@@ -36,9 +36,20 @@ function saveDB(data) {
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
 const CATALOG_CACHE_TTL_MS = 5 * 60 * 1000;
-const DEFAULT_TMDB_AUTO_PAGES = 3;
+const DEFAULT_TMDB_AUTO_PAGES = 1;
+const DEFAULT_CATALOG_LIMIT = 20;
 const DEFAULT_TMDB_TIMEOUT_MS = 8000;
 const catalogCache = new Map();
+
+function getCatalogLimit() {
+  const parsed = Number(process.env.CATALOG_LIMIT || DEFAULT_CATALOG_LIMIT);
+
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    return DEFAULT_CATALOG_LIMIT;
+  }
+
+  return Math.min(parsed, 40);
+}
 
 function getTmdbTimeoutMs() {
   const parsed = Number(process.env.TMDB_TIMEOUT_MS || DEFAULT_TMDB_TIMEOUT_MS);
@@ -168,10 +179,39 @@ function setCache(cacheKey, data) {
   });
 }
 
+function limitCatalogResults(items, type, search) {
+  const limit = getCatalogLimit();
+
+  if (!Array.isArray(items) || items.length <= limit) {
+    return items;
+  }
+
+  if (search || (type && type !== "all")) {
+    return items.slice(0, limit);
+  }
+
+  const movieTarget = Math.ceil(limit / 2);
+  const seriesTarget = Math.floor(limit / 2);
+  const movies = items.filter((item) => item.type === "movie");
+  const series = items.filter((item) => item.type === "series");
+
+  let limited = movies.slice(0, movieTarget).concat(series.slice(0, seriesTarget));
+
+  if (limited.length < limit) {
+    limited = limited
+      .concat(movies.slice(movieTarget))
+      .concat(series.slice(seriesTarget))
+      .slice(0, limit);
+  }
+
+  return limited;
+}
+
 async function fetchCatalogFromTmdb(type, search) {
   const safeSearch = (search || "").trim();
   const autoPages = getTmdbAutoPages();
-  const cacheKey = `${type || "all"}::${safeSearch.toLowerCase()}::${autoPages}`;
+  const limit = getCatalogLimit();
+  const cacheKey = `${type || "all"}::${safeSearch.toLowerCase()}::${autoPages}::${limit}`;
   const cached = getCache(cacheKey);
 
   if (cached) {
@@ -235,6 +275,8 @@ async function fetchCatalogFromTmdb(type, search) {
     mapped = mapped.filter((item) => item.type === normalizedType);
   }
 
+  mapped = limitCatalogResults(mapped, type, safeSearch);
+
   setCache(cacheKey, mapped);
   return mapped;
 }
@@ -270,6 +312,8 @@ router.get("/", async (req, res, next) => {
           );
         }
 
+        fallbackCatalog = limitCatalogResults(fallbackCatalog, type, search);
+
         return res.json({
           status: "success",
           source: "local-fallback",
@@ -291,6 +335,8 @@ router.get("/", async (req, res, next) => {
         item.title.toLowerCase().includes(search.toLowerCase())
       );
     }
+
+    catalog = limitCatalogResults(catalog, type, search);
 
     res.json({
       status: "success",

@@ -23,6 +23,8 @@ let currentCatalogSource = "local";
 let hasShownFallbackToast = false;
 const REQUEST_TIMEOUT_MS = 12000;
 const AUTO_REFRESH_MS = 5 * 60 * 1000;
+const LOGIN_MIN_LOADING_MS = 120;
+const LOGIN_TRANSITION_MS = 320;
 let autoRefreshTimer = null;
 
 class FavoritesManager {
@@ -105,9 +107,10 @@ function initLazyLoading() {
         const realSrc = img.getAttribute("data-src");
 
         if (realSrc) {
+          img.onload = () => img.classList.add("loaded");
+          img.onerror = () => img.classList.add("loaded");
           img.src = realSrc;
           img.removeAttribute("data-src");
-          img.classList.add("loaded");
           imageObserver.unobserve(img);
         }
       });
@@ -169,6 +172,29 @@ function stopAutoCatalogRefresh() {
 
   clearInterval(autoRefreshTimer);
   autoRefreshTimer = null;
+}
+
+function wait(ms) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
+async function ensureMinimumDelay(startTime, minimumMs) {
+  const elapsed = performance.now() - startTime;
+  const remaining = minimumMs - elapsed;
+
+  if (remaining > 0) {
+    await wait(remaining);
+  }
+}
+
+async function animateLoginSuccess() {
+  document.body.classList.add("app-ready");
+  loginScreen.classList.add("is-exiting");
+  await wait(LOGIN_TRANSITION_MS);
+  loginScreen.style.display = "none";
+  loginScreen.classList.remove("is-exiting");
 }
 
 async function loadCatalog(search = "", options = {}) {
@@ -444,11 +470,6 @@ function createModalContent(item) {
   closeBtn.type = "button";
   closeBtn.addEventListener("click", closeModal);
 
-  const iframe = document.createElement("iframe");
-  iframe.src = `https://www.youtube.com/embed/${item.trailerId}`;
-  iframe.allowFullscreen = true;
-  iframe.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture");
-
   const title = document.createElement("h3");
   title.textContent = item.title;
 
@@ -491,7 +512,20 @@ function createModalContent(item) {
   ratingDiv.appendChild(starsContainer);
 
   modalContent.appendChild(closeBtn);
-  modalContent.appendChild(iframe);
+
+  if (item.trailerId) {
+    const iframe = document.createElement("iframe");
+    iframe.src = `https://www.youtube.com/embed/${item.trailerId}`;
+    iframe.allowFullscreen = true;
+    iframe.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture");
+    modalContent.appendChild(iframe);
+  } else {
+    const noTrailer = document.createElement("div");
+    noTrailer.className = "modal-no-trailer";
+    noTrailer.textContent = "Trailer não disponível para este título.";
+    modalContent.appendChild(noTrailer);
+  }
+
   modalContent.appendChild(title);
   modalContent.appendChild(synopsis);
   modalContent.appendChild(ratingDiv);
@@ -551,8 +585,10 @@ loginForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  const loginStartTime = performance.now();
   loginError.textContent = "";
   loginButton.classList.add("loading");
+  loginButton.disabled = true;
 
   try {
     const response = await fetch("/api/auth/login", {
@@ -576,15 +612,17 @@ loginForm.addEventListener("submit", async (event) => {
       return;
     }
 
-    loginScreen.style.display = "none";
     initLazyLoading();
     await loadCatalog();
+    await ensureMinimumDelay(loginStartTime, LOGIN_MIN_LOADING_MS);
+    await animateLoginSuccess();
     startAutoCatalogRefresh();
     showToast("Login realizado com sucesso", "success");
   } catch (err) {
     loginError.textContent = "Erro ao conectar com o servidor. Verifique se o backend esta rodando em http://localhost:3000.";
   } finally {
     loginButton.classList.remove("loading");
+    loginButton.disabled = false;
   }
 });
 

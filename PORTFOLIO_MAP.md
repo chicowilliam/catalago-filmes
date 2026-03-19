@@ -79,6 +79,23 @@
 **Motivo:**
 - Evitar travamento do carregamento quando a TMDB estiver lenta ou indisponivel.
 
+### 19/03/2026 - Otimizacao de catalogo e transicao de login
+**Ajustes aplicados:**
+- `backend/routes/catalog.routes.js`
+  - Catalogo passou a retornar cerca de 20 itens por padrao (`CATALOG_LIMIT`, padrao 20, maximo 40).
+  - Em listagem geral, o limite prioriza equilibrio entre filmes e series para nao concentrar tudo em um unico tipo.
+  - `TMDB_AUTO_PAGES` passou a ter padrao 1 para reduzir requisicoes externas e manter a tela mais leve.
+- `public/css/style.css`
+  - Hover dos cards refinado com easing mais suave e menos agressivo, com movimento mais fluido.
+  - Tela principal agora entra com transicao curta apos login.
+  - Botao de login trocado para loader de bolinhas em vez de spinner circular.
+- `public/js/script.js`
+  - Login agora garante loading minimo de 120ms antes da transicao para a vitrine.
+  - Saida da tela de login passou a usar fade curto antes de revelar a lista.
+
+**Motivo:**
+- Reduzir excesso de cards na tela, melhorar percepcao de fluidez e deixar a experiencia mais polida no acesso inicial.
+
 ### 18/03/2026 - Sessao de hoje
 **Bugs corrigidos:**
 - HTML malformado na `<nav>` (tags sem `>`, `<button` sem `<`) travava o `script.js` inteiro,
