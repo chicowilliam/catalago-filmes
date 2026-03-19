@@ -99,6 +99,11 @@
 **Observacao de publicacao:**
 - Commits locais so aparecem no GitHub apos `git push` para a branch remota.
 
+### 18/03/2026 - Ajuste de copy na hero
+**Mudanca aplicada:**
+- `public/index.html`
+  - Texto de descricao da hero atualizado para destacar que o projeto e inspirado em streaming e usa front-end + back-end.
+
 ## 1) Visao Geral
 Projeto full stack com autenticacao de sessao para area administrativa, catalogo em JSON e frontend focado em experiencia semelhante a plataformas de streaming.
 
