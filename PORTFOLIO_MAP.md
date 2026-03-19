@@ -75,6 +75,19 @@
   - Exibicao de mensagem clara no login quando o frontend nao esta sendo acessado por `http://localhost:3000`.
   - Mensagem de erro de conexao mais objetiva para orientar subida do backend.
 
+### 18/03/2026 - Correcao de loader infinito
+**Contexto:**
+- Usuario reportou tela presa em carregamento.
+- `node_modules` presente; nao ha necessidade de rodar `npm install` novamente em toda execucao.
+
+**Ajustes aplicados:**
+- `public/index.html`
+  - Loader passou a iniciar oculto por padrao (`class="hide"`) para nao bloquear a UI em caso de falha de script/rede.
+- `public/js/script.js`
+  - Adicionado timeout de requisicao no carregamento do catalogo (`AbortController`).
+  - Adicionado fail-safe para esconder loader mesmo quando a API demora/trava.
+  - Toast de erro para feedback ao usuario quando o catalogo nao carregar.
+
 ## 1) Visao Geral
 Projeto full stack com autenticacao de sessao para area administrativa, catalogo em JSON e frontend focado em experiencia semelhante a plataformas de streaming.
 

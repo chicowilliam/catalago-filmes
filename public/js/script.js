@@ -19,6 +19,7 @@ let currentSearch = "";
 let debounceTimer = null;
 let imageObserver = null;
 let allItems = [];
+const REQUEST_TIMEOUT_MS = 12000;
 
 class FavoritesManager {
   constructor() {
@@ -138,11 +139,17 @@ function renderSkeletons() {
 }
 
 async function loadCatalog(search = "") {
+  const controller = new AbortController();
+  const requestTimeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const loaderFailSafe = setTimeout(() => loader.classList.add("hide"), REQUEST_TIMEOUT_MS + 1000);
+
   try {
     loader.classList.remove("hide");
     renderSkeletons();
 
-    const res = await fetch(`/api/catalog?type=all&search=${encodeURIComponent(search)}`);
+    const res = await fetch(`/api/catalog?type=all&search=${encodeURIComponent(search)}`, {
+      signal: controller.signal
+    });
     if (!res.ok) {
       throw new Error(`Erro ao carregar catálogo: ${res.status}`);
     }
@@ -151,13 +158,21 @@ async function loadCatalog(search = "") {
     allItems = Array.isArray(response.data) ? response.data : [];
     renderCurrentView();
   } catch (err) {
-    console.error("Erro ao carregar catálogo:", err);
+    if (err.name === "AbortError") {
+      console.error("Timeout ao carregar catálogo.");
+    } else {
+      console.error("Erro ao carregar catálogo:", err);
+    }
+
     [moviesGrid, seriesGrid, favoritesGrid].forEach((grid) => {
       if (grid) {
         grid.innerHTML = "<p class='empty-grid-message'>Erro ao carregar catálogo. Tente novamente.</p>";
       }
     });
+    showToast("Nao foi possivel carregar o catalogo agora.", "error");
   } finally {
+    clearTimeout(requestTimeout);
+    clearTimeout(loaderFailSafe);
     loader.classList.add("hide");
   }
 }
@@ -555,6 +570,7 @@ themeToggle.addEventListener("click", toggleTheme);
 window.addEventListener("load", () => {
   applyTheme(getInitialTheme());
   validateRuntimeContext();
+  loader.classList.add("hide");
 });
 
 if (window.matchMedia) {
