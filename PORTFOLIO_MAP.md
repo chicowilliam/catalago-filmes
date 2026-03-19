@@ -35,10 +35,14 @@
   - `TMDB_API_KEY` preenchida para uso no backend.
 
 **Diagnostico de Git no terminal:**
-- `user.name`: `viwilliamxz`
+- `user.name`: `viwilliamxz` (ajustado depois para `chicowilliam`)
 - `user.email`: `viniciuswilliam91@gmail.com`
 - `origin`: `https://github.com/chicowilliam/catalago-filmes.git`
 - Branch `master` estava `ahead 8` (commits locais existentes, faltando push).
+
+**Publicacao e autoria:**
+- Push para `origin/master` concluido com sucesso.
+- `git config user.name` atualizado para `chicowilliam` no repositorio local.
 
 ### 18/03/2026 - Sessao de hoje
 **Bugs corrigidos:**
