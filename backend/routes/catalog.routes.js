@@ -36,7 +36,18 @@ function saveDB(data) {
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
 const CATALOG_CACHE_TTL_MS = 5 * 60 * 1000;
+const DEFAULT_TMDB_AUTO_PAGES = 3;
 const catalogCache = new Map();
+
+function getTmdbAutoPages() {
+  const parsed = Number(process.env.TMDB_AUTO_PAGES || DEFAULT_TMDB_AUTO_PAGES);
+
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    return DEFAULT_TMDB_AUTO_PAGES;
+  }
+
+  return Math.min(parsed, 5);
+}
 
 function isTmdbEnabled() {
   return process.env.CATALOG_SOURCE === "tmdb" && !!(process.env.TMDB_BEARER_TOKEN || process.env.TMDB_API_KEY);
@@ -138,7 +149,8 @@ function setCache(cacheKey, data) {
 
 async function fetchCatalogFromTmdb(type, search) {
   const safeSearch = (search || "").trim();
-  const cacheKey = `${type || "all"}::${safeSearch.toLowerCase()}`;
+  const autoPages = getTmdbAutoPages();
+  const cacheKey = `${type || "all"}::${safeSearch.toLowerCase()}::${autoPages}`;
   const cached = getCache(cacheKey);
 
   if (cached) {
@@ -152,11 +164,31 @@ async function fetchCatalogFromTmdb(type, search) {
     const response = await httpGetJson(multiSearchUrl);
     items = Array.isArray(response.results) ? response.results : [];
   } else {
-    const movieUrl = `${TMDB_BASE_URL}/trending/movie/week?language=pt-BR&page=1`;
-    const tvUrl = `${TMDB_BASE_URL}/trending/tv/week?language=pt-BR&page=1`;
-    const [movieRes, tvRes] = await Promise.all([httpGetJson(movieUrl), httpGetJson(tvUrl)]);
-    const movies = Array.isArray(movieRes.results) ? movieRes.results.map((item) => ({ ...item, media_type: "movie" })) : [];
-    const series = Array.isArray(tvRes.results) ? tvRes.results.map((item) => ({ ...item, media_type: "tv" })) : [];
+    const movieRequests = [];
+    const tvRequests = [];
+
+    for (let page = 1; page <= autoPages; page += 1) {
+      movieRequests.push(httpGetJson(`${TMDB_BASE_URL}/trending/movie/week?language=pt-BR&page=${page}`));
+      tvRequests.push(httpGetJson(`${TMDB_BASE_URL}/trending/tv/week?language=pt-BR&page=${page}`));
+    }
+
+    const [movieResponses, tvResponses] = await Promise.all([
+      Promise.all(movieRequests),
+      Promise.all(tvRequests)
+    ]);
+
+    const movies = movieResponses.flatMap((response) =>
+      Array.isArray(response.results)
+        ? response.results.map((item) => ({ ...item, media_type: "movie" }))
+        : []
+    );
+
+    const series = tvResponses.flatMap((response) =>
+      Array.isArray(response.results)
+        ? response.results.map((item) => ({ ...item, media_type: "tv" }))
+        : []
+    );
+
     items = movies.concat(series);
   }
 
@@ -164,6 +196,18 @@ async function fetchCatalogFromTmdb(type, search) {
     .filter((item) => item && (item.media_type === "movie" || item.media_type === "tv" || item.title || item.name))
     .map(mapTmdbItemToCatalog)
     .filter((item) => item.image);
+
+  const seen = new Set();
+  mapped = mapped.filter((item) => {
+    const dedupKey = `${item.type}-${item.id}`;
+
+    if (seen.has(dedupKey)) {
+      return false;
+    }
+
+    seen.add(dedupKey);
+    return true;
+  });
 
   if (type && type !== "all") {
     const normalizedType = type === "series" ? "series" : "movie";

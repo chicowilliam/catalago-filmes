@@ -56,6 +56,20 @@
 **Motivo:**
 - Evitar tela sem filmes quando a API externa falhar (chave invalida, limite de requicoes ou erro de rede).
 
+### 19/03/2026 - Catalogo automatico com TMDB
+**Ajustes aplicados:**
+- `backend/routes/catalog.routes.js`
+  - Carregamento automatico de multiplas paginas da TMDB para `trending/movie` e `trending/tv`.
+  - Quantidade de paginas configuravel por ambiente com `TMDB_AUTO_PAGES` (padrao 3, maximo 5).
+  - Deduplicacao de itens para evitar repeticoes entre paginas.
+- `public/js/script.js`
+  - Atualizacao automatica do catalogo a cada 5 minutos apos login (refresh silencioso).
+  - Reuso da busca ativa no refresh para manter contexto do usuario.
+
+**Resultado esperado:**
+- Mais filmes e series aparecem automaticamente sem cadastro manual no JSON local.
+- Catalogo se atualiza sozinho durante uso da aplicacao.
+
 ### 18/03/2026 - Sessao de hoje
 **Bugs corrigidos:**
 - HTML malformado na `<nav>` (tags sem `>`, `<button` sem `<`) travava o `script.js` inteiro,

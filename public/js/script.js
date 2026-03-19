@@ -22,6 +22,8 @@ let allItems = [];
 let currentCatalogSource = "local";
 let hasShownFallbackToast = false;
 const REQUEST_TIMEOUT_MS = 12000;
+const AUTO_REFRESH_MS = 5 * 60 * 1000;
+let autoRefreshTimer = null;
 
 class FavoritesManager {
   constructor() {
@@ -150,14 +152,40 @@ function updateCatalogSourceIndicator(source) {
   heroKicker.textContent = `Streaming Portfolio • Fonte: ${sourceLabel}`;
 }
 
-async function loadCatalog(search = "") {
+function startAutoCatalogRefresh() {
+  if (autoRefreshTimer) {
+    clearInterval(autoRefreshTimer);
+  }
+
+  autoRefreshTimer = setInterval(() => {
+    loadCatalog(currentSearch, { showLoading: false });
+  }, AUTO_REFRESH_MS);
+}
+
+function stopAutoCatalogRefresh() {
+  if (!autoRefreshTimer) {
+    return;
+  }
+
+  clearInterval(autoRefreshTimer);
+  autoRefreshTimer = null;
+}
+
+async function loadCatalog(search = "", options = {}) {
+  const { showLoading = true } = options;
   const controller = new AbortController();
   const requestTimeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  const loaderFailSafe = setTimeout(() => loader.classList.add("hide"), REQUEST_TIMEOUT_MS + 1000);
+  const loaderFailSafe = setTimeout(() => {
+    if (showLoading) {
+      loader.classList.add("hide");
+    }
+  }, REQUEST_TIMEOUT_MS + 1000);
 
   try {
-    loader.classList.remove("hide");
-    renderSkeletons();
+    if (showLoading) {
+      loader.classList.remove("hide");
+      renderSkeletons();
+    }
 
     const res = await fetch(`/api/catalog?type=all&search=${encodeURIComponent(search)}`, {
       signal: controller.signal
@@ -197,7 +225,9 @@ async function loadCatalog(search = "") {
   } finally {
     clearTimeout(requestTimeout);
     clearTimeout(loaderFailSafe);
-    loader.classList.add("hide");
+    if (showLoading) {
+      loader.classList.add("hide");
+    }
   }
 }
 
@@ -549,6 +579,7 @@ loginForm.addEventListener("submit", async (event) => {
     loginScreen.style.display = "none";
     initLazyLoading();
     await loadCatalog();
+    startAutoCatalogRefresh();
     showToast("Login realizado com sucesso", "success");
   } catch (err) {
     loginError.textContent = "Erro ao conectar com o servidor. Verifique se o backend esta rodando em http://localhost:3000.";
@@ -597,6 +628,8 @@ window.addEventListener("load", () => {
   updateCatalogSourceIndicator(currentCatalogSource);
   loader.classList.add("hide");
 });
+
+window.addEventListener("beforeunload", stopAutoCatalogRefresh);
 
 if (window.matchMedia) {
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (event) => {
