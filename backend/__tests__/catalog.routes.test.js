@@ -10,6 +10,7 @@ const path = require('path');
 
 const catalogRoutes = require('../routes/catalog.routes');
 const authRoutes = require('../routes/auth.routes');
+const errorHandler = require('../middlewares/errorHandler');
 
 // Criar app de teste
 const app = express();
@@ -21,6 +22,7 @@ app.use(session({
 }));
 app.use('/api/auth', authRoutes);
 app.use('/api/catalog', catalogRoutes);
+app.use(errorHandler);
 
 describe('Catalog Routes', () => {
 
@@ -70,7 +72,16 @@ describe('Catalog Routes', () => {
 
   // TESTE 5: Criar filme com dados inválidos
   test('POST /api/catalog - deve rejeitar dados inválidos', async () => {
-    const response = await request(app)
+    const agent = request.agent(app);
+
+    await agent
+      .post('/api/auth/login')
+      .send({
+        username: 'admin',
+        password: 'admin123'
+      });
+
+    const response = await agent
       .post('/api/catalog')
       .send({
         title: 'A', // Muito curto

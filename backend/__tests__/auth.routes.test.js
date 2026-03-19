@@ -8,6 +8,7 @@ const request = require('supertest');
 const express = require('express');
 const session = require('express-session');
 const authRoutes = require('../routes/auth.routes');
+const errorHandler = require('../middlewares/errorHandler');
 
 // Criar app de teste
 const app = express();
@@ -18,6 +19,7 @@ app.use(session({
   saveUninitialized: false
 }));
 app.use('/api/auth', authRoutes);
+app.use(errorHandler);
 
 describe('Auth Routes', () => {
 

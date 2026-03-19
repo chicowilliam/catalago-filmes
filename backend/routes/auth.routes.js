@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const rateLimit = require("express-rate-limit");
 const { validateLogin } = require("../validators/auth.validator");
 const AppError = require("../utils/AppError"); // ← ADICIONE
 
@@ -8,8 +9,20 @@ const ADMIN_USER = {
   password: process.env.ADMIN_PASSWORD || "admin123"
 };
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: {
+    status: "error",
+    code: "TOO_MANY_REQUESTS",
+    message: "Muitas tentativas de login. Tente novamente em alguns minutos."
+  }
+});
+
 // LOGIN COM VALIDAÇÃO E ERRO TRATADO ✅
-router.post("/login", (req, res, next) => {
+router.post("/login", loginLimiter, (req, res, next) => {
   try {
     // Validar dados
     const { error, value } = validateLogin(req.body);

@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 const session = require("express-session");
+const helmet = require("helmet");
 const path = require("path");
 
 const authRoutes = require("./backend/routes/auth.routes");
@@ -14,12 +15,18 @@ const app = express();
    MIDDLEWARES
 ========================= */
 app.use(express.json());
+app.use(helmet());
 
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false
+      saveUninitialized: false,
+      cookie: {
+         httpOnly: true,
+         sameSite: "lax",
+         secure: process.env.NODE_ENV === "production"
+      }
   })
 );
 

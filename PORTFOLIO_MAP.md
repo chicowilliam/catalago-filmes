@@ -2,6 +2,44 @@
 
 ## 0) Historico de Sessoes
 
+### 19/03/2026 - Endurecimento de seguranca, DX e estabilizacao de testes
+**Objetivo:**
+- Aplicar melhorias de seguranca no backend, melhorar experiencia de desenvolvimento e corrigir inconsistencias na suite de testes.
+
+**Ajustes aplicados:**
+- `server.js`
+  - Ativado `helmet()` para headers de seguranca HTTP.
+  - Configuracao de cookie de sessao reforcada com `httpOnly`, `sameSite: "lax"` e `secure` condicionado a `NODE_ENV=production`.
+- `backend/routes/auth.routes.js`
+  - Adicionado rate limit no `POST /api/auth/login` com `express-rate-limit` (janela de 15 min, limite de 10 tentativas).
+  - Retorno padronizado para excesso de tentativas (`TOO_MANY_REQUESTS`).
+- `backend/middlewares/isAdmin.js`
+  - Respostas de autorizacao negada padronizadas com contrato da API (`status`, `code`, `message`).
+- `package.json`
+  - Script de desenvolvimento atualizado para `nodemon` (`npm run dev`).
+- `backend/__tests__/auth.routes.test.js`
+  - App de teste agora usa `errorHandler` para validar contrato de erro real da API.
+- `backend/__tests__/catalog.routes.test.js`
+  - App de teste agora usa `errorHandler`.
+  - Cenário de validacao de `POST /api/catalog` ajustado para autenticar antes de validar payload invalido.
+
+**Resultado esperado:**
+- API mais protegida por padrao sem quebrar contratos existentes.
+- Fluxo de desenvolvimento mais rapido com reload automatico.
+- Suite Jest/Supertest estavel e alinhada ao comportamento real do backend (`26/26` testes passando).
+
+### 19/03/2026 - Correcao definitiva da animacao das bolinhas no login
+**Objetivo:**
+- Resolver o bug em que o loader de bolinhas do botao de login aparecia sem animacao.
+
+**Ajustes aplicados:**
+- `public/css/style.css`
+  - Removidas animacoes do estado base de `.login-spinner` (elemento oculto com `display: none`).
+  - Animacoes movidas para o estado `.login-btn.loading .login-spinner` e pseudo-elementos.
+
+**Resultado esperado:**
+- As bolinhas iniciam a animacao corretamente sempre que o estado de loading do botao e ativado.
+
 ### 19/03/2026 - Pacote de animacoes otimizadas no frontend
 **Objetivo:**
 - Aumentar percepcao de fluidez e sofisticacao visual com animacoes leves e performaticas, mantendo boa experiencia em mobile.
