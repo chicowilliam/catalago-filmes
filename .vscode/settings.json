@@ -1,0 +1,18 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^Get-ChildItem -Recurse -File \\| ForEach-Object \\{ \\$_\\.FullName\\.Replace\\(\\(Get-Location\\)\\.Path \\+ '\\\\\\\\',''\\) \\}$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "ForEach-Object": true,
+        "Set-Content": true,
+        "/^node -e \"require\\('\\./backend/routes/catalog\\.routes'\\)\" 2>&1 ; echo \"---AUTH---\" ; node -e \"require\\('\\./backend/routes/auth\\.routes'\\)\" 2>&1$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^node -e \"try \\{ require\\('\\./backend/routes/catalog\\.routes'\\); console\\.log\\('catalog OK'\\); \\} catch\\(e\\) \\{ console\\.error\\('catalog ERRO:', e\\.message\\); \\}\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
