@@ -1,10 +1,9 @@
 /**
- * TESTES PARA VALIDAÇÃO DE LOGIN
- * 
- * Aqui testamos se a validação funciona corretamente
+ * TESTES PARA VALIDAÇÃO DE LOGIN E ITEM DO CATÁLOGO
  */
 
-const { validateLogin, validateCreateMovie } = require('../validators/auth.validator');
+const { validateLogin } = require('../validators/auth.validator');
+const { validateCatalogItem } = require('../validators/catalog.validator');
 
 describe('Auth Validator', () => {
   
@@ -88,7 +87,7 @@ describe('Auth Validator', () => {
 
   // ========== TESTES DE CRIAÇÃO DE FILME ==========
 
-  describe('validateCreateMovie', () => {
+  describe('validateCatalogItem', () => {
     
     // TESTE 7: Filme válido deve passar
     test('deve aceitar dados de filme válidos', () => {
@@ -100,7 +99,7 @@ describe('Auth Validator', () => {
         trailerId: 'dQw4w9WgXcQ'
       };
 
-      const { error, value } = validateCreateMovie(validData);
+      const { error, value } = validateCatalogItem(validData);
 
       expect(error).toBeUndefined();
       expect(value).toEqual(validData);
@@ -115,7 +114,7 @@ describe('Auth Validator', () => {
         synopsis: 'Uma série sobre um professor de química'
       };
 
-      const { error } = validateCreateMovie(invalidData);
+      const { error } = validateCatalogItem(invalidData);
 
       expect(error).toBeDefined();
     });
@@ -129,7 +128,7 @@ describe('Auth Validator', () => {
         synopsis: 'Uma série sobre um professor de química'
       };
 
-      const { error } = validateCreateMovie(invalidData);
+      const { error } = validateCatalogItem(invalidData);
 
       expect(error).toBeDefined();
     });
@@ -143,7 +142,7 @@ describe('Auth Validator', () => {
         synopsis: 'Descrição com mais de 10 caracteres'
       };
 
-      const { error } = validateCreateMovie(invalidData);
+      const { error } = validateCatalogItem(invalidData);
 
       expect(error).toBeDefined();
     });
@@ -157,7 +156,7 @@ describe('Auth Validator', () => {
         synopsis: 'Curta' // ❌ Muito curta
       };
 
-      const { error } = validateCreateMovie(invalidData);
+      const { error } = validateCatalogItem(invalidData);
 
       expect(error).toBeDefined();
     });
@@ -169,7 +168,7 @@ describe('Auth Validator', () => {
         // Faltam: type, image, synopsis
       };
 
-      const { error } = validateCreateMovie(invalidData);
+      const { error } = validateCatalogItem(invalidData);
 
       expect(error).toBeDefined();
     });

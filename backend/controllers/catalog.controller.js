@@ -9,7 +9,7 @@
 // Ele NÃO acessa o banco diretamente (isso fica no repository).
 
 const catalogService = require("../services/catalog.service");
-const { validateCreateMovie } = require("../validators/auth.validator");
+const { validateCatalogItem } = require("../validators/catalog.validator");
 const AppError = require("../utils/AppError");
 
 /**
@@ -18,7 +18,7 @@ const AppError = require("../utils/AppError");
  * Centraliza a validação para evitar duplicação entre create e update.
  */
 function parseAndValidateBody(body) {
-  const { error, value } = validateCreateMovie(body);
+  const { error, value } = validateCatalogItem(body);
   if (error) {
     throw new AppError(
       error.details.map((d) => d.message).join("; "),
