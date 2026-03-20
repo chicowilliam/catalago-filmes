@@ -63,20 +63,20 @@ async function listCatalog(type, search) {
       return { source: "tmdb", data: limited };
     } catch (err) {
       // TMDB falhou → usa fallback local e avisa o chamador
-      const fallback = _filterLocal(type, search);
+      const fallback = fetchFromLocalStorage(type, search);
       return { source: "local-fallback", warning: err.message, data: fallback };
     }
   }
 
-  const data = _filterLocal(type, search);
+  const data = fetchFromLocalStorage(type, search);
   return { source: "local", data };
 }
 
 /**
- * Filtra e limita os dados do JSON local.
- * Função interna (prefixo _), não é exportada.
+ * Filtra e limita os dados do JSON local por tipo e busca textual.
+ * Função interna — não é exportada, usada apenas dentro deste service.
  */
-function _filterLocal(type, search) {
+function fetchFromLocalStorage(type, search) {
   let items = catalogRepo.findAll();
 
   if (type && type !== "all") {

@@ -13,6 +13,23 @@ const { validateCreateMovie } = require("../validators/auth.validator");
 const AppError = require("../utils/AppError");
 
 /**
+ * Valida o body da requisição contra o schema de item do catálogo.
+ * Lança AppError 400 se inválido, retorna o valor limpo se válido.
+ * Centraliza a validação para evitar duplicação entre create e update.
+ */
+function parseAndValidateBody(body) {
+  const { error, value } = validateCreateMovie(body);
+  if (error) {
+    throw new AppError(
+      error.details.map((d) => d.message).join("; "),
+      400,
+      "VALIDATION_ERROR"
+    );
+  }
+  return value;
+}
+
+/**
  * GET /api/catalog
  * Lista o catálogo com filtros opcionais de tipo e busca.
  */
@@ -39,16 +56,8 @@ async function list(req, res, next) {
  */
 async function create(req, res, next) {
   try {
-    const { error, value } = validateCreateMovie(req.body);
-    if (error) {
-      throw new AppError(
-        error.details.map((d) => d.message).join("; "),
-        400,
-        "VALIDATION_ERROR"
-      );
-    }
-
-    const item = catalogService.createItem(value);
+    const validatedData = parseAndValidateBody(req.body);
+    const item = catalogService.createItem(validatedData);
     res.status(201).json({ status: "success", message: "Item criado com sucesso", item });
   } catch (err) {
     next(err);
@@ -61,16 +70,8 @@ async function create(req, res, next) {
  */
 async function update(req, res, next) {
   try {
-    const { error, value } = validateCreateMovie(req.body);
-    if (error) {
-      throw new AppError(
-        error.details.map((d) => d.message).join("; "),
-        400,
-        "VALIDATION_ERROR"
-      );
-    }
-
-    const item = catalogService.updateItem(req.params.id, value);
+    const validatedData = parseAndValidateBody(req.body);
+    const item = catalogService.updateItem(req.params.id, validatedData);
     res.json({ status: "success", message: "Item atualizado com sucesso", item });
   } catch (err) {
     next(err);

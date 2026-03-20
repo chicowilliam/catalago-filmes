@@ -1,18 +1,12 @@
+const AppError = require("../utils/AppError");
+
 module.exports = function isAdmin(req, res, next) {
   if (!req.session.user) {
-    return res.status(401).json({
-      status: "error",
-      code: "NOT_AUTHENTICATED",
-      message: "Not authenticated"
-    });
+    return next(new AppError("Not authenticated", 401, "NOT_AUTHENTICATED"));
   }
 
   if (req.session.user.role !== "admin") {
-    return res.status(403).json({
-      status: "error",
-      code: "ACCESS_DENIED",
-      message: "Access denied"
-    });
+    return next(new AppError("Access denied", 403, "ACCESS_DENIED"));
   }
 
   next();
