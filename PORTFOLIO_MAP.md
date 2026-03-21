@@ -2,6 +2,52 @@
 
 ## 0) Historico de Sessoes
 
+### 21/03/2026 - UX Premium da Aba Sobre e Tecnologias
+**Objetivo:**
+- Deixar a aba `Sobre` totalmente focada, ocultando o hero de destaque durante essa navegação.
+- Reposicionar a seção de tecnologias com visual premium, clean e centralizado (inspirado em pastas iOS).
+- Elevar a presença dos ícones com aparência de apps e animações leves por `transform` + `opacity`.
+
+**Ajustes aplicados:**
+- `public/js/script.js`
+  - Novo controle de visibilidade com fade suave para seções (`toggleSection` com transição por classe).
+  - Hero (`.hero-panel`) agora é ocultado ao entrar em `Sobre` e reexibido ao sair.
+  - Estado global `about-view-active` no `body` para bloquear interações residuais durante foco em Sobre.
+  - `renderCurrentView()` reorganizado para não renderizar destaque quando a aba ativa é `about`.
+- `public/css/style.css`
+  - Novo estado visual de transição (`.section-fade-hidden`) baseado em `opacity` e `transform`.
+  - Stack section centralizada e com mais respiro visual.
+  - Pastas `Front-end` e `Back-end` aumentadas, formato mais quadrado e menos arredondado.
+  - Grid de tecnologias reformulado com cards maiores estilo app.
+  - Ícones ampliados de forma significativa (`.stack-tech-icon` e `.stack-tech-icon i`).
+  - Hover dos ícones com efeito de flutuação/papel (scale + rotate + translateY + sombra dinâmica).
+  - Refino adicional de suavidade: easing mais orgânico, camadas de profundidade no hover, micro movimento 3D leve e resposta mais fluida para mouse/toque.
+  - Harmonização da linguagem de movimento entre pastas e ícones, incluindo brilho sutil, sombras em duas camadas e ajuste de interação para touch (`pointer: coarse`) e telas sem hover.
+
+**Resultado esperado:**
+- Aba Sobre com foco limpo, sem distrações do hero e do catálogo.
+- Tecnologias mais legíveis e destacadas, com hierarquia visual premium.
+- Interações suaves e performáticas, mantendo compatibilidade desktop/mobile.
+
+### 21/03/2026 - Upgrade Premium do Hero Section
+**Objetivo:**
+- Deixar o hero mais cinematografico e premium sem alterar a integracao com o backend.
+
+**Ajustes aplicados:**
+- `public/css/style.css`
+  - Overlay em gradiente mais sofisticado para contraste e profundidade visual.
+  - Nova animacao suave de background (`heroBackgroundDrift`) para sensacao cinematografica.
+  - Respiracao leve do overlay (`heroOverlayBreath`) para dinamica sutil.
+  - Transicoes mais elegantes no card de destaque (borda, sombra e hover).
+  - Tipografia do destaque ampliada e mais impactante com melhor hierarquia.
+  - Estado `:active` no CTA para feedback de clique mais refinado.
+  - Compatibilidade com modo performance: animacoes do hero desligam quando ativo.
+
+**Resultado esperado:**
+- Hero visualmente mais premium e com maior sensacao de produto final.
+- Melhor leitura de titulo/descricao sobre imagem de fundo.
+- Microinteracoes mais suaves e consistentes.
+
 ### 21/03/2026 - Refatoracao Cinematografica da Home (Layout Minimalista)
 **Objetivo:**
 - Sair da estrutura estilo dashboard na home e adotar uma landing page com foco visual.

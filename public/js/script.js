@@ -12,6 +12,7 @@ const seriesSection = document.getElementById("seriesSection");
 const favoritesSection = document.getElementById("favoritesSection");
 const aboutSection = document.getElementById("aboutSection");
 const stackSection = document.getElementById("stackSection");
+const heroPanel = document.querySelector(".hero-panel");
 const featuredCard = document.getElementById("featuredCard");
 const searchInput = document.getElementById("searchInput");
 const searchMeta = document.getElementById("searchMeta");
@@ -37,6 +38,7 @@ const AUTO_REFRESH_MS = 5 * 60 * 1000;
 const LOGIN_MIN_LOADING_MS = 1000;
 const LOGIN_TRANSITION_MS = 320;
 const FILTER_TRANSITION_MS = 200;
+const SECTION_FADE_MS = 260;
 const PERFORMANCE_STORAGE_KEY = "performanceMode";
 const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 let autoRefreshTimer = null;
@@ -48,6 +50,7 @@ let isPerformanceMode = false;
 let filterTransitionTimer = null;
 let activeCatalogController = null;
 let latestCatalogRequestId = 0;
+const sectionFadeTimers = new WeakMap();
 
 function parseStoredJSON(storageKey, fallbackValue) {
   try {
@@ -738,7 +741,43 @@ function renderGrid(grid, items, emptyMessage) {
 }
 
 function toggleSection(sectionElement, show) {
-  sectionElement.classList.toggle("is-hidden", !show);
+  if (!sectionElement) {
+    return;
+  }
+
+  const pendingTimer = sectionFadeTimers.get(sectionElement);
+  if (pendingTimer) {
+    clearTimeout(pendingTimer);
+    sectionFadeTimers.delete(sectionElement);
+  }
+
+  if (show) {
+    if (sectionElement.classList.contains("is-hidden")) {
+      sectionElement.classList.add("section-fade-hidden");
+      sectionElement.classList.remove("is-hidden");
+
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          sectionElement.classList.remove("section-fade-hidden");
+        });
+      });
+      return;
+    }
+
+    sectionElement.classList.remove("section-fade-hidden");
+    return;
+  }
+
+  if (sectionElement.classList.contains("is-hidden")) {
+    return;
+  }
+
+  sectionElement.classList.add("section-fade-hidden");
+  const timeoutId = window.setTimeout(() => {
+    sectionElement.classList.add("is-hidden");
+    sectionFadeTimers.delete(sectionElement);
+  }, SECTION_FADE_MS);
+  sectionFadeTimers.set(sectionElement, timeoutId);
 }
 
 function updateCounters(movies, series, favorites) {
@@ -791,11 +830,14 @@ function renderCurrentView() {
     .getFavorites()
     .filter((item) => item.title.toLowerCase().includes(currentSearch.toLowerCase()));
 
+  const isAboutView = currentType === "about";
+  document.body.classList.toggle("about-view-active", isAboutView);
+
   updateCounters(movies, series, favorites);
-  renderFeatured(movies, series, favorites);
   updateSearchResultSummary(movies, series, favorites);
 
-  if (currentType === "about") {
+  if (isAboutView) {
+    toggleSection(heroPanel, false);
     toggleSection(aboutSection, true);
     toggleSection(stackSection, true);
     toggleSection(moviesSection, false);
@@ -803,6 +845,9 @@ function renderCurrentView() {
     toggleSection(favoritesSection, false);
     return;
   }
+
+  toggleSection(heroPanel, true);
+  renderFeatured(movies, series, favorites);
 
   toggleSection(aboutSection, false);
   toggleSection(stackSection, false);

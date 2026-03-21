@@ -1,0 +1,214 @@
+﻿  console.error
+    [2026-03-20T18:53:33.423Z] NOT_AUTHENTICATED (401): Not authenticated
+
+    [0m [90m 13 |[39m
+     [90m 14 |[39m   [90m// Log estruturado para debug ÔÇö vis├¡vel apenas no servidor, nunca no cliente[39m
+    [31m[1m>[22m[39m[90m 15 |[39m   console[33m.[39merror([32m`[${timestamp}] ${code} (${status}): ${message}`[39m)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 16 |[39m
+     [90m 17 |[39m   res[33m.[39mstatus(status)[33m.[39mjson({
+     [90m 18 |[39m     status[33m:[39m [32m"error"[39m[33m,[39m[0m
+
+      at error (backend/middlewares/errorHandler.js:15:11)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:71:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/express/lib/router/index.js:646:15
+      at next (node_modules/express/lib/router/index.js:265:14)
+      at next (node_modules/express/lib/router/route.js:141:14)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:67:12)
+      at next (node_modules/express/lib/router/route.js:147:13)
+      at next (backend/middlewares/isAdmin.js:5:12)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at next (node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at node_modules/express/lib/router/index.js:284:15
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at router.handle (node_modules/express/lib/router/index.js:175:3)
+      at router (node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at session (node_modules/express-session/index.js:494:7)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/body-parser/lib/read.js:137:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+
+  console.error
+    [2026-03-20T18:53:33.582Z] VALIDATION_ERROR (400): T├¡tulo deve ter no m├¡nimo 2 caracteres; Imagem deve ser uma URL v├ílida; Tipo deve ser "movie" ou "series"; Sinopse ├® obrigat├│ria
+
+    [0m [90m 13 |[39m
+     [90m 14 |[39m   [90m// Log estruturado para debug ÔÇö vis├¡vel apenas no servidor, nunca no cliente[39m
+    [31m[1m>[22m[39m[90m 15 |[39m   console[33m.[39merror([32m`[${timestamp}] ${code} (${status}): ${message}`[39m)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 16 |[39m
+     [90m 17 |[39m   res[33m.[39mstatus(status)[33m.[39mjson({
+     [90m 18 |[39m     status[33m:[39m [32m"error"[39m[33m,[39m[0m
+
+      at error (backend/middlewares/errorHandler.js:15:11)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:71:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/express/lib/router/index.js:646:15
+      at next (node_modules/express/lib/router/index.js:265:14)
+      at next (node_modules/express/lib/router/route.js:141:14)
+      at next (backend/controllers/catalog.controller.js:63:5)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at next (node_modules/express/lib/router/route.js:149:13)
+      at next (backend/middlewares/isAdmin.js:12:3)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at next (node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at node_modules/express/lib/router/index.js:284:15
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at router.handle (node_modules/express/lib/router/index.js:175:3)
+      at router (node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Immediate._onImmediate (node_modules/express-session/index.js:521:7)
+
+node.exe : PASS backend/__tests__/catalog.routes.test.js (24.811 s)
+No linha:1 caractere:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (PASS backend/__...t.js (24.811 s) 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  Catalog Routes
+    ÔêÜ GET /api/catalog - deve listar filmes (779 ms)
+    ÔêÜ GET /api/catalog?type=movie - deve filtrar por tipo (27 ms)
+    ÔêÜ GET /api/catalog?search=Batman - deve buscar por t├¡tulo (15 ms)
+    ÔêÜ POST /api/catalog - deve rejeitar sem autentica├º├úo (646 ms)
+    ÔêÜ POST /api/catalog - deve rejeitar dados inv├ílidos (111 ms)
+
+  console.error
+    [2026-03-20T18:53:34.835Z] INVALID_CREDENTIALS (401): Usu├írio ou senha incorretos
+
+    [0m [90m 13 |[39m
+     [90m 14 |[39m   [90m// Log estruturado para debug ÔÇö vis├¡vel apenas no servidor, nunca no cliente[39m
+    [31m[1m>[22m[39m[90m 15 |[39m   console[33m.[39merror([32m`[${timestamp}] ${code} (${status}): ${message}`[39m)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 16 |[39m
+     [90m 17 |[39m   res[33m.[39mstatus(status)[33m.[39mjson({
+     [90m 18 |[39m     status[33m:[39m [32m"error"[39m[33m,[39m[0m
+
+      at error (backend/middlewares/errorHandler.js:15:11)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:71:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/express/lib/router/index.js:646:15
+      at next (node_modules/express/lib/router/index.js:265:14)
+      at next (node_modules/express/lib/router/route.js:141:14)
+      at next (backend/controllers/auth.controller.js:29:5)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at next (node_modules/express/lib/router/route.js:149:13)
+      at node_modules/express-rate-limit/dist/index.cjs:947:7
+      at node_modules/express-rate-limit/dist/index.cjs:830:5
+
+  console.error
+    [2026-03-20T18:53:34.914Z] VALIDATION_ERROR (400): Username deve ter no m├¡nimo 3 caracteres; Senha deve ter no m├¡nimo 6 caracteres
+
+    [0m [90m 13 |[39m
+     [90m 14 |[39m   [90m// Log estruturado para debug ÔÇö vis├¡vel apenas no servidor, nunca no cliente[39m
+    [31m[1m>[22m[39m[90m 15 |[39m   console[33m.[39merror([32m`[${timestamp}] ${code} (${status}): ${message}`[39m)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 16 |[39m
+     [90m 17 |[39m   res[33m.[39mstatus(status)[33m.[39mjson({
+     [90m 18 |[39m     status[33m:[39m [32m"error"[39m[33m,[39m[0m
+
+      at error (backend/middlewares/errorHandler.js:15:11)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:71:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/express/lib/router/index.js:646:15
+      at next (node_modules/express/lib/router/index.js:265:14)
+      at next (node_modules/express/lib/router/route.js:141:14)
+      at next (backend/controllers/auth.controller.js:29:5)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at next (node_modules/express/lib/router/route.js:149:13)
+      at node_modules/express-rate-limit/dist/index.cjs:947:7
+      at node_modules/express-rate-limit/dist/index.cjs:830:5
+
+  console.error
+    [2026-03-20T18:53:34.984Z] NOT_AUTHENTICATED (401): Voc├¬ n├úo est├í autenticado
+
+    [0m [90m 13 |[39m
+     [90m 14 |[39m   [90m// Log estruturado para debug ÔÇö vis├¡vel apenas no servidor, nunca no cliente[39m
+    [31m[1m>[22m[39m[90m 15 |[39m   console[33m.[39merror([32m`[${timestamp}] ${code} (${status}): ${message}`[39m)[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 16 |[39m
+     [90m 17 |[39m   res[33m.[39mstatus(status)[33m.[39mjson({
+     [90m 18 |[39m     status[33m:[39m [32m"error"[39m[33m,[39m[0m
+
+      at error (backend/middlewares/errorHandler.js:15:11)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:71:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at Immediate.next (node_modules/express/lib/router/index.js:280:10)
+      at Immediate._onImmediate (node_modules/express/lib/router/index.js:646:15)
+
+PASS backend/__tests__/auth.routes.test.js
+  Auth Routes
+    ÔêÜ POST /api/auth/login - deve fazer login com credenciais v├ílidas (49 
+ms)
+    ÔêÜ POST /api/auth/login - deve rejeitar credenciais inv├ílidas (40 ms)
+    ÔêÜ POST /api/auth/login - deve rejeitar dados inv├ílidos (91 ms)
+    ÔêÜ GET /api/auth/me - deve rejeitar sem autentica├º├úo (55 ms)
+    ÔêÜ POST /api/auth/logout - deve fazer logout (29 ms)
+
+PASS backend/__tests__/auth.validator.test.js
+  Auth Validator
+    validateLogin
+      ÔêÜ deve aceitar dados de login v├ílidos (9 ms)
+      ÔêÜ deve rejeitar username com menos de 3 caracteres (2 ms)
+      ÔêÜ deve rejeitar username com caracteres especiais (1 ms)
+      ÔêÜ deve rejeitar password com menos de 6 caracteres (2 ms)
+      ÔêÜ deve rejeitar quando username est├í faltando (1 ms)
+      ÔêÜ deve rejeitar quando password est├í faltando (1 ms)
+    validateCatalogItem
+      ÔêÜ deve aceitar dados de filme v├ílidos (33 ms)
+      ÔêÜ deve rejeitar tipo de conte├║do inv├ílido (2 ms)
+      ÔêÜ deve rejeitar URL de imagem inv├ílida (2 ms)
+      ÔêÜ deve rejeitar t├¡tulo com menos de 2 caracteres (1 ms)
+      ÔêÜ deve rejeitar sinopse com menos de 10 caracteres (2 ms)
+      ÔêÜ deve rejeitar quando faltam campos obrigat├│rios (2 ms)
+
+PASS backend/__tests__/AppError.test.js
+  AppError
+    ÔêÜ deve criar um erro com mensagem, status e c├│digo (3 ms)
+    ÔêÜ deve usar valores padr├úo quando n├úo especificado (1 ms)
+    ÔêÜ deve ser uma inst├óncia de Error (1 ms)
+    ÔêÜ timestamp deve estar em formato ISO (1 ms)
+
+Test Suites: 4 passed, 4 total
+Tests:       26 passed, 26 total
+Snapshots:   0 total
+Time:        30.971 s
+Ran all test suites.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect 
+async operations that kept running after all tests finished?

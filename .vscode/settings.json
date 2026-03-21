@@ -13,6 +13,11 @@
         "/^node -e \"try \\{ require\\('\\./backend/routes/catalog\\.routes'\\); console\\.log\\('catalog OK'\\); \\} catch\\(e\\) \\{ console\\.error\\('catalog ERRO:', e\\.message\\); \\}\"$/": {
             "approve": true,
             "matchCommandLine": true
+        },
+        "Get-Command": true,
+        "/^node server\\.js$/": {
+            "approve": true,
+            "matchCommandLine": true
         }
     }
 }
