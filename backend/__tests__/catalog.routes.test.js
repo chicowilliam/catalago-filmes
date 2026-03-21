@@ -12,6 +12,10 @@ const catalogRoutes = require('../routes/catalog.routes');
 const authRoutes = require('../routes/auth.routes');
 const errorHandler = require('../middlewares/errorHandler');
 
+process.env.ADMIN_USERNAME = 'admin';
+process.env.ADMIN_PASSWORD = 'admin123';
+process.env.CATALOG_SOURCE = 'local';
+
 // Criar app de teste
 const app = express();
 app.use(express.json());

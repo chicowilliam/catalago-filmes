@@ -60,15 +60,20 @@ async function listCatalog(type, search) {
     try {
       const data = await tmdbService.fetch(type, search);
       const limited = limitAndBalance(data, type, search);
-      return { source: "tmdb", data: limited };
+      const withTrailers = await tmdbService.attachTrailers(limited, 12);
+      return { source: "tmdb", data: withTrailers };
     } catch (err) {
       // TMDB falhou → usa fallback local e avisa o chamador
-      const fallback = fetchFromLocalStorage(type, search);
-      return { source: "local-fallback", warning: err.message, data: fallback };
+      const fallback = await fetchFromLocalStorage(type, search);
+      return {
+        source: "local-fallback",
+        warning: "Fonte externa indisponivel no momento. Exibindo catalogo local.",
+        data: fallback,
+      };
     }
   }
 
-  const data = fetchFromLocalStorage(type, search);
+  const data = await fetchFromLocalStorage(type, search);
   return { source: "local", data };
 }
 
@@ -76,8 +81,8 @@ async function listCatalog(type, search) {
  * Filtra e limita os dados do JSON local por tipo e busca textual.
  * Função interna — não é exportada, usada apenas dentro deste service.
  */
-function fetchFromLocalStorage(type, search) {
-  let items = catalogRepo.findAll();
+async function fetchFromLocalStorage(type, search) {
+  let items = await catalogRepo.findAll();
 
   if (type && type !== "all") {
     items = items.filter((i) => i.type === (type === "series" ? "series" : "movie"));
@@ -96,8 +101,8 @@ function fetchFromLocalStorage(type, search) {
  * @param {Object} payload - dados validados pelo Joi
  * @returns {Object} item criado
  */
-function createItem(payload) {
-  const items = catalogRepo.findAll();
+async function createItem(payload) {
+  const items = await catalogRepo.findAll();
   const maxId = items.length ? Math.max(...items.map((i) => Number(i.id) || 0)) : 0;
 
   const newItem = {
@@ -110,7 +115,7 @@ function createItem(payload) {
     createdAt: new Date().toISOString(),
   };
 
-  catalogRepo.save([...items, newItem]);
+  await catalogRepo.save([...items, newItem]);
   return newItem;
 }
 
@@ -120,8 +125,8 @@ function createItem(payload) {
  * @param {Object} payload - dados validados pelo Joi
  * @returns {Object} item atualizado
  */
-function updateItem(id, payload) {
-  const items = catalogRepo.findAll();
+async function updateItem(id, payload) {
+  const items = await catalogRepo.findAll();
   const index = items.findIndex((i) => String(i.id) === String(id));
 
   if (index === -1) {
@@ -138,7 +143,7 @@ function updateItem(id, payload) {
     updatedAt: new Date().toISOString(),
   };
 
-  catalogRepo.save(items);
+  await catalogRepo.save(items);
   return items[index];
 }
 
@@ -146,15 +151,15 @@ function updateItem(id, payload) {
  * Remove um item pelo id.
  * @param {string|number} id
  */
-function deleteItem(id) {
-  const items = catalogRepo.findAll();
+async function deleteItem(id) {
+  const items = await catalogRepo.findAll();
   const filtered = items.filter((i) => String(i.id) !== String(id));
 
   if (filtered.length === items.length) {
     throw new AppError("Item não encontrado", 404, "ITEM_NOT_FOUND");
   }
 
-  catalogRepo.save(filtered);
+  await catalogRepo.save(filtered);
 }
 
 module.exports = { listCatalog, createItem, updateItem, deleteItem };

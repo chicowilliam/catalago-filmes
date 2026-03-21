@@ -18,6 +18,7 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
 
 // Cache simples em memória: evita bater na TMDB a cada requisição
 const cache = new Map();
+const trailerCache = new Map();
 
 // --- Funções internas de autenticação na TMDB ---
 
@@ -71,11 +72,20 @@ function httpGetJson(url) {
 
 function mapItem(tmdbItem) {
   const isMovie = tmdbItem.media_type === "movie" || !!tmdbItem.title;
+  const posterPath = tmdbItem.poster_path;
+  
+  // Debug: Log se poster_path está vazio (pode indicar problema com chave TMDB)
+  if (!posterPath) {
+    console.warn(
+      `⚠ Item sem poster_path - TMDB ID: ${tmdbItem.id}, Título: ${tmdbItem.title || tmdbItem.name}`
+    );
+  }
+  
   return {
     id: `tmdb-${tmdbItem.id}`,
     title: tmdbItem.title || tmdbItem.name || "Título indisponível",
     type: isMovie ? "movie" : "series",
-    image: tmdbItem.poster_path ? `${TMDB_IMAGE_BASE}${tmdbItem.poster_path}` : "",
+    image: posterPath ? `${TMDB_IMAGE_BASE}${posterPath}` : "",
     synopsis: tmdbItem.overview || "Sinopse indisponível.",
     trailerId: "",
   };
@@ -97,6 +107,69 @@ function setCache(key, data) {
   cache.set(key, { timestamp: Date.now(), data });
 }
 
+function getTrailerCache(key) {
+  const entry = trailerCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+    trailerCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setTrailerCache(key, data) {
+  trailerCache.set(key, { timestamp: Date.now(), data });
+}
+
+async function fetchTrailerId(item) {
+  const tmdbId = String(item.id || "").replace("tmdb-", "");
+  if (!tmdbId) return "";
+
+  const mediaType = item.type === "series" ? "tv" : "movie";
+  const cacheKey = `${mediaType}:${tmdbId}`;
+  const cached = getTrailerCache(cacheKey);
+  if (cached !== null) return cached;
+
+  try {
+    const url = `${TMDB_BASE_URL}/${mediaType}/${tmdbId}/videos?language=pt-BR`;
+    const response = await httpGetJson(url);
+    const results = Array.isArray(response.results) ? response.results : [];
+
+    const preferred = results.find((video) => video.site === "YouTube" && video.type === "Trailer")
+      || results.find((video) => video.site === "YouTube" && video.type === "Teaser")
+      || results.find((video) => video.site === "YouTube");
+
+    const key = preferred && preferred.key ? preferred.key : "";
+    setTrailerCache(cacheKey, key);
+    return key;
+  } catch {
+    setTrailerCache(cacheKey, "");
+    return "";
+  }
+}
+
+async function attachTrailers(items, maxItems = 12) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return items;
+  }
+
+  const enriched = items.map((item) => ({ ...item }));
+  const targets = enriched
+    .filter((item) => String(item.id || "").startsWith("tmdb-") && !item.trailerId)
+    .slice(0, maxItems);
+
+  await Promise.all(
+    targets.map(async (item) => {
+      const trailerId = await fetchTrailerId(item);
+      if (trailerId) {
+        item.trailerId = trailerId;
+      }
+    })
+  );
+
+  return enriched;
+}
+
 // --- Função principal exportada ---
 
 /**
@@ -114,7 +187,12 @@ async function fetch(type, search) {
   const cacheKey = `${type || "all"}::${safeSearch.toLowerCase()}::${autoPages}::${limit}`;
 
   const cached = getCache(cacheKey);
-  if (cached) return cached;
+  if (cached) {
+    console.log(`✅ TMDB cache hit: ${cacheKey}`);
+    return cached;
+  }
+
+  console.log(`🔄 Buscando TMDB: tipo=${type}, busca="${safeSearch}", cache_key=${cacheKey}`);
 
   let items = [];
 
@@ -148,25 +226,37 @@ async function fetch(type, search) {
 
   // Mapear, filtrar sem imagem e deduplicar
   const seen = new Set();
-  let mapped = items
+  const mappedItems = items
     .filter((i) => i && (i.media_type === "movie" || i.media_type === "tv" || i.title || i.name))
-    .map(mapItem)
-    .filter((i) => i.image)
-    .filter((i) => {
-      const key = `${i.type}-${i.id}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    .map(mapItem);
+
+  const itemsWithImage = mappedItems.filter((i) => i.image);
+  
+  // DEBUG: Se muitos itens perderam imagem, algo está errado
+  if (mappedItems.length > 0 && itemsWithImage.length === 0) {
+    console.error(
+      `❌ CRÍTICO: Nenhuma imagem foi encontrada! Mapeados: ${mappedItems.length}, Com imagem: ${itemsWithImage.length}`
+    );
+    console.error(`   Verifique se sua chave TMDB está válida e se o poster_path está sendo retornado.`);
+    console.error(`   Primeiros itens mapeados:`, JSON.stringify(mappedItems.slice(0, 2), null, 2));
+  }
+
+  let deduped = itemsWithImage.filter((i) => {
+    const key = `${i.type}-${i.id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 
   // Filtrar por tipo se solicitado
   if (type && type !== "all") {
     const normalizedType = type === "series" ? "series" : "movie";
-    mapped = mapped.filter((i) => i.type === normalizedType);
+    deduped = deduped.filter((i) => i.type === normalizedType);
   }
 
-  setCache(cacheKey, mapped);
-  return mapped;
+  console.log(`✅ TMDB retornou ${deduped.length} itens válidos com imagem`);
+  setCache(cacheKey, deduped);
+  return deduped;
 }
 
-module.exports = { fetch };
+module.exports = { fetch, attachTrailers };

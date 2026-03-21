@@ -9,11 +9,20 @@
 
 const AppError = require("../utils/AppError");
 
-// Credenciais lidas do .env (com fallback para desenvolvimento)
-const ADMIN_USER = {
-  username: process.env.ADMIN_USERNAME || "admin",
-  password: process.env.ADMIN_PASSWORD || "admin123",
-};
+function getAdminCredentials() {
+  const username = process.env.ADMIN_USERNAME;
+  const password = process.env.ADMIN_PASSWORD;
+
+  if (!username || !password) {
+    throw new AppError(
+      "Credenciais de administrador nao configuradas no ambiente",
+      500,
+      "AUTH_CONFIG_ERROR"
+    );
+  }
+
+  return { username, password };
+}
 
 /**
  * Verifica se as credenciais fornecidas são válidas.
@@ -23,8 +32,26 @@ const ADMIN_USER = {
  * @param {string} password
  * @returns {{ username: string, role: string }}
  */
+/**
+ * Constant-time comparison para evitar timing attacks.
+ */
+function constantTimeCompare(a, b) {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
 function verifyCredentials(username, password) {
-  if (username !== ADMIN_USER.username || password !== ADMIN_USER.password) {
+  const adminUser = getAdminCredentials();
+
+  // Usa constant-time para evitar timing attacks
+  const usernameMatches = constantTimeCompare(username, adminUser.username);
+  const passwordMatches = constantTimeCompare(password, adminUser.password);
+  
+  if (!usernameMatches || !passwordMatches) {
     throw new AppError("Usuário ou senha incorretos", 401, "INVALID_CREDENTIALS");
   }
 

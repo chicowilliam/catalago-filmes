@@ -15,14 +15,17 @@ const path = require("path");
 const AppError = require("../utils/AppError");
 
 const dbPath = path.join(__dirname, "../data/catalog.json");
+const tempPath = `${dbPath}.tmp`;
+let writeQueue = Promise.resolve();
 
 /**
  * Lê todos os itens do catálogo.
  * @returns {Array} lista de filmes/séries
  */
-function findAll() {
+async function findAll() {
   try {
-    return JSON.parse(fs.readFileSync(dbPath, "utf-8"));
+    const raw = await fs.promises.readFile(dbPath, "utf-8");
+    return JSON.parse(raw);
   } catch {
     throw new AppError("Erro ao ler banco de dados", 500, "DATABASE_READ_ERROR");
   }
@@ -32,9 +35,18 @@ function findAll() {
  * Grava a lista completa de itens no catálogo.
  * @param {Array} data - lista atualizada de filmes/séries
  */
-function save(data) {
+async function save(data) {
+  const payload = JSON.stringify(data, null, 2);
+
+  writeQueue = writeQueue
+    .catch(() => undefined)
+    .then(async () => {
+      await fs.promises.writeFile(tempPath, payload, "utf-8");
+      await fs.promises.rename(tempPath, dbPath);
+    });
+
   try {
-    fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
+    await writeQueue;
   } catch {
     throw new AppError("Erro ao salvar no banco de dados", 500, "DATABASE_WRITE_ERROR");
   }

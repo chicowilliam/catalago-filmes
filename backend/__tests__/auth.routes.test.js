@@ -10,6 +10,9 @@ const session = require('express-session');
 const authRoutes = require('../routes/auth.routes');
 const errorHandler = require('../middlewares/errorHandler');
 
+process.env.ADMIN_USERNAME = 'admin';
+process.env.ADMIN_PASSWORD = 'admin123';
+
 // Criar app de teste
 const app = express();
 app.use(express.json());

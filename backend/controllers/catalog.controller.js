@@ -57,7 +57,7 @@ async function list(req, res, next) {
 async function create(req, res, next) {
   try {
     const validatedData = parseAndValidateBody(req.body);
-    const item = catalogService.createItem(validatedData);
+    const item = await catalogService.createItem(validatedData);
     res.status(201).json({ status: "success", message: "Item criado com sucesso", item });
   } catch (err) {
     next(err);
@@ -71,7 +71,7 @@ async function create(req, res, next) {
 async function update(req, res, next) {
   try {
     const validatedData = parseAndValidateBody(req.body);
-    const item = catalogService.updateItem(req.params.id, validatedData);
+    const item = await catalogService.updateItem(req.params.id, validatedData);
     res.json({ status: "success", message: "Item atualizado com sucesso", item });
   } catch (err) {
     next(err);
@@ -84,7 +84,7 @@ async function update(req, res, next) {
  */
 async function remove(req, res, next) {
   try {
-    catalogService.deleteItem(req.params.id);
+    await catalogService.deleteItem(req.params.id);
     res.json({ status: "success", message: "Item removido com sucesso" });
   } catch (err) {
     next(err);
