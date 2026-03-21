@@ -40,6 +40,7 @@ const LOGIN_TRANSITION_MS = 320;
 const FILTER_TRANSITION_MS = 200;
 const SECTION_FADE_MS = 260;
 const PERFORMANCE_STORAGE_KEY = "performanceMode";
+const MODAL_ANIMATION_DELAY_MS = 60;
 const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 let autoRefreshTimer = null;
 let revealObserver = null;
@@ -51,6 +52,7 @@ let filterTransitionTimer = null;
 let activeCatalogController = null;
 let latestCatalogRequestId = 0;
 const sectionFadeTimers = new WeakMap();
+const gsapInstance = window.gsap || null;
 
 function parseStoredJSON(storageKey, fallbackValue) {
   try {
@@ -214,6 +216,11 @@ function openStackModal(categoryId) {
   }
 
   modal.classList.add("show");
+
+  window.setTimeout(() => {
+    animateTechItemsReveal();
+    setupMotionHoverBindings();
+  }, MODAL_ANIMATION_DELAY_MS);
 }
 
 function updateSearchResultSummary(movies, series, favorites) {
@@ -509,6 +516,223 @@ function setupMotionEnhancements() {
   setupHeroParallax();
 }
 
+function canUseAdvancedMotion() {
+  return Boolean(gsapInstance) && !prefersReducedMotion && !isPerformanceMode;
+}
+
+function animateHeroReveal() {
+  if (!featuredCard) {
+    return;
+  }
+
+  const heroContent = featuredCard.querySelector(".featured-motion-content");
+  if (!heroContent) {
+    return;
+  }
+
+  if (!canUseAdvancedMotion()) {
+    heroContent.style.opacity = "1";
+    heroContent.style.transform = "none";
+    return;
+  }
+
+  gsapInstance.killTweensOf(featuredCard);
+  gsapInstance.killTweensOf(heroContent);
+
+  gsapInstance.fromTo(
+    featuredCard,
+    { opacity: 0.2, y: 16 },
+    { opacity: 1, y: 0, duration: 0.62, ease: "power3.out", clearProps: "transform" }
+  );
+
+  gsapInstance.fromTo(
+    heroContent,
+    { opacity: 0, y: 26 },
+    { opacity: 1, y: 0, duration: 0.72, ease: "power3.out", clearProps: "transform,opacity" }
+  );
+
+  gsapInstance.to(featuredCard, {
+    backgroundPosition: "52% 48%",
+    duration: 7.2,
+    repeat: -1,
+    yoyo: true,
+    ease: "sine.inOut"
+  });
+}
+
+function animateAboutReveal() {
+  if (!canUseAdvancedMotion()) {
+    return;
+  }
+
+  const aboutTargets = [
+    ...aboutSection.querySelectorAll(".about-kicker, .about-spotlight, .about-copy-text, .about-signal, .about-fact-card"),
+    ...stackSection.querySelectorAll(".stack-folder")
+  ];
+
+  if (!aboutTargets.length) {
+    return;
+  }
+
+  gsapInstance.killTweensOf(aboutTargets);
+  gsapInstance.set(aboutTargets, { opacity: 0, y: 20, scale: 0.985 });
+  gsapInstance.to(aboutTargets, {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    duration: 0.56,
+    ease: "power2.out",
+    stagger: 0.055,
+    clearProps: "transform,opacity"
+  });
+}
+
+function animateStackFoldersReveal() {
+  if (!canUseAdvancedMotion()) {
+    return;
+  }
+
+  const folders = Array.from(document.querySelectorAll(".stack-folder"));
+  if (!folders.length) {
+    return;
+  }
+
+  gsapInstance.killTweensOf(folders);
+  gsapInstance.fromTo(
+    folders,
+    { opacity: 0, scale: 0.92, y: 24 },
+    {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      duration: 0.58,
+      stagger: 0.08,
+      ease: "power3.out",
+      clearProps: "transform,opacity"
+    }
+  );
+}
+
+function animateTechItemsReveal() {
+  if (!canUseAdvancedMotion()) {
+    return;
+  }
+
+  const techItems = Array.from(modalContent.querySelectorAll(".stack-tech-item"));
+  if (!techItems.length) {
+    return;
+  }
+
+  gsapInstance.killTweensOf(techItems);
+  gsapInstance.fromTo(
+    techItems,
+    { opacity: 0, y: 18, scale: 0.95 },
+    {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.46,
+      stagger: 0.06,
+      ease: "power2.out",
+      clearProps: "transform,opacity"
+    }
+  );
+}
+
+function setupMotionHoverBindings() {
+  if (!canUseAdvancedMotion()) {
+    return;
+  }
+
+  const bindHover = (element, options = {}) => {
+    if (!element || element.dataset.motionBound === "true") {
+      return;
+    }
+
+    const {
+      y = -6,
+      rotate = 0.7,
+      scale = 1.02,
+      durationIn = 0.34,
+      durationOut = 0.5,
+      easeIn = "power2.out",
+      easeOut = "elastic.out(1, 0.5)",
+      iconSelector = null
+    } = options;
+
+    const icon = iconSelector ? element.querySelector(iconSelector) : null;
+
+    element.dataset.motionBound = "true";
+    element.addEventListener("pointerenter", () => {
+      const direction = element.matches(":nth-child(even)") ? 1 : -1;
+      gsapInstance.to(element, {
+        y,
+        rotateZ: rotate * direction,
+        scale,
+        duration: durationIn,
+        ease: easeIn,
+        overwrite: "auto"
+      });
+    });
+
+    element.addEventListener("pointermove", (event) => {
+      if (!icon) {
+        return;
+      }
+
+      const rect = element.getBoundingClientRect();
+      const relX = ((event.clientX - rect.left) / rect.width - 0.5) * 5;
+      const relY = ((event.clientY - rect.top) / rect.height - 0.5) * 5;
+      gsapInstance.to(icon, {
+        x: relX,
+        y: relY,
+        duration: 0.28,
+        ease: "power2.out",
+        overwrite: "auto"
+      });
+    });
+
+    element.addEventListener("pointerleave", () => {
+      gsapInstance.to(element, {
+        y: 0,
+        rotateZ: 0,
+        scale: 1,
+        duration: durationOut,
+        ease: easeOut,
+        overwrite: "auto"
+      });
+
+      if (icon) {
+        gsapInstance.to(icon, {
+          x: 0,
+          y: 0,
+          duration: 0.34,
+          ease: "power2.out",
+          overwrite: "auto"
+        });
+      }
+    });
+  };
+
+  document.querySelectorAll(".stack-folder").forEach((folder) => {
+    bindHover(folder, {
+      y: -7,
+      rotate: 0.65,
+      scale: 1.018,
+      iconSelector: null
+    });
+  });
+
+  document.querySelectorAll(".stack-tech-item").forEach((item) => {
+    bindHover(item, {
+      y: -5,
+      rotate: 0.55,
+      scale: 1.022,
+      iconSelector: ".stack-tech-icon"
+    });
+  });
+}
+
 function applyFilterState(nextType) {
   currentType = nextType;
   renderCurrentView();
@@ -740,10 +964,12 @@ function renderGrid(grid, items, emptyMessage) {
   });
 }
 
-function toggleSection(sectionElement, show) {
+function toggleSection(sectionElement, show, options = {}) {
   if (!sectionElement) {
     return;
   }
+
+  const { immediateHide = false } = options;
 
   const pendingTimer = sectionFadeTimers.get(sectionElement);
   if (pendingTimer) {
@@ -769,6 +995,12 @@ function toggleSection(sectionElement, show) {
   }
 
   if (sectionElement.classList.contains("is-hidden")) {
+    return;
+  }
+
+  if (immediateHide) {
+    sectionElement.classList.add("section-fade-hidden");
+    sectionElement.classList.add("is-hidden");
     return;
   }
 
@@ -817,10 +1049,15 @@ function renderFeatured(movies, series, favorites) {
   actionBtn.textContent = "Assistir trailer";
   actionBtn.addEventListener("click", () => openModal(featured));
 
-  featuredCard.appendChild(tag);
-  featuredCard.appendChild(title);
-  featuredCard.appendChild(synopsis);
-  featuredCard.appendChild(actionBtn);
+  const contentWrap = document.createElement("div");
+  contentWrap.className = "featured-motion-content";
+  contentWrap.appendChild(tag);
+  contentWrap.appendChild(title);
+  contentWrap.appendChild(synopsis);
+  contentWrap.appendChild(actionBtn);
+  featuredCard.appendChild(contentWrap);
+
+  animateHeroReveal();
 }
 
 function renderCurrentView() {
@@ -837,12 +1074,17 @@ function renderCurrentView() {
   updateSearchResultSummary(movies, series, favorites);
 
   if (isAboutView) {
-    toggleSection(heroPanel, false);
+    toggleSection(heroPanel, false, { immediateHide: true });
     toggleSection(aboutSection, true);
     toggleSection(stackSection, true);
     toggleSection(moviesSection, false);
     toggleSection(seriesSection, false);
     toggleSection(favoritesSection, false);
+    window.requestAnimationFrame(() => {
+      animateAboutReveal();
+      animateStackFoldersReveal();
+      setupMotionHoverBindings();
+    });
     return;
   }
 
@@ -1158,6 +1400,7 @@ window.addEventListener("load", () => {
   setSearchFeedback("Catalogo pronto para explorar");
   loader.classList.add("hide");
   setupMotionEnhancements();
+  setupMotionHoverBindings();
 });
 
 window.addEventListener("beforeunload", stopAutoCatalogRefresh);

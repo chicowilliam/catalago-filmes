@@ -2,7 +2,6 @@ export const stackCategories = [
   {
     id: "frontend",
     title: "Front-end",
-    emoji: "📱",
     description: "Experiência visual, responsividade e interações do usuário.",
     summary: "Interfaces sem framework, performance e acabamento visual.",
     technologies: [
@@ -14,7 +13,6 @@ export const stackCategories = [
   {
     id: "backend",
     title: "Back-end",
-    emoji: "🛠",
     description: "Regras de negócio, API e integração de dados.",
     summary: "Node.js, Express e consumo de APIs com arquitetura enxuta.",
     technologies: [
@@ -32,10 +30,6 @@ function createStackFolderButton(category, onSelectCategory) {
   button.setAttribute("data-stack-id", category.id);
   button.setAttribute("aria-label", `Abrir pasta ${category.title}`);
 
-  const emoji = document.createElement("span");
-  emoji.className = "stack-folder-emoji";
-  emoji.textContent = category.emoji;
-
   const title = document.createElement("strong");
   title.className = "stack-folder-title";
   title.textContent = category.title;
@@ -48,7 +42,6 @@ function createStackFolderButton(category, onSelectCategory) {
   openHint.className = "stack-folder-open";
   openHint.textContent = "Abrir";
 
-  button.appendChild(emoji);
   button.appendChild(title);
   button.appendChild(meta);
   button.appendChild(openHint);
@@ -92,7 +85,7 @@ export function renderStackModal(modalContent, categoryId, onClose) {
 
   const title = document.createElement("h3");
   title.className = "stack-modal-title";
-  title.textContent = `${category.emoji} ${category.title}`;
+  title.textContent = category.title;
 
   const description = document.createElement("p");
   description.className = "stack-modal-description";
