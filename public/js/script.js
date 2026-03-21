@@ -6,9 +6,12 @@ const seriesSection = document.getElementById("seriesSection");
 const favoritesSection = document.getElementById("favoritesSection");
 const featuredCard = document.getElementById("featuredCard");
 const searchInput = document.getElementById("searchInput");
+const searchMeta = document.getElementById("searchMeta");
+const searchBox = document.querySelector(".search-box");
 const loader = document.getElementById("loader");
 const modal = document.getElementById("modal");
 const modalContent = document.getElementById("modalContent");
+const stackFoldersContainer = document.getElementById("stackFolders");
 const countAll = document.getElementById("countAll");
 const countMovies = document.getElementById("countMovies");
 const countSeries = document.getElementById("countSeries");
@@ -35,10 +38,52 @@ let heroParallax = { x: 0, y: 0 };
 let scrollProgressReady = false;
 let isPerformanceMode = false;
 let filterTransitionTimer = null;
+let activeCatalogController = null;
+let latestCatalogRequestId = 0;
+
+const stackCategories = [
+  {
+    id: "frontend",
+    title: "Front-end",
+    emoji: "📱",
+    description: "Experiência visual, responsividade e interações do usuário.",
+    technologies: [
+      { name: "HTML", iconClass: "devicon-html5-plain colored" },
+      { name: "CSS", iconClass: "devicon-css3-plain colored" },
+      { name: "JavaScript", iconClass: "devicon-javascript-plain colored" }
+    ]
+  },
+  {
+    id: "backend",
+    title: "Back-end",
+    emoji: "🛠",
+    description: "Regras de negócio, API e integração de dados.",
+    technologies: [
+      { name: "Node.js", iconClass: "devicon-nodejs-plain colored" },
+      { name: "Express", iconClass: "devicon-express-original" },
+      { name: "APIs", iconClass: "devicon-fastapi-plain colored" }
+    ]
+  }
+];
+
+function parseStoredJSON(storageKey, fallbackValue) {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) {
+      return fallbackValue;
+    }
+
+    const parsed = JSON.parse(raw);
+    return parsed ?? fallbackValue;
+  } catch (err) {
+    localStorage.removeItem(storageKey);
+    return fallbackValue;
+  }
+}
 
 class FavoritesManager {
   constructor() {
-    this.favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+    this.favorites = parseStoredJSON("favorites", []);
   }
 
   addFavorite(movie) {
@@ -70,9 +115,26 @@ class FavoritesManager {
 
 const favoritesManager = new FavoritesManager();
 
+/**
+ * Sanitiza URL para evitar CSS injection.
+ * Remove caracteres perigosos e valida protocolos seguros.
+ */
+function sanitizeUrl(url) {
+  try {
+    const urlObj = new URL(url, window.location.href);
+    const safe = urlObj.protocol === "http:" || urlObj.protocol === "https:" || urlObj.protocol === "data:";
+    if (!safe) return "";
+    
+    return urlObj.toString();
+  } catch (err) {
+    console.warn("Invalid URL", url, err);
+    return "";
+  }
+}
+
 class RatingManager {
   constructor() {
-    this.ratings = JSON.parse(localStorage.getItem("ratings")) || {};
+    this.ratings = parseStoredJSON("ratings", {});
   }
 
   setRating(movieId, rating) {
@@ -102,6 +164,206 @@ function showToast(message, type = "info") {
     toast.classList.remove("show");
     setTimeout(() => toast.remove(), 300);
   }, 2800);
+}
+
+function setSearchFeedback(message, state = "idle") {
+  if (!searchMeta || !searchBox) {
+    return;
+  }
+
+  searchMeta.textContent = message;
+  searchMeta.classList.toggle("is-loading", state === "loading");
+  searchMeta.classList.toggle("is-error", state === "error");
+  searchBox.classList.toggle("is-loading", state === "loading");
+}
+
+function getVisibleGrids() {
+  const visibilityMap = [
+    { section: moviesSection, grid: moviesGrid },
+    { section: seriesSection, grid: seriesGrid },
+    { section: favoritesSection, grid: favoritesGrid }
+  ];
+
+  if (currentType === "all") {
+    return visibilityMap.map((entry) => entry.grid).filter(Boolean);
+  }
+
+  return visibilityMap
+    .filter((entry) => entry.section && !entry.section.classList.contains("is-hidden"))
+    .map((entry) => entry.grid)
+    .filter(Boolean);
+}
+
+function renderInlineRetry(grid, message) {
+  if (!grid) {
+    return;
+  }
+
+  grid.innerHTML = "";
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "grid-feedback";
+
+  const text = document.createElement("p");
+  text.className = "empty-grid-message";
+  text.textContent = message;
+
+  const retryBtn = document.createElement("button");
+  retryBtn.className = "inline-retry-btn";
+  retryBtn.type = "button";
+  retryBtn.textContent = "Tentar novamente";
+  retryBtn.addEventListener("click", () => {
+    loadCatalog(currentSearch, { showLoading: true });
+  });
+
+  wrapper.appendChild(text);
+  wrapper.appendChild(retryBtn);
+  grid.appendChild(wrapper);
+}
+
+function createStackFolderButton(category) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "stack-folder";
+  button.setAttribute("data-stack-id", category.id);
+  button.setAttribute("aria-label", `Abrir pasta ${category.title}`);
+
+  const emoji = document.createElement("span");
+  emoji.className = "stack-folder-emoji";
+  emoji.textContent = category.emoji;
+
+  const title = document.createElement("strong");
+  title.className = "stack-folder-title";
+  title.textContent = category.title;
+
+  const meta = document.createElement("span");
+  meta.className = "stack-folder-meta";
+  meta.textContent = `${category.technologies.length} tecnologias`;
+
+  const openHint = document.createElement("span");
+  openHint.className = "stack-folder-open";
+  openHint.textContent = "Abrir";
+
+  button.appendChild(emoji);
+  button.appendChild(title);
+  button.appendChild(meta);
+  button.appendChild(openHint);
+
+  button.addEventListener("click", () => openStackModal(category.id));
+  return button;
+}
+
+function renderStackFolders() {
+  if (!stackFoldersContainer) {
+    return;
+  }
+
+  stackFoldersContainer.innerHTML = "";
+  stackCategories.forEach((category) => {
+    stackFoldersContainer.appendChild(createStackFolderButton(category));
+  });
+}
+
+function createStackModalContent(category) {
+  modalContent.innerHTML = "";
+  modalContent.classList.add("stack-modal");
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "modal-close";
+  closeBtn.innerHTML = "&times;";
+  closeBtn.type = "button";
+  closeBtn.addEventListener("click", closeModal);
+
+  const header = document.createElement("header");
+  header.className = "stack-modal-header";
+
+  const label = document.createElement("span");
+  label.className = "stack-modal-label";
+  label.textContent = "Categoria";
+
+  const title = document.createElement("h3");
+  title.className = "stack-modal-title";
+  title.textContent = `${category.emoji} ${category.title}`;
+
+  const description = document.createElement("p");
+  description.className = "stack-modal-description";
+  description.textContent = category.description;
+
+  header.appendChild(label);
+  header.appendChild(title);
+  header.appendChild(description);
+
+  const techGrid = document.createElement("div");
+  techGrid.className = "stack-tech-grid";
+
+  category.technologies.forEach((tech, index) => {
+    const item = document.createElement("article");
+    item.className = "stack-tech-item";
+    item.style.setProperty("--tech-delay", `${index * 70}ms`);
+
+    const icon = document.createElement("span");
+    icon.className = "stack-tech-icon";
+
+    const iconElement = document.createElement("i");
+    iconElement.className = tech.iconClass;
+    iconElement.setAttribute("aria-hidden", "true");
+    icon.appendChild(iconElement);
+
+    const name = document.createElement("span");
+    name.className = "stack-tech-name";
+    name.textContent = tech.name;
+
+    item.appendChild(icon);
+    item.appendChild(name);
+    techGrid.appendChild(item);
+  });
+
+  modalContent.appendChild(closeBtn);
+  modalContent.appendChild(header);
+  modalContent.appendChild(techGrid);
+}
+
+function openStackModal(categoryId) {
+  const category = stackCategories.find((item) => item.id === categoryId);
+  if (!category) {
+    return;
+  }
+
+  createStackModalContent(category);
+  modal.classList.add("show");
+}
+
+function updateSearchResultSummary(movies, series, favorites) {
+  if (!searchMeta) {
+    return;
+  }
+
+  const totalVisible = movies.length + series.length + favorites.length;
+  const hasSearch = Boolean(currentSearch);
+
+  if (hasSearch) {
+    const plural = totalVisible === 1 ? "resultado" : "resultados";
+    setSearchFeedback(`${totalVisible} ${plural} para \"${currentSearch}\"`);
+    return;
+  }
+
+  setSearchFeedback(`${totalVisible} titulos prontos para explorar`);
+}
+
+function getNavigableCards() {
+  return getVisibleGrids().flatMap((grid) =>
+    Array.from(grid.querySelectorAll(".movie-card"))
+  );
+}
+
+function getGridColumnCount(gridElement) {
+  if (!gridElement) {
+    return 1;
+  }
+
+  const template = window.getComputedStyle(gridElement).gridTemplateColumns;
+  const columns = template ? template.split(" ").filter(Boolean).length : 1;
+  return Math.max(columns, 1);
 }
 
 function initLazyLoading() {
@@ -143,7 +405,7 @@ function createSkeletonCard() {
 }
 
 function renderSkeletons() {
-  [moviesGrid, seriesGrid, favoritesGrid].forEach((grid) => {
+  getVisibleGrids().forEach((grid) => {
     if (!grid) {
       return;
     }
@@ -412,7 +674,14 @@ async function animateLoginSuccess() {
 
 async function loadCatalog(search = "", options = {}) {
   const { showLoading = true } = options;
+  const requestId = ++latestCatalogRequestId;
+
+  if (activeCatalogController) {
+    activeCatalogController.abort();
+  }
+
   const controller = new AbortController();
+  activeCatalogController = controller;
   const requestTimeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   const loaderFailSafe = setTimeout(() => {
     if (showLoading) {
@@ -421,6 +690,8 @@ async function loadCatalog(search = "", options = {}) {
   }, REQUEST_TIMEOUT_MS + 1000);
 
   try {
+    setSearchFeedback("Buscando no catalogo...", "loading");
+
     if (showLoading) {
       loader.classList.remove("hide");
       renderSkeletons();
@@ -434,6 +705,11 @@ async function loadCatalog(search = "", options = {}) {
     }
 
     const response = await res.json();
+
+    if (requestId !== latestCatalogRequestId) {
+      return;
+    }
+
     allItems = Array.isArray(response.data) ? response.data : [];
     currentCatalogSource = response.source || "local";
     updateCatalogSourceIndicator(currentCatalogSource);
@@ -447,23 +723,38 @@ async function loadCatalog(search = "", options = {}) {
       hasShownFallbackToast = false;
     }
 
+    // ⚠️ Se for TMDB e retornar vazio ou com poucos itens, pode ser problema de imagens
+    if (currentCatalogSource === "tmdb" && allItems.length === 0) {
+      console.warn("⚠ TMDB retornou 0 itens - pode ser problema com chave ou falta de poster_path");
+      console.warn("   Verifique no console do servidor se há avisos sobre poster_path.");
+      showToast("⚠ Catalogo TMDB vazio - revise sua chave de API", "warning");
+    }
+
     renderCurrentView();
   } catch (err) {
+    if (requestId !== latestCatalogRequestId) {
+      return;
+    }
+
     if (err.name === "AbortError") {
-      console.error("Timeout ao carregar catálogo.");
+      return;
     } else {
       console.error("Erro ao carregar catálogo:", err);
     }
 
-    [moviesGrid, seriesGrid, favoritesGrid].forEach((grid) => {
-      if (grid) {
-        grid.innerHTML = "<p class='empty-grid-message'>Erro ao carregar catálogo. Tente novamente.</p>";
-      }
+    getVisibleGrids().forEach((grid) => {
+      renderInlineRetry(grid, "Erro ao carregar catalogo. Tente novamente.");
     });
+    setSearchFeedback("Erro ao buscar. Clique em tentar novamente.", "error");
     showToast("Nao foi possivel carregar o catalogo agora.", "error");
   } finally {
     clearTimeout(requestTimeout);
     clearTimeout(loaderFailSafe);
+
+    if (activeCatalogController === controller) {
+      activeCatalogController = null;
+    }
+
     if (showLoading) {
       loader.classList.add("hide");
     }
@@ -473,6 +764,9 @@ async function loadCatalog(search = "", options = {}) {
 function createMovieCard(item) {
   const card = document.createElement("article");
   card.className = "movie-card";
+  card.tabIndex = 0;
+  card.setAttribute("role", "button");
+  card.setAttribute("aria-label", `Abrir detalhes de ${item.title}`);
   card.style.setProperty("--card-pop-delay", isPerformanceMode ? "0ms" : `${Math.round(Math.random() * 140)}ms`);
 
   const mediaDiv = document.createElement("div");
@@ -527,9 +821,20 @@ function createMovieCard(item) {
   title.className = "movie-title";
   title.textContent = item.title;
 
+  const meta = document.createElement("p");
+  meta.className = "movie-meta";
+  meta.textContent = item.type === "movie" ? "Filme" : "Serie";
+
   card.appendChild(mediaDiv);
   card.appendChild(title);
+  card.appendChild(meta);
   card.addEventListener("click", () => openModal(item));
+  card.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openModal(item);
+    }
+  });
 
   return card;
 }
@@ -566,18 +871,31 @@ function renderFeatured(movies, series, favorites) {
     return;
   }
 
-  featuredCard.style.setProperty("--featured-image", `url('${featured.image}')`);
-  featuredCard.innerHTML = `
-    <span class="featured-tag">Destaque da semana</span>
-    <h3>${featured.title}</h3>
-    <p>${featured.synopsis}</p>
-    <button class="featured-action" type="button">Assistir trailer</button>
-  `;
+  // Sanitiza URL para evitar CSS injection
+  const safeImageUrl = sanitizeUrl(featured.image);
+  featuredCard.style.setProperty("--featured-image", `url('${safeImageUrl}')`);
+  featuredCard.innerHTML = "";
 
-  const actionBtn = featuredCard.querySelector(".featured-action");
-  if (actionBtn) {
-    actionBtn.addEventListener("click", () => openModal(featured));
-  }
+  const tag = document.createElement("span");
+  tag.className = "featured-tag";
+  tag.textContent = "Destaque da semana";
+
+  const title = document.createElement("h3");
+  title.textContent = featured.title || "Titulo indisponivel";
+
+  const synopsis = document.createElement("p");
+  synopsis.textContent = featured.synopsis || "Sinopse indisponivel.";
+
+  const actionBtn = document.createElement("button");
+  actionBtn.className = "featured-action";
+  actionBtn.type = "button";
+  actionBtn.textContent = "Assistir trailer";
+  actionBtn.addEventListener("click", () => openModal(featured));
+
+  featuredCard.appendChild(tag);
+  featuredCard.appendChild(title);
+  featuredCard.appendChild(synopsis);
+  featuredCard.appendChild(actionBtn);
 }
 
 function renderCurrentView() {
@@ -589,6 +907,7 @@ function renderCurrentView() {
 
   updateCounters(movies, series, favorites);
   renderFeatured(movies, series, favorites);
+  updateSearchResultSummary(movies, series, favorites);
 
   if (currentType === "movie") {
     toggleSection(moviesSection, true);
@@ -667,6 +986,8 @@ filterGroup.addEventListener("keydown", (event) => {
 searchInput.addEventListener("input", (event) => {
   const searchValue = event.target.value.trim();
 
+  setSearchFeedback("Buscando no catalogo...", "loading");
+
   if (debounceTimer) {
     clearTimeout(debounceTimer);
   }
@@ -679,6 +1000,7 @@ searchInput.addEventListener("input", (event) => {
 
 function createModalContent(item) {
   modalContent.innerHTML = "";
+  modalContent.classList.remove("stack-modal");
 
   const closeBtn = document.createElement("button");
   closeBtn.className = "modal-close";
@@ -763,6 +1085,37 @@ modal.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
+  if (event.key === "/" && document.activeElement !== searchInput) {
+    event.preventDefault();
+    searchInput.focus();
+    return;
+  }
+
+  if (["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp"].includes(event.key)) {
+    const activeCard = document.activeElement;
+    if (activeCard && activeCard.classList && activeCard.classList.contains("movie-card")) {
+      event.preventDefault();
+
+      const parentGrid = activeCard.closest(".movies-grid");
+      const cards = parentGrid ? Array.from(parentGrid.querySelectorAll(".movie-card")) : [];
+      const currentIndex = cards.indexOf(activeCard);
+      if (currentIndex === -1) {
+        return;
+      }
+
+      const columns = getGridColumnCount(parentGrid);
+      let nextIndex = currentIndex;
+
+      if (event.key === "ArrowRight") nextIndex = Math.min(cards.length - 1, currentIndex + 1);
+      if (event.key === "ArrowLeft") nextIndex = Math.max(0, currentIndex - 1);
+      if (event.key === "ArrowDown") nextIndex = Math.min(cards.length - 1, currentIndex + columns);
+      if (event.key === "ArrowUp") nextIndex = Math.max(0, currentIndex - columns);
+
+      cards[nextIndex].focus();
+      return;
+    }
+  }
+
   if (event.key === "Escape") {
     closeModal();
   }
@@ -888,10 +1241,12 @@ if (performanceToggle) {
 }
 
 window.addEventListener("load", () => {
+  renderStackFolders();
   applyPerformanceMode(loadPerformancePreference());
   applyTheme(getInitialTheme());
   validateRuntimeContext();
   updateCatalogSourceIndicator(currentCatalogSource);
+  setSearchFeedback("Catalogo pronto para explorar");
   loader.classList.add("hide");
   setupMotionEnhancements();
 });

@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -68,6 +69,7 @@
           class="search-input"
           placeholder="Buscar por titulo..."
         >
+        <p id="searchMeta" class="search-meta" aria-live="polite">Catalogo pronto para explorar</p>
       </div>
     </div>
 
@@ -118,6 +120,17 @@
     <article class="featured-card" id="featuredCard" aria-live="polite">
       <p class="featured-empty">Carregando destaque...</p>
     </article>
+  </section>
+
+  <section class="section-block stack-section" id="stackSection" aria-labelledby="stackHeading">
+    <div class="section-headline stack-headline">
+      <div>
+        <h3 id="stackHeading" class="section-title">Minha stack full stack</h3>
+        <span class="section-subtitle">Pastas interativas com foco em interface, lógica de aplicação e integração com APIs</span>
+      </div>
+      <span class="stack-tip">Toque para abrir cada pasta</span>
+    </div>
+    <div class="stack-folders" id="stackFolders" aria-label="Categorias da stack"></div>
   </section>
 
   <section class="section-block" id="moviesSection" aria-labelledby="moviesHeading">
