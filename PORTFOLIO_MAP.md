@@ -2,6 +2,75 @@
 
 ## 0) Historico de Sessoes
 
+### 21/03/2026 - Refatoracao Cinematografica da Home (Layout Minimalista)
+**Objetivo:**
+- Sair da estrutura estilo dashboard na home e adotar uma landing page com foco visual.
+- Priorizar hero cinematografico com imagem de destaque, texto e CTA.
+- Manter conexao front/back intacta (login, listagem e trailers).
+
+**Revisao de integracao front/back antes das mudancas:**
+- Front segue consumindo `POST /api/auth/login` e `GET /api/catalog`.
+- Backend continua retornando `status`, `source`, `data`, `count` e `trailerId` sem alteracao de contrato.
+- Suite de testes backend executada com sucesso (`4 suites`, `26 testes`, todos `pass`).
+
+**Ajustes aplicados:**
+- `public/index.html`
+  - Removidos elementos de dashboard da home (chips de metricas e blocos auxiliares do hero antigo).
+  - Navbar simplificada, mantendo apenas elementos essenciais de navegacao + busca.
+  - Hero reorganizado para um unico bloco visual full-width com destaque principal.
+  - Seção de tecnologias (`#stackSection`) passou a iniciar oculta e fica disponivel apenas na aba `Sobre`.
+- `public/css/style.css`
+  - Header e navbar com linguagem mais clean e leve (menos peso visual e menos bordas pesadas).
+  - Hero reconstruido com escala cinematografica: maior altura, overlay escuro e tipografia dominante.
+  - Botao do destaque com microinteracoes suaves (`transform` + `opacity`/`shadow`).
+  - Ajustes responsivos para manter boa leitura no mobile.
+- `public/js/script.js`
+  - `renderCurrentView()` atualizado para exibir stack somente quando `currentType === "about"`.
+  - `updateCounters()` tornou-se resiliente para ausencia dos elementos de metrica removidos do HTML.
+  - `renderFeatured()` passou a exibir origem da fonte no selo do destaque (`TMDB` ou `Local`).
+  - Event listener de tema protegido com guarda para evitar erro quando o botao nao estiver no layout.
+
+**Resultado esperado:**
+- Home mais premium e cinematografica, com foco em conteudo e impacto visual.
+- Navegacao mais limpa e objetiva.
+- Tecnologias concentradas na aba Sobre, reduzindo ruido na pagina inicial.
+- Integracao com backend preservada e validada por testes.
+
+### 21/03/2026 - Refino UI/UX: Aba Sobre, Stack Minimalista e Loading Fluido
+**Objetivo:**
+- Adicionar aba `Sobre` na navbar para exibir visão geral do projeto e tecnologias.
+- Reduzir peso visual da seção de stack, mantendo o conceito de pasta interativa.
+- Melhorar sensação de fluidez com loading de bolinhas realmente animado e microinterações mais polidas.
+- Evoluir a seção Sobre para um bloco mais editorial e modularizar a UI relacionada a navegação/stack.
+
+**Ajustes aplicados:**
+- `public/index.html`
+  - Nova aba `Sobre` ao lado de `Favoritos`.
+  - Nova seção `#aboutSection` com visão geral do projeto, experiência e stack.
+- `public/css/style.css`
+  - Navbar atualizada para suportar cinco abas.
+  - Seção About com layout editorial mais limpo e hierarquia por espaçamento.
+  - Stack section sem container pesado; folders ficaram maiores, mais clean e com hover/active refinados.
+  - Modal de tecnologias com grid mais espaçado e minimalista.
+  - Loader do login redesenhado com animação real de três bolinhas usando `@keyframes`.
+- `public/js/script.js`
+  - Novo fluxo de filtro `about` integrado ao sistema existente.
+  - `renderCurrentView()` agora alterna entre catálogo e visão institucional sem duplicar layout.
+  - Pastas da stack ganharam copy mais enxuta via `summary`.
+  - Script principal passou a importar helpers de navegação/stack de um módulo dedicado.
+- `public/js/portfolio-sections.js`
+  - Novo módulo com renderização das pastas da stack, modal das tecnologias e controles da navbar.
+- `public/index.html`
+  - Script principal migrado para `type="module"`.
+- `public/css/style.css`
+  - Seção About refinada com headline forte, sinais curtos e cards de destaque mais sofisticados.
+
+**Resultado esperado:**
+- Navegação mais clara com uma área dedicada para contexto do projeto.
+- Seção de tecnologias com aparência mais premium, limpa e alinhada a interfaces Apple/streaming.
+- Loading perceptível e suave no login.
+- Código de UI mais organizado, com menor acoplamento dentro do `script.js` principal.
+
 ### 21/03/2026 - Ajuste de Mídia: Devicon + Trailers TMDB
 **Objetivo:**
 - Trocar ícones das tecnologias para Devicon.

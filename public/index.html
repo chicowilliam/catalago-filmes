@@ -59,6 +59,7 @@
           <button class="filter-btn" data-type="movie" role="tab" aria-selected="false" tabindex="-1">Filmes</button>
           <button class="filter-btn" data-type="series" role="tab" aria-selected="false" tabindex="-1">Séries</button>
           <button class="filter-btn" id="favoritesBtn" data-type="favorites" role="tab" aria-selected="false" tabindex="-1">Favoritos</button>
+          <button class="filter-btn" id="aboutBtn" data-type="about" role="tab" aria-selected="false" tabindex="-1">Sobre</button>
         </div>
       </nav>
 
@@ -72,61 +73,59 @@
         <p id="searchMeta" class="search-meta" aria-live="polite">Catalogo pronto para explorar</p>
       </div>
     </div>
-
-    <button id="performanceToggle" class="performance-toggle" type="button" aria-pressed="false" title="Alternar modo performance">Performance: Off</button>
-
-    <button id="themeToggle" class="theme-toggle" title="Alternar tema" aria-label="Alternar tema claro/escuro">
-      <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="5"></circle>
-        <line x1="12" y1="1" x2="12" y2="3"></line>
-        <line x1="12" y1="21" x2="12" y2="23"></line>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-        <line x1="1" y1="12" x2="3" y2="12"></line>
-        <line x1="21" y1="12" x2="23" y2="12"></line>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-      </svg>
-    </button>
   </div>
 </header>
 
 <!-- MAIN -->
 <main class="main">
   <section class="hero-panel" aria-labelledby="heroTitle">
-    <div class="hero-copy">
-      <p class="hero-kicker">Streaming Portfolio</p>
-      <h2 id="heroTitle" class="hero-title">Explore um catálogo moderno de filmes e series</h2>
-      <p class="hero-description">Projeto full stack inspirado em serviços de streaming, onde desenvolvi desde a interface do usuário até a integração com APIs de filmes e estrutura de back-end para gerenciamento dos dados.</p>
-      <div class="hero-stats">
-        <div class="stat-chip">
-          <span class="stat-label">Catálogo</span>
-          <strong id="countAll">0</strong>
-        </div>
-        <div class="stat-chip">
-          <span class="stat-label">Filmes</span>
-          <strong id="countMovies">0</strong>
-        </div>
-        <div class="stat-chip">
-          <span class="stat-label">Séries</span>
-          <strong id="countSeries">0</strong>
-        </div>
-        <div class="stat-chip">
-          <span class="stat-label">Favoritos</span>
-          <strong id="countFavorites">0</strong>
-        </div>
-      </div>
-    </div>
-    <article class="featured-card" id="featuredCard" aria-live="polite">
+    <article class="featured-card" id="featuredCard" aria-live="polite" role="region" aria-label="Filme em destaque">
       <p class="featured-empty">Carregando destaque...</p>
     </article>
   </section>
 
-  <section class="section-block stack-section" id="stackSection" aria-labelledby="stackHeading">
+  <section class="section-block about-section is-hidden" id="aboutSection" aria-labelledby="aboutHeading">
+    <div class="section-headline about-headline">
+      <div>
+        <h3 id="aboutHeading" class="section-title">Sobre o projeto</h3>
+        <span class="section-subtitle">Catálogo full stack inspirado em streaming, com foco em UX, integração com API e arquitetura limpa.</span>
+      </div>
+    </div>
+
+    <div class="about-layout">
+      <article class="about-copy-block">
+        <span class="about-kicker">Portfolio case</span>
+        <h4 class="about-spotlight">Interface com linguagem de streaming, arquitetura leve e foco em sensação de produto final.</h4>
+        <p class="about-copy-text">Este projeto combina front-end em JavaScript vanilla com back-end em Node.js + Express, autenticação por sessão, integração com TMDB e uma experiência visual construída para transmitir clareza, ritmo e acabamento premium.</p>
+        <div class="about-signal-row" aria-label="Características do projeto">
+          <span class="about-signal">UX focada em catálogo</span>
+          <span class="about-signal">TMDB via backend</span>
+          <span class="about-signal">Sessões e favoritos</span>
+        </div>
+      </article>
+
+      <div class="about-facts" aria-label="Destaques do projeto">
+        <article class="about-fact-card">
+          <span class="about-point-label">Front-end</span>
+          <p>HTML, CSS e JavaScript com componentes visuais customizados, navegação por filtros, modal e microinterações.</p>
+        </article>
+        <article class="about-fact-card">
+          <span class="about-point-label">Back-end</span>
+          <p>Express com sessões, validação, erros padronizados, integração com API externa e fallback local.</p>
+        </article>
+        <article class="about-fact-card">
+          <span class="about-point-label">Experiência</span>
+          <p>Busca, trailers, favoritos, loading states, lazy loading e responsividade pensados como vitrine de portfólio.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block stack-section is-hidden" id="stackSection" aria-labelledby="stackHeading">
     <div class="section-headline stack-headline">
       <div>
-        <h3 id="stackHeading" class="section-title">Minha stack full stack</h3>
-        <span class="section-subtitle">Pastas interativas com foco em interface, lógica de aplicação e integração com APIs</span>
+        <h3 id="stackHeading" class="section-title">Tecnologias utilizadas</h3>
+        <span class="section-subtitle">Disponíveis apenas na aba Sobre para manter a home limpa e cinematográfica</span>
       </div>
       <span class="stack-tip">Toque para abrir cada pasta</span>
     </div>
@@ -171,7 +170,7 @@
 </footer>
 
 <!-- SCRIPT -->
-<script src="js/script.js" defer></script>
+<script type="module" src="js/script.js"></script>
 
 </body>
 </html>

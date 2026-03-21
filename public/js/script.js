@@ -1,9 +1,17 @@
-﻿const moviesGrid = document.getElementById("moviesGrid");
+﻿import {
+  renderStackFolders,
+  renderStackModal,
+  setupFilterControls,
+} from "./portfolio-sections.js";
+
+const moviesGrid = document.getElementById("moviesGrid");
 const seriesGrid = document.getElementById("seriesGrid");
 const favoritesGrid = document.getElementById("favoritesGrid");
 const moviesSection = document.getElementById("moviesSection");
 const seriesSection = document.getElementById("seriesSection");
 const favoritesSection = document.getElementById("favoritesSection");
+const aboutSection = document.getElementById("aboutSection");
+const stackSection = document.getElementById("stackSection");
 const featuredCard = document.getElementById("featuredCard");
 const searchInput = document.getElementById("searchInput");
 const searchMeta = document.getElementById("searchMeta");
@@ -40,31 +48,6 @@ let isPerformanceMode = false;
 let filterTransitionTimer = null;
 let activeCatalogController = null;
 let latestCatalogRequestId = 0;
-
-const stackCategories = [
-  {
-    id: "frontend",
-    title: "Front-end",
-    emoji: "📱",
-    description: "Experiência visual, responsividade e interações do usuário.",
-    technologies: [
-      { name: "HTML", iconClass: "devicon-html5-plain colored" },
-      { name: "CSS", iconClass: "devicon-css3-plain colored" },
-      { name: "JavaScript", iconClass: "devicon-javascript-plain colored" }
-    ]
-  },
-  {
-    id: "backend",
-    title: "Back-end",
-    emoji: "🛠",
-    description: "Regras de negócio, API e integração de dados.",
-    technologies: [
-      { name: "Node.js", iconClass: "devicon-nodejs-plain colored" },
-      { name: "Express", iconClass: "devicon-express-original" },
-      { name: "APIs", iconClass: "devicon-fastapi-plain colored" }
-    ]
-  }
-];
 
 function parseStoredJSON(storageKey, fallbackValue) {
   try {
@@ -221,120 +204,22 @@ function renderInlineRetry(grid, message) {
   grid.appendChild(wrapper);
 }
 
-function createStackFolderButton(category) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "stack-folder";
-  button.setAttribute("data-stack-id", category.id);
-  button.setAttribute("aria-label", `Abrir pasta ${category.title}`);
-
-  const emoji = document.createElement("span");
-  emoji.className = "stack-folder-emoji";
-  emoji.textContent = category.emoji;
-
-  const title = document.createElement("strong");
-  title.className = "stack-folder-title";
-  title.textContent = category.title;
-
-  const meta = document.createElement("span");
-  meta.className = "stack-folder-meta";
-  meta.textContent = `${category.technologies.length} tecnologias`;
-
-  const openHint = document.createElement("span");
-  openHint.className = "stack-folder-open";
-  openHint.textContent = "Abrir";
-
-  button.appendChild(emoji);
-  button.appendChild(title);
-  button.appendChild(meta);
-  button.appendChild(openHint);
-
-  button.addEventListener("click", () => openStackModal(category.id));
-  return button;
-}
-
-function renderStackFolders() {
-  if (!stackFoldersContainer) {
-    return;
-  }
-
-  stackFoldersContainer.innerHTML = "";
-  stackCategories.forEach((category) => {
-    stackFoldersContainer.appendChild(createStackFolderButton(category));
-  });
-}
-
-function createStackModalContent(category) {
-  modalContent.innerHTML = "";
-  modalContent.classList.add("stack-modal");
-
-  const closeBtn = document.createElement("button");
-  closeBtn.className = "modal-close";
-  closeBtn.innerHTML = "&times;";
-  closeBtn.type = "button";
-  closeBtn.addEventListener("click", closeModal);
-
-  const header = document.createElement("header");
-  header.className = "stack-modal-header";
-
-  const label = document.createElement("span");
-  label.className = "stack-modal-label";
-  label.textContent = "Categoria";
-
-  const title = document.createElement("h3");
-  title.className = "stack-modal-title";
-  title.textContent = `${category.emoji} ${category.title}`;
-
-  const description = document.createElement("p");
-  description.className = "stack-modal-description";
-  description.textContent = category.description;
-
-  header.appendChild(label);
-  header.appendChild(title);
-  header.appendChild(description);
-
-  const techGrid = document.createElement("div");
-  techGrid.className = "stack-tech-grid";
-
-  category.technologies.forEach((tech, index) => {
-    const item = document.createElement("article");
-    item.className = "stack-tech-item";
-    item.style.setProperty("--tech-delay", `${index * 70}ms`);
-
-    const icon = document.createElement("span");
-    icon.className = "stack-tech-icon";
-
-    const iconElement = document.createElement("i");
-    iconElement.className = tech.iconClass;
-    iconElement.setAttribute("aria-hidden", "true");
-    icon.appendChild(iconElement);
-
-    const name = document.createElement("span");
-    name.className = "stack-tech-name";
-    name.textContent = tech.name;
-
-    item.appendChild(icon);
-    item.appendChild(name);
-    techGrid.appendChild(item);
-  });
-
-  modalContent.appendChild(closeBtn);
-  modalContent.appendChild(header);
-  modalContent.appendChild(techGrid);
-}
-
 function openStackModal(categoryId) {
-  const category = stackCategories.find((item) => item.id === categoryId);
-  if (!category) {
+  const rendered = renderStackModal(modalContent, categoryId, closeModal);
+  if (!rendered) {
     return;
   }
 
-  createStackModalContent(category);
   modal.classList.add("show");
 }
 
 function updateSearchResultSummary(movies, series, favorites) {
   if (!searchMeta) {
+    return;
+  }
+
+  if (currentType === "about") {
+    setSearchFeedback("Visão geral do projeto e da stack", "idle");
     return;
   }
 
@@ -857,10 +742,10 @@ function toggleSection(sectionElement, show) {
 }
 
 function updateCounters(movies, series, favorites) {
-  countMovies.textContent = String(movies.length);
-  countSeries.textContent = String(series.length);
-  countFavorites.textContent = String(favorites.length);
-  countAll.textContent = String(movies.length + series.length);
+  if (countMovies) countMovies.textContent = String(movies.length);
+  if (countSeries) countSeries.textContent = String(series.length);
+  if (countFavorites) countFavorites.textContent = String(favorites.length);
+  if (countAll) countAll.textContent = String(movies.length + series.length);
 }
 
 function renderFeatured(movies, series, favorites) {
@@ -878,7 +763,8 @@ function renderFeatured(movies, series, favorites) {
 
   const tag = document.createElement("span");
   tag.className = "featured-tag";
-  tag.textContent = "Destaque da semana";
+  const sourceLabel = currentCatalogSource === "tmdb" ? "TMDB" : "Local";
+  tag.textContent = `Destaque • ${sourceLabel}`;
 
   const title = document.createElement("h3");
   title.textContent = featured.title || "Titulo indisponivel";
@@ -908,6 +794,18 @@ function renderCurrentView() {
   updateCounters(movies, series, favorites);
   renderFeatured(movies, series, favorites);
   updateSearchResultSummary(movies, series, favorites);
+
+  if (currentType === "about") {
+    toggleSection(aboutSection, true);
+    toggleSection(stackSection, true);
+    toggleSection(moviesSection, false);
+    toggleSection(seriesSection, false);
+    toggleSection(favoritesSection, false);
+    return;
+  }
+
+  toggleSection(aboutSection, false);
+  toggleSection(stackSection, false);
 
   if (currentType === "movie") {
     toggleSection(moviesSection, true);
@@ -945,43 +843,7 @@ function renderCurrentView() {
 
 const filterGroup = document.querySelector(".filter-group");
 const filterButtons = Array.from(document.querySelectorAll(".filter-btn"));
-
-function setActiveFilter(selectedBtn) {
-  filterButtons.forEach((btn) => {
-    const isActive = btn === selectedBtn;
-    btn.classList.toggle("active", isActive);
-    btn.setAttribute("aria-selected", String(isActive));
-    btn.setAttribute("tabindex", isActive ? "0" : "-1");
-  });
-}
-
-filterGroup.addEventListener("click", (event) => {
-  const filterBtn = event.target.closest(".filter-btn");
-  if (!filterBtn) {
-    return;
-  }
-
-  const nextType = filterBtn.getAttribute("data-type") || "all";
-  setActiveFilter(filterBtn);
-  applyFilterWithTransition(nextType);
-});
-
-filterGroup.addEventListener("keydown", (event) => {
-  const currentIndex = filterButtons.indexOf(document.activeElement);
-  if (currentIndex === -1) {
-    return;
-  }
-
-  if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") {
-    return;
-  }
-
-  event.preventDefault();
-  const direction = event.key === "ArrowRight" ? 1 : -1;
-  const nextIndex = (currentIndex + direction + filterButtons.length) % filterButtons.length;
-  filterButtons[nextIndex].focus();
-  filterButtons[nextIndex].click();
-});
+setupFilterControls(filterGroup, filterButtons, applyFilterWithTransition);
 
 searchInput.addEventListener("input", (event) => {
   const searchValue = event.target.value.trim();
@@ -1229,7 +1091,9 @@ function toggleTheme() {
   applyTheme(currentTheme === "dark" ? "light" : "dark");
 }
 
-themeToggle.addEventListener("click", toggleTheme);
+if (themeToggle) {
+  themeToggle.addEventListener("click", toggleTheme);
+}
 
 if (performanceToggle) {
   performanceToggle.addEventListener("click", () => {
@@ -1241,7 +1105,7 @@ if (performanceToggle) {
 }
 
 window.addEventListener("load", () => {
-  renderStackFolders();
+  renderStackFolders(stackFoldersContainer, openStackModal);
   applyPerformanceMode(loadPerformancePreference());
   applyTheme(getInitialTheme());
   validateRuntimeContext();
