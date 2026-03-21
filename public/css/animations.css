@@ -1,0 +1,224 @@
+﻿/* ========================================================================
+   Animations
+   - Keyframes centralizados
+   - Estados de transicao/reveal
+   - Regras de acessibilidade e modo performance
+   ======================================================================== */
+
+@keyframes spinnerRotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes searchPulse {
+  0%,
+  100% {
+    background-position: 170% center;
+  }
+
+  50% {
+    background-position: -60% center;
+  }
+}
+
+@keyframes featureReveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.984);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes heroBackgroundDrift {
+  0% {
+    transform: translate3d(-1.8%, -1.4%, 0) scale(1.03);
+    opacity: 0.84;
+  }
+
+  100% {
+    transform: translate3d(1.6%, 1.3%, 0) scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes heroOverlayBreath {
+  0% {
+    opacity: 0.92;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes techItemIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes sectionReveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cardReveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes skeletonMove {
+  to {
+    background-position: -120% 0;
+  }
+}
+
+@keyframes loginDotPulse {
+  0% {
+    opacity: 0.45;
+  }
+
+  50% {
+    opacity: 0.95;
+  }
+
+  100% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes loginShimmer {
+  from {
+    transform: translateX(-120%);
+  }
+
+  to {
+    transform: translateX(130%);
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 260ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (pointer: coarse) {
+  .stack-folder {
+    transition-duration: 240ms;
+  }
+
+  .stack-folder:active {
+    transform: translate3d(0, -3px, 0) scale(1.01);
+    box-shadow: 0 22px 34px rgba(0, 0, 0, 0.24);
+  }
+
+  .stack-tech-item {
+    transition-duration: 240ms;
+  }
+
+  .stack-tech-item:active {
+    transform: translate3d(0, -4px, 0) scale(1.018);
+    box-shadow: 0 24px 34px rgba(0, 0, 0, 0.24);
+  }
+}
+
+@media (hover: none) {
+  .stack-folder:hover,
+  .stack-folder:focus-visible,
+  .stack-tech-item:hover,
+  .stack-tech-item:focus-within {
+    transform: none;
+  }
+
+  .stack-folder:hover::after,
+  .stack-tech-item:hover::before {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal,
+  .reveal.reveal-visible {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  body::before {
+    display: none;
+  }
+}
+
+:root[data-performance="on"] body::before {
+  display: none;
+}
+
+:root[data-performance="on"] .featured-card {
+  transform: none !important;
+  transition: none !important;
+}
+
+:root[data-performance="on"] .featured-card::before,
+:root[data-performance="on"] .featured-card::after {
+  animation: none !important;
+}
+
+:root[data-performance="on"] .section-block,
+:root[data-performance="on"] .movie-card,
+:root[data-performance="on"] .movie-image,
+:root[data-performance="on"] .featured-action,
+:root[data-performance="on"] .filter-btn,
+:root[data-performance="on"] .theme-toggle {
+  animation: none !important;
+  transition: none !important;
+}
+
+:root[data-performance="on"] .reveal,
+:root[data-performance="on"] .reveal.reveal-visible {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+:root[data-performance="on"] .movie-card::after {
+  display: none;
+}

@@ -2,6 +2,126 @@
 
 ## 0) Historico de Sessoes
 
+### 21/03/2026 - Refino de Hover para Sensação 60 FPS
+**Objetivo:**
+- Reduzir agressividade nas interações de mouse.
+- Deixar hover e parallax com movimento contínuo, suave e estável.
+
+**Ajustes aplicados:**
+- `public/css/components.css`
+  - Hover de cards com deslocamento/escala menores.
+  - Easing sem overshoot para entrada/saída mais natural.
+  - Zoom da capa reduzido para evitar sensação de "tranco".
+- `public/css/pages.css`
+  - Hovers da seção Stack (pastas e tecnologias) suavizados com menor amplitude.
+  - Redução de rotação e sombras excessivas para navegação mais calma.
+- `public/js/motion.js`
+  - Hover magnético simplificado (menos transformação por evento).
+  - `pointermove` de ícones com atualização via `requestAnimationFrame`, reduzindo custo por frame.
+  - Parallax do hero com amplitude menor e amortecimento (lerp), evitando resposta brusca ao mouse.
+
+**Resultado esperado:**
+- Interações de hover com aparência mais "fluida" e menos agressiva.
+- Melhor estabilidade visual durante movimentação rápida do mouse.
+
+### 21/03/2026 - Ajuste de Fluidez dos Cards e Bootstrap de Toggles
+**Objetivo:**
+- Eliminar sensação de animação estática/brusca nos cards.
+- Reforçar legibilidade do hero em diferentes tamanhos de tela.
+- Garantir inicialização confiável dos controles de tema/performance.
+
+**Ajustes aplicados:**
+- `public/css/components.css`
+  - Hover de cards recalibrado para reduzir "pulo" visual.
+  - Base de transição dos cards refinada com easing mais suave em `transform` e `opacity`.
+  - Estado hover/focus com entrada um pouco mais rápida e saída estável.
+- `public/css/layout.css`
+  - Hero com contraste ajustado (overlay/text-shadow) para leitura mais consistente.
+  - Melhorias de responsividade em breakpoints de tablet e mobile para altura/proporção.
+- `public/js/script.js`
+  - Inicialização migrada para função idempotente com gatilho em `DOMContentLoaded` e fallback em `load`.
+  - Reduz risco de botões (`theme/performance`) sem listener em cenários de carregamento irregular.
+
+**Verificação de interferência back/front:**
+- `server.js` validado: backend apenas expõe estáticos via `express.static(public)` e rotas `/api/*`.
+- Execução local indicou porta em uso (`EADDRINUSE`), sugerindo instância já ativa, não bloqueio de animações no front.
+
+**Resultado esperado:**
+- Cards com interação mais fluida e menos brusca.
+- Hero mais legível em desktop e mobile.
+- Toggles de tema/performance mais confiáveis no carregamento da página.
+
+### 21/03/2026 - Correcao Tecnica de Animacoes, Hero e Toggles
+**Objetivo:**
+- Reduzir saltos visuais nos cards e melhorar fluidez de hover.
+- Corrigir robustez visual do hero com fallback de imagem.
+- Garantir consistencia dos toggles de tema/performance com persistencia.
+
+**Ajustes aplicados:**
+- `public/css/components.css`
+  - Transicoes de card centralizadas no estado base com foco em `transform` e `opacity`.
+  - Hover dos cards suavizado para reduzir comportamento brusco.
+  - Regra para dispositivos sem hover, evitando estado "preso" em mobile.
+- `public/css/layout.css`
+  - Hero com `aspect-ratio`, `background-size: cover`, `background-position` configuravel e overlay de contraste mais estavel.
+  - Estado `featured-no-image` para manter qualidade visual sem imagem valida.
+- `public/js/render.js`
+  - Fallback de hero: quando imagem e invalida/ausente, o card recebe classe de fallback e usa fundo degradê sem quebrar layout.
+- `public/js/settings.js`
+  - Tema/performance com validacao de preferencias salvas.
+  - Protecao contra listeners duplicados nos botoes (`data-bound`).
+- `public/js/script.js`
+  - Listener de `prefers-color-scheme` agora respeita preferencia explicita do usuario salva no `localStorage`.
+
+**Resultado esperado:**
+- Interacoes mais fluidas e sem "saltos" nos cards.
+- Hero mais previsivel e legivel em diferentes tamanhos de tela.
+- Toggles de tema/performance consistentes entre recarregamentos.
+
+### 21/03/2026 - Correcao de Animações e Loadings no Frontend
+**Objetivo:**
+- Resolver percepcao de animacoes quase nulas e loadings estaticos.
+- Evitar estado de modo performance "travado" sem controle visual.
+
+**Ajustes aplicados:**
+- `public/index.html`
+  - Reintroduzidos os controles de interface no header:
+    - botao `#performanceToggle` (liga/desliga modo performance),
+    - botao `#themeToggle` (alternancia de tema) com icone inline.
+- `public/css/layout.css`
+  - Adicionado bloco `.header-actions` para organizar os controles no topo.
+- `public/css/components.css`
+  - Ajuste responsivo para `.header-actions` em telas menores, mantendo alinhamento e usabilidade.
+- `public/js/script.js`
+  - Fallback defensivo: se nao existir `#performanceToggle` e o estado estiver em performance, o app desativa o modo automaticamente para nao suprimir animacoes sem opcao de retorno.
+
+**Resultado esperado:**
+- Animacoes visuais e estados de loading voltam a ficar perceptiveis no fluxo normal.
+- Usuario pode controlar claramente quando reduzir animacoes via botao de performance.
+
+### 21/03/2026 - Modularizacao do CSS por Responsabilidade
+**Objetivo:**
+- Reduzir acoplamento do arquivo unico `public/css/style.css`.
+- Organizar estilos por contexto (base, layout, components, pages, animations).
+
+**Ajustes aplicados:**
+- `public/css/style.css`
+  - Convertido em agregador com `@import` para os modulos.
+- `public/css/base.css`
+  - Variaveis globais (tokens), reset e base visual da aplicacao.
+- `public/css/layout.css`
+  - Header, navegacao, area principal e hero.
+- `public/css/pages.css`
+  - Regras especificas das secoes Sobre/Stack.
+- `public/css/components.css`
+  - Componentes reutilizaveis (cards, modal, toast, login e grids).
+- `public/css/animations.css`
+  - Keyframes, regras de transicao, acessibilidade (`prefers-reduced-motion`) e modo performance.
+
+**Resultado esperado:**
+- Manutencao mais simples e previsivel do front-end.
+- Melhor legibilidade e evolucao incremental sem regressao visual.
+
 ### 21/03/2026 - UX Premium da Aba Sobre e Tecnologias
 **Objetivo:**
 - Deixar a aba `Sobre` totalmente focada, ocultando o hero de destaque durante essa navegação.
