@@ -23,6 +23,14 @@
   - Hover dos ícones com efeito de flutuação/papel (scale + rotate + translateY + sombra dinâmica).
   - Refino adicional de suavidade: easing mais orgânico, camadas de profundidade no hover, micro movimento 3D leve e resposta mais fluida para mouse/toque.
   - Harmonização da linguagem de movimento entre pastas e ícones, incluindo brilho sutil, sombras em duas camadas e ajuste de interação para touch (`pointer: coarse`) e telas sem hover.
+  - Correção de layout da aba Sobre: hero removido completamente do fluxo ao abrir Sobre (`.hero-panel.is-hidden { display: none; }`), eliminando gap visual.
+  - Seção Sobre centralizada e mais compacta, com hierarquia limpa e melhor aproveitamento vertical.
+  - Pastas de tecnologia simplificadas: remoção de emojis e elementos visuais extras, texto centralizado e tipografia mais forte/moderna.
+  - Integração de GSAP para animações avançadas no frontend (hero, Sobre, pastas e tecnologias) com entrada em sequência e microinterações de movimento.
+  - Hero com entrada cinematográfica (fade + deslocamento), transição mais fluida de conteúdo e movimento sutil de background via animação contínua.
+  - Seção Sobre com entrada em stagger (fade + slide) para blocos de texto/cards e pastas, evitando transição seca.
+  - Tecnologias no modal com cascata de entrada e hover de flutuação mais natural.
+  - Loading do botão de login atualizado de bolinhas para shimmer moderno, mantendo performance com `transform` e `opacity`.
 
 **Resultado esperado:**
 - Aba Sobre com foco limpo, sem distrações do hero e do catálogo.
