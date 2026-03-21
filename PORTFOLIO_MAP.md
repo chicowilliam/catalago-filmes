@@ -2,6 +2,154 @@
 
 ## 0) Historico de Sessoes
 
+### 21/03/2026 - Ajuste de Mídia: Devicon + Trailers TMDB
+**Objetivo:**
+- Trocar ícones das tecnologias para Devicon.
+- Corrigir ausência de vídeos em itens vindos da TMDB.
+- Revisar cadeia API front/back para fotos e trailers.
+
+**Ajustes aplicados:**
+- `public/index.html`
+  - Adicionado CDN do Devicon no `<head>`.
+- `public/js/script.js`
+  - Stack categories atualizadas para `iconClass` do Devicon.
+  - Renderização dos ícones migrada de emoji para `<i class="devicon-..."></i>`.
+- `public/css/style.css`
+  - Ajustes visuais para renderização dos ícones Devicon no grid.
+- `backend/services/tmdb.service.js`
+  - Novo enriquecimento de trailer por item (`attachTrailers`).
+  - Cache em memória de trailers para evitar chamadas repetidas.
+  - Busca de trailer priorizando YouTube Trailer > Teaser > qualquer YouTube.
+- `backend/services/catalog.service.js`
+  - Lista TMDB agora retorna itens já enriquecidos com `trailerId`.
+- `server.js`
+  - CSP atualizada para permitir Devicon via `cdn.jsdelivr.net` (`styleSrc`/`fontSrc`).
+
+**Validação técnica:**
+- Execução direta do service retornou:
+  - `SOURCE tmdb`
+  - `COUNT 20`
+  - `IMAGES 20`
+  - `TRAILERS 11`
+- Conclusão: API TMDB está funcional para fotos e agora também para parte dos vídeos.
+
+**Observação importante:**
+- `public/assets/images/` está vazio no projeto atual.
+- Se a TMDB cair e entrar em `local-fallback`, os itens locais podem ficar sem capa por falta de arquivos físicos nessa pasta.
+
+### 21/03/2026 - Componente UI: Pastas iOS para Stack Full Stack
+**Objetivo:**
+- Criar componente visual reutilizável para exibir categorias Front-end e Back-end.
+- Aplicar interação estilo pasta clicável (inspirado em iOS) com modal animado.
+- Manter visual moderno mobile-first sem quebrar identidade do portfólio.
+
+**Ajustes aplicados:**
+- `public/index.html`
+  - Nova seção `#stackSection` após o hero com container `#stackFolders`.
+  - Headline dedicada para a stack com dica de interação.
+- `public/css/style.css`
+  - Estilos das pastas (`.stack-folder`, `.stack-folders`, `.stack-tip`).
+  - Estilos do modal de tecnologias (`.stack-modal`, `.stack-tech-grid`, `.stack-tech-item`).
+  - Animações com `transform` e `opacity` para abertura/listagem.
+  - Ajustes responsivos para tablet/mobile.
+- `public/js/script.js`
+  - Estrutura configurável `stackCategories` com Front-end e Back-end.
+  - Renderização reutilizável via `renderStackFolders()` e `createStackFolderButton()`.
+  - Reuso do modal existente com modo de conteúdo para stack (`openStackModal()`).
+  - Grid de tecnologias com ícones por categoria e animação em cascade.
+
+**Resultado esperado:**
+- Usuário vê duas pastas clicáveis com aparência mobile moderna.
+- Clique abre overlay suave com tecnologias em grid.
+- Código mantém padrão vanilla JS com funções reutilizáveis.
+
+### 21/03/2026 - Debug & Diagnóstico: Imagens TMDB Não Aparecem
+**Objetivo:**
+- Identificar e resolver problema de imagens não sendo exibidas.
+- Fornecer ferramentas de debug para diagnosticar chave TMDB inválida.
+
+**Ajustes aplicados:**
+- `backend/services/tmdb.service.js`
+  - Adicionados logs de debug ao mapear itens (aviso se `poster_path` está vazio).
+  - Log crítico à função `fetch()` com contagem de itens com/sem imagem.
+  - Melhor mensagem de erro se nenhuma imagem for encontrada.
+- `server.js`
+  - Validação na inicialização: se `CATALOG_SOURCE=tmdb` mas sem chave, mensagem de erro clara.
+  - Aviso sobre necessidade de reconfigurar chave TMDB.
+- `public/js/script.js`
+  - Alerta no frontend se TMDB retornar 0 itens.
+  - Sugestão de verificar logs do servidor.
+- **Novo arquivo:**
+  - `DIAGNÓSTICO_IMAGENS.md`: Guia prático com checklist, problemas comuns e soluções.
+
+**Resultado esperado:**
+- Usuario pode rapidamente identificar se problema é: chave inválida, TMDB offline, ou falta de `poster_path`.
+- Logs claros no console do servidor facilitam debug sem rastrear código.
+- Frontend alerta sobre estado de falha com sugestão de ação.
+
+### 20/03/2026 - UX streaming refinada sem perder identidade visual
+**Objetivo:**
+- Implementar os 3 pacotes de melhoria UX (feedback, navegacao e refinamento visual) preservando paleta, tipografia e linguagem existente do portfolio.
+
+**Ajustes aplicados:**
+- `public/index.html`
+  - Adicionado indicador textual de busca no header (`#searchMeta`) com `aria-live="polite"`.
+- `public/css/style.css`
+  - Novo estado visual de busca em andamento na barra de pesquisa (`.search-box.is-loading`).
+  - Estilos para feedback de status da busca (`.search-meta` com estados loading/error).
+  - Refino de trilho com foco contextual: cards vizinhos reduzem destaque quando um card esta em hover/foco.
+  - Estados de foco visivel para navegacao por teclado em cards e controles principais.
+  - Hierarquia dos cards ajustada com linha secundaria (`.movie-meta`) sem alterar identidade da interface.
+  - Estado de erro com retry inline dentro das grades (`.grid-feedback` e `.inline-retry-btn`).
+- `public/js/script.js`
+  - Feedback de busca em tempo real: "Buscando...", total de resultados e mensagem de erro.
+  - Skeleton/loading agora prioriza grades visiveis do filtro ativo.
+  - Erros de carregamento renderizam CTA "Tentar novamente" dentro da grade ativa.
+  - Navegacao de cards por teclado com setas (esquerda/direita/cima/baixo) dentro de cada grade.
+  - Cards ficaram acessiveis via teclado com `tabIndex`, `role` e abertura por `Enter/Espaco`.
+  - Atalho `/` para focar rapidamente a busca.
+
+**Resultado esperado:**
+- Experiencia mais proxima de plataforma de streaming profissional sem descaracterizar o visual atual.
+- Fluxo de busca mais claro para o usuario (estado, resultado e recuperacao de erro).
+- Navegacao mais fluida para desktop e acessibilidade por teclado.
+
+### 20/03/2026 - Pacote completo de hardening (seguranca + robustez de estado)
+**Objetivo:**
+- Aplicar todas as correcoes recomendadas na revisao: seguranca critica, estabilidade de frontend e confiabilidade de persistencia local.
+
+**Ajustes aplicados:**
+- `server.js`
+  - Adicionada validacao obrigatoria de `SESSION_SECRET` no boot (fail-fast).
+  - Sessao endurecida com `name`, `unset: "destroy"`, `maxAge` explicito e `trust proxy` em producao.
+- `backend/services/auth.service.js`
+  - Removido fallback inseguro de credenciais (`admin/admin123`) em runtime.
+  - Login agora exige `ADMIN_USERNAME` e `ADMIN_PASSWORD` definidos no ambiente (`AUTH_CONFIG_ERROR` quando ausentes).
+- `backend/repositories/catalog.repository.js`
+  - Migrado de I/O sincrono para assíncrono com `fs.promises`.
+  - Escrita passou a usar fila serializada + swap atomico (`.tmp` -> arquivo final) para reduzir risco de corrupcao/perda em concorrencia.
+- `backend/services/catalog.service.js`
+  - Fluxos `list/create/update/delete` adaptados para operacoes assíncronas.
+  - Warning de fallback TMDB padronizado sem expor detalhe tecnico interno.
+- `backend/controllers/catalog.controller.js`
+  - `create`, `update` e `remove` agora aguardam (`await`) o service assíncrono.
+- `public/js/script.js`
+  - Adicionado `safe parse` de `localStorage` para `favorites` e `ratings` (evita quebra da UI com JSON corrompido).
+  - Corrigida condicao de corrida em buscas do catalogo com cancelamento da requisicao anterior (`AbortController`) e controle de request mais recente.
+  - Bloco de destaque removido de interpolacao HTML com dados dinâmicos; renderizacao agora via `createElement + textContent` para reduzir risco de XSS.
+- `backend/__tests__/auth.routes.test.js`
+  - Credenciais de admin fixadas no ambiente do teste para manter previsibilidade.
+- `backend/__tests__/catalog.routes.test.js`
+  - Credenciais de admin fixadas no ambiente do teste.
+  - Fonte do catalogo em teste fixada para `local` (evita variacao por TMDB).
+
+**Resultado esperado:**
+- Eliminacao de credencial padrao insegura em runtime.
+- Menor superficie de XSS no frontend.
+- Busca de catalogo sem sobrescrita por respostas antigas.
+- API local mais resiliente sob operacoes de escrita sequenciais.
+- Suite de testes mais deterministica entre ambientes.
+
 ### 19/03/2026 - Endurecimento de seguranca, DX e estabilizacao de testes
 **Objetivo:**
 - Aplicar melhorias de seguranca no backend, melhorar experiencia de desenvolvimento e corrigir inconsistencias na suite de testes.
@@ -395,3 +543,41 @@ Projeto full stack com autenticacao de sessao para area administrativa, catalogo
 - `public/index.html`
 - `public/css/style.css`
 - `public/js/script.js`
+
+### 21/03/2026 - Hardening de Segurança: CSP, Rate Limit Global, Timing Attacks
+**Objetivo:**
+- Incrementar proteção contra ataques comuns: XSS, CSRF, brute force, timing attacks
+- Documentar boas práticas de segurança para deploy em produção
+- Manter compatibilidade com stack existing (sem alterar estrutura)
+
+**Ajustes aplicados:**
+- `backend/services/auth.service.js`
+  - Adicionado `constantTimeCompare()` para comparação de credenciais segura.
+  - Previne timing attacks que poderiam revelar se username existe.
+- `server.js`
+  - Helmet aprimorado com **Content Security Policy (CSP)** completa:
+    - Scripts: apenas `'self'`
+    - Styles: `'self'` + Google Fonts
+    - Iframes: apenas YouTube
+    - Imagens: `'self'` + data URIs + HTTPS
+  - HSTS headers para forçar HTTPS em produção (1 ano)
+  - Framebusting, X-Content-Type-Options, Referrer Policy
+  - **Rate limit global**: 100 req/min (exceção: `/api/health`)
+  - **Validação obrigatória de Content-Type**: POST/PUT/DELETE exigem `application/json`
+- `public/js/script.js`
+  - Adicionada função `sanitizeUrl()` para validar URLs antes de inserir em CSS
+  - Previne CSS injection via `style.setProperty()`
+  - Aceita apenas `http://`, `https://`, `data:` protocols
+- **Novo arquivo:**
+  - `SEGURANÇA.md`: Guia prático com testes de segurança e checklist pré-deploy
+
+**Resultado esperado:**
+
+**Arquivos Novos/Modificados:**
+- `server.js`: Helm aprimorado, rate limit global, content-type validation
+- `backend/services/auth.service.js`: Constant-time comparison
+- `public/js/script.js`: Sanitização de URL
+- `SEGURANÇA.md`: Guia prático de segurança com testes
+- `REVISÃO_SEGURANÇA_RESUMO.md`: Matriz de riscos e checklist
+
+**Resultado esperado:**
