@@ -9,7 +9,6 @@ export const state = {
   allItems: [],
   currentCatalogSource: "local",
   hasShownFallbackToast: false,
-  isPerformanceMode: false,
   scrollProgressReady: false,
   debounceTimer: null,
   filterTransitionTimer: null,

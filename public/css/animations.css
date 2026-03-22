@@ -2,7 +2,7 @@
    Animations
    - Keyframes centralizados
    - Estados de transicao/reveal
-   - Regras de acessibilidade e modo performance
+   - Regras de acessibilidade
    ======================================================================== */
 
 @keyframes spinnerRotate {
@@ -186,39 +186,4 @@
   body::before {
     display: none;
   }
-}
-
-:root[data-performance="on"] body::before {
-  display: none;
-}
-
-:root[data-performance="on"] .featured-card {
-  transform: none !important;
-  transition: none !important;
-}
-
-:root[data-performance="on"] .featured-card::before,
-:root[data-performance="on"] .featured-card::after {
-  animation: none !important;
-}
-
-:root[data-performance="on"] .section-block,
-:root[data-performance="on"] .movie-card,
-:root[data-performance="on"] .movie-image,
-:root[data-performance="on"] .featured-action,
-:root[data-performance="on"] .filter-btn,
-:root[data-performance="on"] .theme-toggle {
-  animation: none !important;
-  transition: none !important;
-}
-
-:root[data-performance="on"] .reveal,
-:root[data-performance="on"] .reveal.reveal-visible {
-  opacity: 1 !important;
-  transform: none !important;
-  filter: none !important;
-}
-
-:root[data-performance="on"] .movie-card::after {
-  display: none;
 }

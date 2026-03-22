@@ -7,7 +7,7 @@ import { featuredCard, aboutSection, stackSection, modalContent } from "./dom.js
 // ---------------------------------------------------------------------------
 
 export function canUseAdvancedMotion() {
-  return Boolean(gsapInstance) && !prefersReducedMotion && !state.isPerformanceMode;
+  return Boolean(gsapInstance) && !prefersReducedMotion;
 }
 
 // ---------------------------------------------------------------------------
@@ -225,7 +225,7 @@ function updateScrollProgress() {
 }
 
 export function setupScrollProgress() {
-  if (prefersReducedMotion || state.isPerformanceMode || state.scrollProgressReady) return;
+  if (prefersReducedMotion || state.scrollProgressReady) return;
   state.scrollProgressReady = true;
 
   let ticking = false;
@@ -248,7 +248,7 @@ export function setupScrollProgress() {
 // ---------------------------------------------------------------------------
 
 export function setupRevealAnimations() {
-  if (prefersReducedMotion || state.isPerformanceMode) {
+  if (prefersReducedMotion) {
     document.querySelectorAll(".reveal").forEach((el) => el.classList.add("reveal-visible"));
     return;
   }
@@ -283,12 +283,7 @@ export function setupRevealAnimations() {
 // ---------------------------------------------------------------------------
 
 export function setupHeroParallax() {
-  if (
-    prefersReducedMotion ||
-    state.isPerformanceMode ||
-    !featuredCard ||
-    featuredCard.dataset.parallaxBound === "true"
-  ) {
+  if (prefersReducedMotion || !featuredCard || featuredCard.dataset.parallaxBound === "true") {
     return;
   }
 

@@ -191,10 +191,7 @@ export function createMovieCard(item) {
   card.tabIndex = 0;
   card.setAttribute("role", "button");
   card.setAttribute("aria-label", `Abrir detalhes de ${item.title}`);
-  card.style.setProperty(
-    "--card-pop-delay",
-    state.isPerformanceMode ? "0ms" : `${Math.round(Math.random() * 140)}ms`
-  );
+  card.style.setProperty("--card-pop-delay", `${Math.round(Math.random() * 140)}ms`);
 
   const mediaDiv = document.createElement("div");
   mediaDiv.className = "movie-media";
@@ -238,6 +235,14 @@ export function createMovieCard(item) {
   mediaDiv.appendChild(badge);
   mediaDiv.appendChild(favoriteBtn);
   mediaDiv.appendChild(img);
+
+    const glassOverlay = document.createElement("div");
+    glassOverlay.className = "card-glass-overlay";
+    const glassTitle = document.createElement("span");
+    glassTitle.className = "card-glass-title";
+    glassTitle.textContent = item.title;
+    glassOverlay.appendChild(glassTitle);
+    mediaDiv.appendChild(glassOverlay);
 
   const title = document.createElement("h3");
   title.className = "movie-title";
@@ -335,7 +340,7 @@ export function applyFilterState(nextType) {
 export function applyFilterWithTransition(nextType) {
   if (nextType === state.currentType) return;
 
-  if (prefersReducedMotion || state.isPerformanceMode) {
+  if (prefersReducedMotion) {
     applyFilterState(nextType);
     return;
   }

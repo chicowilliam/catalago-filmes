@@ -28,5 +28,4 @@ export const loginScreen = document.getElementById("loginScreen");
 export const loginError = document.getElementById("loginError");
 export const loginButton = loginForm ? loginForm.querySelector(".login-btn") : null;
 export const themeToggle = document.getElementById("themeToggle");
-export const performanceToggle = document.getElementById("performanceToggle");
 export const htmlElement = document.documentElement;

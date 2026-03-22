@@ -2,6 +2,48 @@
 
 ## 0) Historico de Sessoes
 
+### 21/03/2026 - Remocao Total do Modo Performance
+**Objetivo:**
+- Eliminar conflitos que estavam desativando animacoes e transicoes do frontend.
+- Remover completamente o modo performance da interface e da logica da aplicacao.
+
+**Ajustes aplicados:**
+- `public/index.html`
+  - Botao `#performanceToggle` removido do header.
+- `public/js/settings.js`
+  - Removida a logica de persistencia e alternancia do modo performance.
+  - Adicionada limpeza defensiva do `localStorage` legado (`performanceMode`) e do atributo `data-performance`.
+- `public/js/script.js`
+  - Inicializacao simplificada para sempre desativar qualquer estado legado de performance ao carregar.
+- `public/js/motion.js`
+  - Efeitos GSAP, reveal, parallax e barra de progresso deixam de ser bloqueados por `isPerformanceMode`.
+- `public/js/render.js`
+  - Cards e transicoes de filtro deixam de reduzir comportamento por causa do antigo modo performance.
+- `public/js/config.js`, `public/js/state.js`, `public/js/dom.js`
+  - Removidas constantes, estado e referencias DOM ligadas ao modo performance.
+- `public/css/animations.css`, `public/css/layout.css`, `public/css/components.css`
+  - Removidas regras visuais e overrides que zeravam `animation` e `transition` quando `data-performance="on"` estava ativo.
+
+**Resultado esperado:**
+- Nenhuma parte do app desliga mais as animacoes por modo performance.
+- Hover dos cards, reveal das secoes e transicoes voltam a funcionar sem conflito com estado legado.
+
+### 21/03/2026 - Hover com Scale nos Cards de Filmes
+**Objetivo:**
+- Aplicar hover mais explícito nos cards do catálogo com `scale`.
+- Padronizar transições mais suaves de `0.5s` dentro dos cards dos filmes.
+
+**Ajustes aplicados:**
+- `public/css/components.css`
+  - `.movie-card:hover` alterado para destaque por escala.
+  - Transições de `transform`, `opacity`, `box-shadow` e `border-color` ajustadas para `0.5s`.
+  - Imagem do card, brilho de overlay e botão de favorito também receberam transições mais suaves.
+  - Regras de hover do grid mantidas alinhadas com o novo comportamento dos cards.
+
+**Resultado esperado:**
+- Cards de filmes com hover mais visível e suave ao passar o mouse.
+- Sensação de animação mais contínua dentro da área dos cards.
+
 ### 21/03/2026 - Refino de Hover para Sensação 60 FPS
 **Objetivo:**
 - Reduzir agressividade nas interações de mouse.

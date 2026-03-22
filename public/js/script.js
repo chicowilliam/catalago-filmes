@@ -13,7 +13,7 @@
  *  render.js          - criacao de cards, grids, featured, secoes
  *  catalog.js         - chamadas a API e auto-refresh
  *  auth.js            - formulario de login
- *  settings.js        - tema e modo performance
+ *  settings.js        - tema
  *  portfolio-sections.js - dados e UI da stack de tecnologias
  */
 
@@ -30,9 +30,7 @@ import {
   getInitialTheme,
   hasExplicitThemePreference,
   setupThemeToggle,
-  setupPerformanceToggle,
-  applyPerformanceMode,
-  loadPerformancePreference,
+  disableLegacyPerformanceMode,
 } from "./settings.js";
 import { validateRuntimeContext, setupLoginForm } from "./auth.js";
 
@@ -111,10 +109,7 @@ function initializeUi() {
   hasInitializedUi = true;
 
   renderStackFolders(stackFoldersContainer, openStackModal);
-  applyPerformanceMode(loadPerformancePreference());
-  if (!document.getElementById("performanceToggle") && state.isPerformanceMode) {
-    applyPerformanceMode(false);
-  }
+  disableLegacyPerformanceMode();
   applyTheme(getInitialTheme());
   validateRuntimeContext();
   updateCatalogSourceIndicator(state.currentCatalogSource);
@@ -123,7 +118,6 @@ function initializeUi() {
   setupMotionEnhancements();
   setupMotionHoverBindings();
   setupThemeToggle(themeToggle);
-  setupPerformanceToggle();
   setupLoginForm();
 }
 
