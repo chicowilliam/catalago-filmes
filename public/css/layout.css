@@ -182,10 +182,11 @@
   color: #ffffff;
   background-image:
     linear-gradient(180deg, rgba(6, 8, 14, 0.16) 0%, rgba(6, 8, 14, 0.94) 88%),
+    linear-gradient(90deg, rgba(6, 8, 14, 0.72) 0%, rgba(6, 8, 14, 0.18) 52%, transparent 100%),
     var(--featured-image, none),
     linear-gradient(135deg, #2d0f13, #090909);
-  background-size: 100% 100%, cover, cover;
-  background-position: center, var(--featured-position, 50% 28%), center;
+  background-size: 100% 100%, 100% 100%, auto 100%, cover;
+  background-position: center, center, right center, center;
   background-repeat: no-repeat;
   display: flex;
   flex-direction: column;
@@ -228,7 +229,7 @@
 }
 
 .featured-card.featured-no-image {
-  background-position: center, center, center;
+  background-position: center, center, center, center;
 }
 
 .featured-motion-content {
@@ -345,7 +346,7 @@
 @media (max-width: 1024px) {
   .featured-card {
     min-height: clamp(320px, 62vh, 620px);
-    background-position: center, var(--featured-position, 50% 24%), center;
+    background-position: center, center, right center, center;
   }
 }
 
@@ -354,7 +355,7 @@
     border-radius: 20px;
     min-height: clamp(300px, 58vh, 520px);
     aspect-ratio: auto;
-    background-position: center, var(--featured-position, 50% 18%), center;
+    background-position: center, center, right center, center;
     box-shadow: 0 22px 40px rgba(0, 0, 0, 0.32);
   }
 

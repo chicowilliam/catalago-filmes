@@ -2,6 +2,60 @@
 
 ## 0) Historico de Sessoes
 
+### 21/03/2026 - Correcao de Loading e Transicao do Login
+**Objetivo:**
+- Investigar por que o loading do login e a transicao entre tela de acesso e catalogo pareciam estaticos.
+- Remover interferencias globais e tornar o fluxo de autenticacao visualmente perceptivel.
+
+**Ajustes aplicados:**
+- `public/js/auth.js`
+  - O loading minimo agora vale tanto para sucesso quanto para erro, evitando sumico instantaneo do estado `loading`.
+  - A transicao de saida do login passa a disparar antes do reveal do app, com um frame de separacao para garantir animacao perceptivel.
+- `public/css/components.css`
+  - A tela de login ganhou transicao combinada de `opacity` + `transform`.
+  - O card de login agora sai com deslocamento e blur leves, em vez de parecer apenas desligar.
+  - O botao em `loading` ganhou micro-resposta visual para reforcar o estado assíncrono.
+- `public/css/animations.css`
+  - O bloqueio global de `prefers-reduced-motion` deixa de matar spinner e transicoes essenciais do fluxo de login/loading.
+
+**Resultado esperado:**
+- O shimmer do botao de login volta a se mover de forma visivel.
+- A troca entre login e catalogo fica perceptivel mesmo em ambientes com reducao de movimento ativa no sistema.
+
+### 21/03/2026 - Correcao de Limite do Catalogo e Destaque
+**Objetivo:**
+- Garantir que novos itens adicionados ao catalogo local aparecam na interface sem serem cortados por limite interno.
+- Corrigir o card de destaque para respeitar a proporcao real do poster em todos os breakpoints.
+
+**Ajustes aplicados:**
+- `backend/services/catalog.service.js`
+  - Removido o corte por `limitAndBalance()` para o catalogo local.
+  - O JSON local agora retorna todos os itens filtrados, evitando sumico de entradas novas na home.
+- `public/css/layout.css`
+  - Corrigidos os `background-position` responsivos do `.featured-card` para refletirem as 4 camadas atuais de background.
+  - Mantido o poster alinhado a direita, sem voltar para o comportamento antigo que causava corte visual.
+
+**Resultado esperado:**
+- Todos os itens presentes em `backend/data/catalog.json` passam a ficar disponiveis na listagem local.
+- O destaque deixa de voltar para um enquadramento incorreto em tablet e mobile.
+
+### 21/03/2026 - Expansao do Catalogo e Hover de Cards em 0.8s
+**Objetivo:**
+- Completar mais a vitrine inicial com 4 filmes e 4 series adicionais.
+- Deixar o hover dos cards mais suave e cinematografico com transicoes em `0.8s`.
+
+**Ajustes aplicados:**
+- `backend/data/catalog.json`
+  - Adicionados 8 novos titulos ao catalogo local: 4 filmes e 4 series.
+  - Novas entradas usam URLs validas de poster para manter compatibilidade com o schema de validacao do backend.
+- `public/css/components.css`
+  - Transicoes principais dos cards, glow, glass overlay, zoom da imagem e botao de favorito ajustadas para `0.8s`.
+  - Mantido o hover com destaque visual, mas com easing mais suave para reduzir sensacao de corte brusco.
+
+**Resultado esperado:**
+- Catalogo inicial mais encorpado e equilibrado entre filmes e series.
+- Hover dos cards com resposta mais lenta, suave e premium.
+
 ### 21/03/2026 - Remocao Total do Modo Performance
 **Objetivo:**
 - Eliminar conflitos que estavam desativando animacoes e transicoes do frontend.

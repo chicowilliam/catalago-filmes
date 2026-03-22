@@ -103,8 +103,13 @@ body.is-filter-transitioning .section-block {
 
 .movies-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 18px;
+}
+
+/* Favoritos: auto-fill para manter cards no tamanho normal com poucos itens */
+#favoritesGrid {
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
 }
 
 .movies-grid:hover .movie-card {
@@ -129,10 +134,10 @@ body.is-filter-transitioning .section-block {
   will-change: transform, box-shadow;
   backface-visibility: hidden;
   transition:
-    transform 0.5s ease,
-    opacity 0.5s ease,
-    box-shadow 0.5s ease,
-    border-color 0.5s ease;
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.8s ease,
+    box-shadow 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.8s ease;
   animation: cardReveal 550ms cubic-bezier(0.2, 0.9, 0.25, 1) backwards;
   animation-delay: var(--card-pop-delay, 0ms);
   position: relative;
@@ -168,10 +173,10 @@ body.is-filter-transitioning .section-block {
 .movie-card:hover,
 .movie-card:focus-visible {
   transition:
-    transform 0.5s ease,
-    opacity 0.5s ease,
-    box-shadow 0.5s ease,
-    border-color 0.5s ease;
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.8s ease,
+    box-shadow 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.8s ease;
 }
 
 .movie-card::after {
@@ -182,50 +187,26 @@ body.is-filter-transitioning .section-block {
   pointer-events: none;
   opacity: 0;
   background: radial-gradient(280px circle at 82% 0%, rgba(255, 255, 255, 0.24), transparent 58%);
-  transition: opacity 0.5s ease;
+  transition: opacity 0.8s ease;
 }
 
 .movie-card:hover::after {
   opacity: 1;
 }
 
-/* Glass overlay — desliza de baixo da capa no hover */
+/* Glass effect no card-info (area do nome, abaixo do poster) */
 
-.card-glass-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 36px 12px 12px;
-  background: linear-gradient(
-    to top,
-    rgba(4, 6, 18, 0.96) 0%,
-    rgba(4, 6, 18, 0.62) 52%,
-    transparent 100%
-  );
-  backdrop-filter: blur(6px) saturate(1.6);
-  -webkit-backdrop-filter: blur(6px) saturate(1.6);
-  transform: translateY(100%);
-  opacity: 0;
+.card-info {
   transition:
-    transform 0.48s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.32s ease;
-  z-index: 4;
+    background 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    backdrop-filter 0.8s ease;
+  border-radius: 0 0 14px 14px;
 }
 
-.movie-card:hover .card-glass-overlay {
-  transform: translateY(0);
-  opacity: 1;
-}
-
-.card-glass-title {
-  display: block;
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: #ffffff;
-  line-height: 1.25;
-  letter-spacing: 0.015em;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+.movie-card:hover .card-info {
+  background: rgba(8, 12, 24, 0.55);
+  backdrop-filter: blur(14px) saturate(1.8);
+  -webkit-backdrop-filter: blur(14px) saturate(1.8);
 }
 
 ::view-transition-old(root),
@@ -248,7 +229,7 @@ body.is-filter-transitioning .section-block {
   object-fit: cover;
   transform: translate3d(0, 0, 0) scale(1.001);
   will-change: transform, opacity;
-  transition: transform 0.5s ease, opacity 0.5s ease;
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.8s ease;
 }
 
 .movie-card:hover .movie-image {
@@ -265,9 +246,10 @@ body.is-filter-transitioning .section-block {
     transform: translate3d(0, 0, 0) scale(1);
   }
 
-  .movie-card:hover .card-glass-overlay {
-    transform: translateY(100%);
-    opacity: 0;
+  .movie-card:hover .card-info {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
 
@@ -301,7 +283,7 @@ body.is-filter-transitioning .section-block {
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(8px);
-  transition: transform 0.5s ease, background-color 0.5s ease, border-color 0.5s ease;
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.8s ease, border-color 0.8s ease;
 }
 
 .favorite-btn:hover {
@@ -605,7 +587,8 @@ body.is-filter-transitioning .section-block {
   padding: 20px;
   opacity: 1;
   visibility: visible;
-  transition: opacity 0.32s ease, visibility 0.32s ease;
+  transform: translateY(0);
+  transition: opacity 0.32s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.32s;
 }
 
 .login-box {
@@ -617,18 +600,23 @@ body.is-filter-transitioning .section-block {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  opacity: 1;
+  transform: translateY(0) scale(1);
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.36);
-  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease, filter 0.32s ease;
 }
 
 .login-screen.is-exiting {
   opacity: 0;
   visibility: hidden;
+  transform: translateY(-6px);
+  pointer-events: none;
 }
 
 .login-screen.is-exiting .login-box {
   opacity: 0;
-  transform: translateY(-10px) scale(0.98);
+  filter: blur(6px);
+  transform: translateY(-22px) scale(0.965);
 }
 
 .login-title {
@@ -721,6 +709,7 @@ body.is-filter-transitioning .section-block {
 
 .login-btn.loading {
   cursor: wait;
+  transform: scale(0.995);
 }
 
 .login-btn:disabled {

@@ -93,7 +93,7 @@ async function fetchFromLocalStorage(type, search) {
     items = items.filter((i) => i.title.toLowerCase().includes(q));
   }
 
-  return limitAndBalance(items, type, search);
+  return items;
 }
 
 /**

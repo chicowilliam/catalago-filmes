@@ -236,13 +236,8 @@ export function createMovieCard(item) {
   mediaDiv.appendChild(favoriteBtn);
   mediaDiv.appendChild(img);
 
-    const glassOverlay = document.createElement("div");
-    glassOverlay.className = "card-glass-overlay";
-    const glassTitle = document.createElement("span");
-    glassTitle.className = "card-glass-title";
-    glassTitle.textContent = item.title;
-    glassOverlay.appendChild(glassTitle);
-    mediaDiv.appendChild(glassOverlay);
+  const infoDiv = document.createElement("div");
+  infoDiv.className = "card-info";
 
   const title = document.createElement("h3");
   title.className = "movie-title";
@@ -252,9 +247,11 @@ export function createMovieCard(item) {
   meta.className = "movie-meta";
   meta.textContent = item.type === "movie" ? "Filme" : "Serie";
 
+  infoDiv.appendChild(title);
+  infoDiv.appendChild(meta);
+
   card.appendChild(mediaDiv);
-  card.appendChild(title);
-  card.appendChild(meta);
+  card.appendChild(infoDiv);
   card.addEventListener("click", () => openModal(item));
   card.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") {

@@ -186,4 +186,20 @@
   body::before {
     display: none;
   }
+
+  .spinner,
+  .login-spinner::before {
+    animation-duration: 0.85s !important;
+    animation-iteration-count: infinite !important;
+  }
+
+  #loader,
+  .login-screen,
+  .login-box,
+  .login-btn,
+  .header,
+  .main,
+  .footer {
+    transition-duration: 0.32s !important;
+  }
 }

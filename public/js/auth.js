@@ -31,8 +31,9 @@ export function validateRuntimeContext() {
 // ---------------------------------------------------------------------------
 
 async function animateLoginSuccess() {
-  document.body.classList.add("app-ready");
   loginScreen.classList.add("is-exiting");
+  await wait(16);
+  document.body.classList.add("app-ready");
   await wait(LOGIN_TRANSITION_MS);
   loginScreen.style.display = "none";
   loginScreen.classList.remove("is-exiting");
@@ -64,6 +65,8 @@ export function setupLoginForm() {
       loginButton.disabled = true;
     }
 
+    let loginSucceeded = false;
+
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
@@ -86,15 +89,20 @@ export function setupLoginForm() {
 
       initLazyLoading();
       await loadCatalog();
-      await ensureMinimumDelay(loginStartTime, LOGIN_MIN_LOADING_MS);
-      await animateLoginSuccess();
-      setupMotionEnhancements();
-      startAutoCatalogRefresh();
-      showToast("Login realizado com sucesso", "success");
+      loginSucceeded = true;
     } catch {
       loginError.textContent =
         "Erro ao conectar com o servidor. Verifique se o backend esta rodando em http://localhost:3000.";
     } finally {
+      await ensureMinimumDelay(loginStartTime, LOGIN_MIN_LOADING_MS);
+
+      if (loginSucceeded) {
+        await animateLoginSuccess();
+        setupMotionEnhancements();
+        startAutoCatalogRefresh();
+        showToast("Login realizado com sucesso", "success");
+      }
+
       if (loginButton) {
         loginButton.classList.remove("loading");
         loginButton.disabled = false;
