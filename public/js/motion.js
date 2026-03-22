@@ -15,30 +15,15 @@ export function canUseAdvancedMotion() {
 // ---------------------------------------------------------------------------
 
 export function animateHeroReveal() {
-  if (!featuredCard) return;
-  const heroContent = featuredCard.querySelector(".featured-motion-content");
-  if (!heroContent) return;
-
-  if (!canUseAdvancedMotion()) {
-    heroContent.style.opacity = "1";
-    heroContent.style.transform = "none";
-    return;
-  }
+  if (!featuredCard || !canUseAdvancedMotion()) return;
 
   gsapInstance.killTweensOf(featuredCard);
-  gsapInstance.killTweensOf(heroContent);
-
   gsapInstance.fromTo(
     featuredCard,
     { opacity: 0, y: 12 },
     { opacity: 1, y: 0, duration: 0.75, ease: "expo.out", clearProps: "transform" }
   );
-
-  gsapInstance.fromTo(
-    heroContent,
-    { opacity: 0, y: 20 },
-    { opacity: 1, y: 0, duration: 0.85, ease: "power4.out", delay: 0.08, clearProps: "transform,opacity" }
-  );
+  // Animação do conteúdo delegada ao CSS via classe .is-active
 }
 
 // ---------------------------------------------------------------------------

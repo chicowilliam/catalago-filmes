@@ -19,5 +19,7 @@ export const state = {
   heroParallax: { x: 0, y: 0 },
   imageObserver: null,
   revealObserver: null,
+  gridInteractionsReady: false,
+  sliderAutoTimer: null,
   sectionFadeTimers: new WeakMap(),
 };

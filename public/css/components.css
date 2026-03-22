@@ -113,14 +113,14 @@ body.is-filter-transitioning .section-block {
 }
 
 .movies-grid:hover .movie-card {
-  opacity: 0.9;
-  transform: translate3d(0, 0, 0) scale(0.98);
+  opacity: 0.88;
+  transform: translate3d(0, 0, 0) scale(0.984);
 }
 
 .movies-grid:hover .movie-card:hover,
 .movies-grid:hover .movie-card:focus-visible {
   opacity: 1;
-  transform: translate3d(0, -8px, 0) scale(1.08);
+  transform: translate3d(0, -5px, 0) scale(1.04);
 }
 
 .movie-card {
@@ -134,10 +134,10 @@ body.is-filter-transitioning .section-block {
   will-change: transform, box-shadow;
   backface-visibility: hidden;
   transition:
-    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.8s ease,
-    box-shadow 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.8s ease;
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.55s ease,
+    box-shadow 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.45s ease;
   animation: cardReveal 550ms cubic-bezier(0.2, 0.9, 0.25, 1) backwards;
   animation-delay: var(--card-pop-delay, 0ms);
   position: relative;
@@ -161,22 +161,22 @@ body.is-filter-transitioning .section-block {
 }
 
 .movie-card:hover {
-  transform: translate3d(0, -8px, 0) scale(1.08);
+  transform: translate3d(0, -5px, 0) scale(1.04);
   box-shadow:
-    0 28px 52px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(255, 255, 255, 0.13),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.16);
+    0 18px 36px rgba(0, 0, 0, 0.40),
+    0 0 0 1px rgba(255, 255, 255, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.13);
   z-index: 10;
 }
 
 .movie-card:hover,
 .movie-card:focus-visible {
   transition:
-    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.8s ease,
-    box-shadow 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.8s ease;
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.55s ease,
+    box-shadow 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.45s ease;
 }
 
 .movie-card::after {
@@ -187,7 +187,7 @@ body.is-filter-transitioning .section-block {
   pointer-events: none;
   opacity: 0;
   background: radial-gradient(280px circle at 82% 0%, rgba(255, 255, 255, 0.24), transparent 58%);
-  transition: opacity 0.8s ease;
+  transition: opacity 0.55s ease;
 }
 
 .movie-card:hover::after {
@@ -198,8 +198,8 @@ body.is-filter-transitioning .section-block {
 
 .card-info {
   transition:
-    background 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-    backdrop-filter 0.8s ease;
+    background 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    backdrop-filter 0.55s ease;
   border-radius: 0 0 14px 14px;
 }
 
@@ -229,11 +229,11 @@ body.is-filter-transitioning .section-block {
   object-fit: cover;
   transform: translate3d(0, 0, 0) scale(1.001);
   will-change: transform, opacity;
-  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.8s ease;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s ease;
 }
 
 .movie-card:hover .movie-image {
-  transform: translate3d(0, 0, 0) scale(1.06);
+  transform: translate3d(0, 0, 0) scale(1.04);
 }
 
 @media (hover: none) {
@@ -283,7 +283,7 @@ body.is-filter-transitioning .section-block {
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(8px);
-  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.8s ease, border-color 0.8s ease;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .favorite-btn:hover {
@@ -755,6 +755,67 @@ body.is-filter-transitioning .section-block {
   padding: 26px 16px 32px;
 }
 
+/* Slider de destaque — controles de navegação */
+.slider-controls {
+  position: absolute;
+  bottom: clamp(14px, 2.5vw, 28px);
+  right: clamp(20px, 4vw, 56px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 20;
+}
+
+.slider-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(8, 12, 24, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.88);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, background-color 0.22s ease, border-color 0.22s ease;
+  flex-shrink: 0;
+}
+
+.slider-btn:hover {
+  transform: scale(1.1);
+  background: rgba(8, 12, 24, 0.78);
+  border-color: rgba(255, 255, 255, 0.38);
+}
+
+.slider-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.slider-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.slider-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  border: 0;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.36);
+  cursor: pointer;
+  transition: background-color 0.3s ease, width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.slider-dot.active {
+  background: rgba(255, 255, 255, 0.92);
+  width: 18px;
+}
+
 .movie-image[data-src] {
   opacity: 0;
 }
@@ -778,10 +839,6 @@ body.is-filter-transitioning .section-block {
 }
 
 @media (max-width: 1080px) {
-  .featured-card {
-    min-height: 62vh;
-  }
-
   .about-layout {
     grid-template-columns: 1fr;
   }
@@ -847,12 +904,14 @@ body.is-filter-transitioning .section-block {
   }
 
   .featured-card {
-    padding: 20px;
-    min-height: 56vh;
     border-radius: 22px;
   }
 
-  .featured-card > * {
+  .featured-slide {
+    padding: 20px;
+  }
+
+  .featured-slide > * {
     max-width: 100%;
   }
 

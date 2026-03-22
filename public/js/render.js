@@ -33,6 +33,10 @@ import { openModal } from "./modal.js";
 // ---------------------------------------------------------------------------
 
 export function initLazyLoading() {
+  if (state.imageObserver) {
+    state.imageObserver.disconnect();
+  }
+
   state.imageObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -188,6 +192,7 @@ function updateSearchResultSummary(movies, series, favorites) {
 export function createMovieCard(item) {
   const card = document.createElement("article");
   card.className = "movie-card";
+  card.dataset.itemId = String(item.id);
   card.tabIndex = 0;
   card.setAttribute("role", "button");
   card.setAttribute("aria-label", `Abrir detalhes de ${item.title}`);
@@ -203,6 +208,7 @@ export function createMovieCard(item) {
   const favoriteBtn = document.createElement("button");
   favoriteBtn.className = "favorite-btn";
   favoriteBtn.type = "button";
+  favoriteBtn.setAttribute("data-action", "toggle-favorite");
   favoriteBtn.setAttribute("aria-label", "Adicionar ou remover favorito");
   favoriteBtn.classList.add(favoritesManager.isFavorite(item.id) ? "favorited" : "not-favorited");
   favoriteBtn.innerHTML = `
@@ -211,21 +217,11 @@ export function createMovieCard(item) {
     </svg>
   `;
 
-  favoriteBtn.addEventListener("click", (event) => {
-    event.stopPropagation();
-    if (favoritesManager.isFavorite(item.id)) {
-      favoritesManager.removeFavorite(item.id);
-      showToast("Removido dos favoritos", "info");
-    } else {
-      favoritesManager.addFavorite(item);
-      showToast("Adicionado aos favoritos", "success");
-    }
-    renderCurrentView();
-  });
-
   const img = document.createElement("img");
   img.className = "movie-image";
   img.setAttribute("data-src", item.image);
+  img.loading = "lazy";
+  img.decoding = "async";
   img.src =
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 600'%3E%3Crect fill='%23121422' width='400' height='600'/%3E%3C/svg%3E";
   img.alt = item.title;
@@ -252,15 +248,63 @@ export function createMovieCard(item) {
 
   card.appendChild(mediaDiv);
   card.appendChild(infoDiv);
-  card.addEventListener("click", () => openModal(item));
-  card.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      openModal(item);
-    }
-  });
 
   return card;
+}
+
+function getItemById(itemId) {
+  const fromCatalog = state.allItems.find((item) => String(item.id) === String(itemId));
+  if (fromCatalog) return fromCatalog;
+  return favoritesManager.getFavorites().find((item) => String(item.id) === String(itemId)) || null;
+}
+
+export function setupGridInteractions() {
+  if (state.gridInteractionsReady) return;
+
+  const grids = [moviesGrid, seriesGrid, favoritesGrid].filter(Boolean);
+
+  const onClick = (event) => {
+    const favoriteButton = event.target.closest(".favorite-btn");
+    const card = event.target.closest(".movie-card");
+    if (!card) return;
+
+    const item = getItemById(card.dataset.itemId);
+    if (!item) return;
+
+    if (favoriteButton) {
+      event.stopPropagation();
+      if (favoritesManager.isFavorite(item.id)) {
+        favoritesManager.removeFavorite(item.id);
+        showToast("Removido dos favoritos", "info");
+      } else {
+        favoritesManager.addFavorite(item);
+        showToast("Adicionado aos favoritos", "success");
+      }
+      renderCurrentView();
+      return;
+    }
+
+    openModal(item);
+  };
+
+  const onKeydown = (event) => {
+    const card = event.target.closest(".movie-card");
+    if (!card) return;
+    if (event.key !== "Enter" && event.key !== " ") return;
+
+    const item = getItemById(card.dataset.itemId);
+    if (!item) return;
+
+    event.preventDefault();
+    openModal(item);
+  };
+
+  grids.forEach((grid) => {
+    grid.addEventListener("click", onClick);
+    grid.addEventListener("keydown", onKeydown);
+  });
+
+  state.gridInteractionsReady = true;
 }
 
 // ---------------------------------------------------------------------------
@@ -273,55 +317,178 @@ export function renderGrid(grid, items, emptyMessage) {
     grid.innerHTML = `<p class="empty-grid-message">${emptyMessage}</p>`;
     return;
   }
-  items.forEach((item) => grid.appendChild(createMovieCard(item)));
+
+  const fragment = document.createDocumentFragment();
+  items.forEach((item) => fragment.appendChild(createMovieCard(item)));
+  grid.appendChild(fragment);
 }
 
 // ---------------------------------------------------------------------------
-// Destaque (featured card)
+// Destaque (slider de filmes em destaque)
 // ---------------------------------------------------------------------------
 
-export function renderFeatured(movies, series, favorites) {
-  const featured = movies[0] || series[0] || favorites[0];
+const SLIDER_INTERVAL_MS = 6000;
+let _cleanupSlider = null;
 
-  if (!featured) {
+function buildFeaturedSlider(candidates) {
+  if (_cleanupSlider) {
+    _cleanupSlider();
+    _cleanupSlider = null;
+  }
+
+  featuredCard.innerHTML = "";
+  featuredCard.className = "featured-card";
+  featuredCard.style.removeProperty("--featured-image");
+
+  const slider = document.createElement("div");
+  slider.className = "featured-slider";
+
+  const track = document.createElement("div");
+  track.className = "featured-slides-track";
+
+  const slides = candidates.map((item, index) => {
+    const slide = document.createElement("div");
+    slide.className = "featured-slide" + (index === 0 ? " is-active" : "");
+
+    const safeImg = sanitizeUrl(item.image);
+    slide.style.setProperty("--slide-image", safeImg ? `url('${safeImg}')` : "none");
+    if (!safeImg) slide.classList.add("featured-no-image");
+
+    const content = document.createElement("div");
+    content.className = "featured-motion-content";
+
+    const tag = document.createElement("span");
+    tag.className = "featured-tag";
+    tag.textContent = `${item.type === "movie" ? "Filme" : "Série"} • ${
+      state.currentCatalogSource === "tmdb" ? "TMDB" : "Local"
+    }`;
+
+    const title = document.createElement("h3");
+    title.textContent = item.title || "Titulo indisponivel";
+
+    const synopsis = document.createElement("p");
+    synopsis.textContent = item.synopsis || "Sinopse indisponivel.";
+
+    const actionBtn = document.createElement("button");
+    actionBtn.className = "featured-action";
+    actionBtn.type = "button";
+    actionBtn.textContent = "Assistir trailer";
+    actionBtn.addEventListener("click", () => openModal(item));
+
+    content.appendChild(tag);
+    content.appendChild(title);
+    content.appendChild(synopsis);
+    content.appendChild(actionBtn);
+    slide.appendChild(content);
+    return slide;
+  });
+
+  slides.forEach((slide) => track.appendChild(slide));
+  slider.appendChild(track);
+
+  // Controles de navegação
+  const controls = document.createElement("div");
+  controls.className = "slider-controls";
+
+  const prevBtn = document.createElement("button");
+  prevBtn.className = "slider-btn slider-prev";
+  prevBtn.type = "button";
+  prevBtn.setAttribute("aria-label", "Slide anterior");
+  prevBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>`;
+
+  const dotsWrap = document.createElement("div");
+  dotsWrap.className = "slider-dots";
+
+  const dots = candidates.map((_, i) => {
+    const dot = document.createElement("button");
+    dot.className = "slider-dot" + (i === 0 ? " active" : "");
+    dot.type = "button";
+    dot.setAttribute("aria-label", `Slide ${i + 1}`);
+    return dot;
+  });
+  dots.forEach((d) => dotsWrap.appendChild(d));
+
+  const nextBtn = document.createElement("button");
+  nextBtn.className = "slider-btn slider-next";
+  nextBtn.type = "button";
+  nextBtn.setAttribute("aria-label", "Próximo slide");
+  nextBtn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>`;
+
+  controls.appendChild(prevBtn);
+  controls.appendChild(dotsWrap);
+  controls.appendChild(nextBtn);
+  slider.appendChild(controls);
+  featuredCard.appendChild(slider);
+
+  // Lógica do slider
+  let current = 0;
+  const total = candidates.length;
+
+  function goTo(index) {
+    const prev = current;
+    current = ((index % total) + total) % total;
+    if (current === prev) return;
+    track.style.transform = `translateX(-${current * 100}%)`;
+    slides[prev].classList.remove("is-active");
+    dots[prev].classList.remove("active");
+    slides[current].classList.add("is-active");
+    dots[current].classList.add("active");
+  }
+
+  function startAuto() {
+    if (state.sliderAutoTimer) clearInterval(state.sliderAutoTimer);
+    state.sliderAutoTimer = setInterval(() => goTo(current + 1), SLIDER_INTERVAL_MS);
+  }
+
+  function stopAuto() {
+    if (state.sliderAutoTimer) {
+      clearInterval(state.sliderAutoTimer);
+      state.sliderAutoTimer = null;
+    }
+  }
+
+  nextBtn.addEventListener("click", () => { goTo(current + 1); stopAuto(); startAuto(); });
+  prevBtn.addEventListener("click", () => { goTo(current - 1); stopAuto(); startAuto(); });
+  dots.forEach((dot, i) => dot.addEventListener("click", () => { goTo(i); stopAuto(); startAuto(); }));
+
+  const onEnter = () => stopAuto();
+  const onLeave = () => startAuto();
+  featuredCard.addEventListener("mouseenter", onEnter);
+  featuredCard.addEventListener("mouseleave", onLeave);
+
+  _cleanupSlider = () => {
+    stopAuto();
+    featuredCard.removeEventListener("mouseenter", onEnter);
+    featuredCard.removeEventListener("mouseleave", onLeave);
+  };
+
+  startAuto();
+}
+
+export function renderFeatured(movies, series, favorites) {
+  if (_cleanupSlider) {
+    _cleanupSlider();
+    _cleanupSlider = null;
+  }
+
+  // Intercalar filmes e séries, máximo 5 itens no slider
+  const candidates = [];
+  let mi = 0;
+  let si = 0;
+  while (candidates.length < 5) {
+    let added = false;
+    if (mi < movies.length) { candidates.push(movies[mi++]); added = true; }
+    if (candidates.length < 5 && si < series.length) { candidates.push(series[si++]); added = true; }
+    if (!added) break;
+  }
+  if (!candidates.length) candidates.push(...favorites.slice(0, 5));
+
+  if (!candidates.length) {
     featuredCard.innerHTML = "<p class='featured-empty'>Nenhum conteúdo disponível no momento.</p>";
     return;
   }
 
-  const safeImageUrl = sanitizeUrl(featured.image);
-  if (safeImageUrl) {
-    featuredCard.style.setProperty("--featured-image", `url('${safeImageUrl}')`);
-    featuredCard.classList.remove("featured-no-image");
-  } else {
-    featuredCard.style.setProperty("--featured-image", "none");
-    featuredCard.classList.add("featured-no-image");
-  }
-  featuredCard.innerHTML = "";
-
-  const tag = document.createElement("span");
-  tag.className = "featured-tag";
-  tag.textContent = `Destaque • ${state.currentCatalogSource === "tmdb" ? "TMDB" : "Local"}`;
-
-  const title = document.createElement("h3");
-  title.textContent = featured.title || "Titulo indisponivel";
-
-  const synopsis = document.createElement("p");
-  synopsis.textContent = featured.synopsis || "Sinopse indisponivel.";
-
-  const actionBtn = document.createElement("button");
-  actionBtn.className = "featured-action";
-  actionBtn.type = "button";
-  actionBtn.textContent = "Assistir trailer";
-  actionBtn.addEventListener("click", () => openModal(featured));
-
-  const contentWrap = document.createElement("div");
-  contentWrap.className = "featured-motion-content";
-  contentWrap.appendChild(tag);
-  contentWrap.appendChild(title);
-  contentWrap.appendChild(synopsis);
-  contentWrap.appendChild(actionBtn);
-  featuredCard.appendChild(contentWrap);
-
+  buildFeaturedSlider(candidates);
   animateHeroReveal();
 }
 
