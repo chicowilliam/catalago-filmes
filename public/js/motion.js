@@ -233,6 +233,22 @@ export function setupScrollProgress() {
 // ---------------------------------------------------------------------------
 
 export function setupRevealAnimations() {
+  const supportsViewTimeline =
+    typeof CSS !== "undefined" &&
+    typeof CSS.supports === "function" &&
+    CSS.supports("animation-timeline: view()");
+
+  if (supportsViewTimeline) {
+    if (state.revealObserver) state.revealObserver.disconnect();
+    state.revealObserver = null;
+    document.querySelectorAll(".reveal").forEach((el) => {
+      el.classList.remove("reveal");
+      el.classList.remove("reveal-visible");
+      el.style.removeProperty("--reveal-delay");
+    });
+    return;
+  }
+
   if (prefersReducedMotion) {
     document.querySelectorAll(".reveal").forEach((el) => el.classList.add("reveal-visible"));
     return;

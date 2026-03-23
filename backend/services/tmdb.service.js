@@ -19,6 +19,7 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
 // Cache simples em memória: evita bater na TMDB a cada requisição
 const cache = new Map();
 const trailerCache = new Map();
+const posterLookupCache = new Map();
 
 // --- Funções internas de autenticação na TMDB ---
 
@@ -121,6 +122,20 @@ function setTrailerCache(key, data) {
   trailerCache.set(key, { timestamp: Date.now(), data });
 }
 
+function getPosterLookupCache(key) {
+  const entry = posterLookupCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+    posterLookupCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setPosterLookupCache(key, data) {
+  posterLookupCache.set(key, { timestamp: Date.now(), data });
+}
+
 async function fetchTrailerId(item) {
   const tmdbId = String(item.id || "").replace("tmdb-", "");
   if (!tmdbId) return "";
@@ -168,6 +183,31 @@ async function attachTrailers(items, maxItems = 12) {
   );
 
   return enriched;
+}
+
+async function resolvePosterForTitle(title, type) {
+  const normalizedTitle = String(title || "").trim();
+  if (!normalizedTitle || !(process.env.TMDB_API_KEY || process.env.TMDB_BEARER_TOKEN)) {
+    return "";
+  }
+
+  const normalizedType = type === "series" ? "tv" : "movie";
+  const cacheKey = `${normalizedType}:${normalizedTitle.toLowerCase()}`;
+  const cached = getPosterLookupCache(cacheKey);
+  if (cached !== null) return cached;
+
+  try {
+    const endpoint = `${TMDB_BASE_URL}/search/${normalizedType}?language=pt-BR&query=${encodeURIComponent(normalizedTitle)}&include_adult=false&page=1`;
+    const response = await httpGetJson(endpoint);
+    const results = Array.isArray(response.results) ? response.results : [];
+    const preferred = results.find((item) => item.poster_path) || null;
+    const posterUrl = preferred && preferred.poster_path ? `${TMDB_IMAGE_BASE}${preferred.poster_path}` : "";
+    setPosterLookupCache(cacheKey, posterUrl);
+    return posterUrl;
+  } catch {
+    setPosterLookupCache(cacheKey, "");
+    return "";
+  }
 }
 
 // --- Função principal exportada ---
@@ -259,4 +299,4 @@ async function fetch(type, search) {
   return deduped;
 }
 
-module.exports = { fetch, attachTrailers };
+module.exports = { fetch, attachTrailers, resolvePosterForTitle };

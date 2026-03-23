@@ -2,6 +2,67 @@
 
 ## 0) Historico de Sessoes
 
+### 22/03/2026 - Revisao Tecnica Completa (Back + Front + DX)
+**Objetivo:**
+- Revisar o projeto de ponta a ponta (arquitetura, UX, dados, seguranca e performance).
+- Consolidar riscos tecnicos e sugerir plano pratico de evolucao.
+
+**Diagnostico resumido:**
+- Testes automatizados: 26/26 passando (Jest + Supertest).
+- Backend: estrutura em camadas esta boa (routes/controller/service/repository), com fallback local/TMDB funcional.
+- Frontend: arquitetura modular clara, com melhorias recentes de lazy loading, delegation e transicoes.
+
+**Riscos e pontos de atencao (prioridade):**
+- Critico: catalogo local referencia 15 imagens em `assets/images/...`, mas `public/assets/images` esta vazio. Hoje funciona apenas quando ha enriquecimento via TMDB; sem token/chave, cards podem quebrar visualmente.
+- Medio: middleware global exige `Content-Type: application/json` para `DELETE`, o que pode bloquear clientes REST validos que nao enviam body nesse metodo.
+- Medio: validacao de contexto no login fixa a porta `3000`, impedindo execucao em outra porta local mesmo quando o backend esta correto.
+- Baixo: logs de erro esperados de teste (401/400) aparecem com `console.error`, gerando ruido em CI e leitura de diagnostico.
+
+**Sugestoes praticas (roadmap curto):**
+- Dados/imagens:
+  - Migrar entradas locais de `backend/data/catalog.json` para URLs HTTPS validas (padrao `w500`) ou reintroduzir assets reais em `public/assets/images`.
+  - Criar teste de integridade para garantir que cada item tenha `image` acessivel (http/https) ou fallback valido.
+- API e contratos:
+  - Ajustar middleware de `Content-Type` para validar apenas `POST` e `PUT` (ou condicional no `DELETE` so quando houver body).
+  - Adicionar teste de rota `DELETE /api/catalog/:id` sem header `Content-Type` para evitar regressao.
+- UX e configuracao:
+  - Tornar validacao de porta no frontend configuravel (por `window.location.origin` ou variavel de ambiente injetada), removendo acoplamento com `3000`.
+  - Incluir fallback visual explicito para poster ausente no card (estado nao dependente de TMDB).
+- Observabilidade:
+  - Reduzir ruido de logs em ambiente de teste (`NODE_ENV=test`) mantendo erro estruturado em producao.
+
+**Resultado esperado apos backlog:**
+- Portfolio mais resiliente sem dependencia forte da TMDB para renderizar capa.
+- Menos falso-positivo de erro em integracoes/CI.
+- Melhor experiencia para rodar projeto em ambientes locais diferentes (outra porta/proxy).
+
+### 22/03/2026 - Ajuste de Catalogo e Otimizacoes de Performance
+**Objetivo:**
+- Corrigir imagens quebradas do catalogo antigo sem depender de arquivos locais ausentes.
+- Remover 3 filmes da expansao recente e reduzir a sensacao de peso no frontend.
+
+**Ajustes aplicados:**
+- `backend/services/tmdb.service.js`
+  - Adicionada busca/cache de poster por titulo para enriquecer itens locais com imagem da TMDB quando o caminho local nao existe mais.
+- `backend/services/catalog.service.js`
+  - Catalogo local agora tenta resolver poster via TMDB para entradas antigas com `assets/images/...`.
+  - Adicionado cache em memoria do catalogo local enriquecido (com TTL), evitando novas buscas de poster em cada requisicao.
+  - Cache invalida automaticamente em create/update/delete de item.
+- `backend/data/catalog.json`
+  - Removidos 3 filmes da expansao recente: `O Poderoso Chefao`, `Pulp Fiction` e `Gladiador`.
+  - Posters externos ajustados de `w780` para `w500`, reduzindo peso de download.
+- `public/js/render.js`
+  - `IntersectionObserver` de imagens deixa de acumular instancias antigas.
+  - Cards passam a usar `DocumentFragment` no render para reduzir reflow.
+  - Interacoes de abrir modal/favoritar migradas para event delegation por grid, evitando listeners por card.
+  - Imagens configuradas com `loading="lazy"` e `decoding="async"`.
+- `public/js/state.js`, `public/js/script.js`
+  - Adicionado controle unico para binding das interacoes dos grids.
+
+**Resultado esperado:**
+- Titulos antigos do portfolio voltam a ter poster mesmo sem arquivos locais em `public/assets/images`.
+- Menos downloads pesados de imagem e menos custo de render/listeners no frontend.
+
 ### 21/03/2026 - Correcao de Loading e Transicao do Login
 **Objetivo:**
 - Investigar por que o loading do login e a transicao entre tela de acesso e catalogo pareciam estaticos.

@@ -13,6 +13,13 @@ const tmdbService = require("./tmdb.service");
 const { getCatalogLimit, isTmdbEnabled } = require("../config/catalog.config");
 const AppError = require("../utils/AppError");
 
+const LOCAL_ENRICHED_CACHE_TTL_MS = 15 * 60 * 1000;
+let localEnrichedCatalogCache = {
+  signature: "",
+  items: null,
+  expiresAt: 0,
+};
+
 // --- Helpers internos ---
 
 /**
@@ -43,6 +50,84 @@ function limitAndBalance(items, type, search) {
   }
 
   return result;
+}
+
+async function enrichLocalCatalogImages(items) {
+  if (!Array.isArray(items) || items.length === 0) return items;
+
+  const enrichedItems = await Promise.all(
+    items.map(async (item) => {
+      const currentImage = String(item.image || "");
+      if (/^https?:\/\//i.test(currentImage)) {
+        return item;
+      }
+
+      const fallbackPoster = await tmdbService.resolvePosterForTitle(item.title, item.type);
+      if (!fallbackPoster) {
+        return item;
+      }
+
+      return {
+        ...item,
+        image: fallbackPoster,
+      };
+    })
+  );
+
+  return enrichedItems;
+}
+
+function buildLocalCatalogSignature(items) {
+  if (!Array.isArray(items) || items.length === 0) return "empty";
+  return items
+    .map((item) => `${item.id}|${item.type}|${item.title}|${item.image || ""}`)
+    .join("||");
+}
+
+function invalidateLocalEnrichedCache() {
+  localEnrichedCatalogCache = {
+    signature: "",
+    items: null,
+    expiresAt: 0,
+  };
+}
+
+async function getEnrichedLocalCatalogItems() {
+  const baseItems = await catalogRepo.findAll();
+  const signature = buildLocalCatalogSignature(baseItems);
+  const now = Date.now();
+
+  if (
+    localEnrichedCatalogCache.items &&
+    localEnrichedCatalogCache.signature === signature &&
+    localEnrichedCatalogCache.expiresAt > now
+  ) {
+    return localEnrichedCatalogCache.items;
+  }
+
+  const enrichedItems = await enrichLocalCatalogImages(baseItems);
+  localEnrichedCatalogCache = {
+    signature,
+    items: enrichedItems,
+    expiresAt: now + LOCAL_ENRICHED_CACHE_TTL_MS,
+  };
+
+  return enrichedItems;
+}
+
+function filterLocalCatalogItems(items, type, search) {
+  let filtered = items;
+
+  if (type && type !== "all") {
+    filtered = filtered.filter((i) => i.type === (type === "series" ? "series" : "movie"));
+  }
+
+  if (search) {
+    const q = search.toLowerCase();
+    filtered = filtered.filter((i) => i.title.toLowerCase().includes(q));
+  }
+
+  return filtered;
 }
 
 // --- Operações exportadas ---
@@ -82,18 +167,8 @@ async function listCatalog(type, search) {
  * Função interna — não é exportada, usada apenas dentro deste service.
  */
 async function fetchFromLocalStorage(type, search) {
-  let items = await catalogRepo.findAll();
-
-  if (type && type !== "all") {
-    items = items.filter((i) => i.type === (type === "series" ? "series" : "movie"));
-  }
-
-  if (search) {
-    const q = search.toLowerCase();
-    items = items.filter((i) => i.title.toLowerCase().includes(q));
-  }
-
-  return items;
+  const enrichedItems = await getEnrichedLocalCatalogItems();
+  return filterLocalCatalogItems(enrichedItems, type, search);
 }
 
 /**
@@ -116,6 +191,7 @@ async function createItem(payload) {
   };
 
   await catalogRepo.save([...items, newItem]);
+  invalidateLocalEnrichedCache();
   return newItem;
 }
 
@@ -144,6 +220,7 @@ async function updateItem(id, payload) {
   };
 
   await catalogRepo.save(items);
+  invalidateLocalEnrichedCache();
   return items[index];
 }
 
@@ -160,6 +237,7 @@ async function deleteItem(id) {
   }
 
   await catalogRepo.save(filtered);
+  invalidateLocalEnrichedCache();
 }
 
 module.exports = { listCatalog, createItem, updateItem, deleteItem };

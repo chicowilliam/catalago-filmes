@@ -351,7 +351,10 @@ function buildFeaturedSlider(candidates) {
     slide.className = "featured-slide" + (index === 0 ? " is-active" : "");
 
     const safeImg = sanitizeUrl(item.image);
-    slide.style.setProperty("--slide-image", safeImg ? `url('${safeImg}')` : "none");
+    const bannerImg = safeImg
+      ? safeImg.replace("/w500/", "/w1280/").replace("/w780/", "/w1280/")
+      : "";
+    slide.style.setProperty("--slide-image", bannerImg ? `url('${bannerImg}')` : "none");
     if (!safeImg) slide.classList.add("featured-no-image");
 
     const content = document.createElement("div");

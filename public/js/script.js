@@ -22,7 +22,7 @@ import { state } from "./state.js";
 import { searchInput, stackFoldersContainer, themeToggle, modal, loader } from "./dom.js";
 import { setSearchFeedback } from "./utils.js";
 import { loadCatalog, stopAutoCatalogRefresh, updateCatalogSourceIndicator } from "./catalog.js";
-import { applyFilterWithTransition, getGridColumnCount } from "./render.js";
+import { applyFilterWithTransition, getGridColumnCount, setupGridInteractions } from "./render.js";
 import { openStackModal, closeModal } from "./modal.js";
 import { setupMotionEnhancements, setupMotionHoverBindings } from "./motion.js";
 import {
@@ -117,6 +117,7 @@ function initializeUi() {
   loader.classList.add("hide");
   setupMotionEnhancements();
   setupMotionHoverBindings();
+  setupGridInteractions();
   setupThemeToggle(themeToggle);
   setupLoginForm();
 }
