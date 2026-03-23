@@ -23,9 +23,8 @@
 }
 
 .logo {
-  font-family: "Space Grotesk", sans-serif;
   font-size: 1.55rem;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   white-space: nowrap;
 }
 
@@ -42,33 +41,72 @@
 }
 
 .filter-group {
+  --filter-indicator-x: 0px;
+  --filter-indicator-scale: 0;
+  --filter-indicator-opacity: 0;
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 2px;
+  position: relative;
+  padding: 2px 0 10px;
 }
 
 .filter-btn {
+  position: relative;
+  z-index: 1;
   border: 1px solid transparent;
   cursor: pointer;
   border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 0.82rem;
-  font-weight: 600;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.04);
-  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.22s ease, color 0.2s ease, border-color 0.2s ease;
+  background: transparent;
+  transform: translate3d(0, 0, 0) scale(1);
+  transform-origin: center;
+  transition:
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 320ms ease;
 }
 
-.filter-btn:hover,
+.filter-btn:hover {
+  color: color-mix(in srgb, var(--text-primary) 94%, var(--accent) 6%);
+  transform: translate3d(0, -1px, 0) scale(1.02);
+}
+
 .filter-btn.active {
   color: var(--text-primary);
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  border-color: color-mix(in srgb, var(--accent) 32%, transparent);
-  transform: translateY(-1px) scale(1.01);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 .filter-btn:active {
-  transform: translateY(0) scale(0.98);
+  transform: translate3d(0, 0, 0) scale(0.985);
+}
+
+.filter-group::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 88%, #ff6b76), color-mix(in srgb, #ffffff 12%, var(--accent)));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 30%, transparent);
+  opacity: var(--filter-indicator-opacity);
+  transform: translate3d(var(--filter-indicator-x), 0, 0) scaleX(var(--filter-indicator-scale));
+  transform-origin: left center;
+  transition:
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 220ms ease;
+  pointer-events: none;
+}
+
+.filter-group.is-measuring::after {
+  transition: none;
 }
 
 .search-box {
@@ -108,7 +146,7 @@
 .search-meta {
   margin-top: 6px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--text-tertiary);
   min-height: 1.1em;
@@ -306,9 +344,8 @@
 }
 
 .featured-card h3 {
-  font-family: "Space Grotesk", sans-serif;
   font-size: clamp(2.2rem, 5.3vw, 4.4rem);
-  letter-spacing: -0.05em;
+  letter-spacing: -0.028em;
   line-height: 1.02;
   margin-bottom: 14px;
   font-weight: 700;

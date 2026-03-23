@@ -131,6 +131,25 @@ export function setupFilterControls(filterGroup, filterButtons, onSelectFilter) 
     return;
   }
 
+  const updateActiveIndicator = (selectedBtn, animate = false) => {
+    const activeBtn = selectedBtn || filterGroup.querySelector(".filter-btn.active") || filterButtons[0];
+    if (!activeBtn) {
+      filterGroup.style.setProperty("--filter-indicator-scale", "0");
+      filterGroup.style.setProperty("--filter-indicator-opacity", "0");
+      return;
+    }
+
+    const groupRect = filterGroup.getBoundingClientRect();
+    const buttonRect = activeBtn.getBoundingClientRect();
+    const nextX = buttonRect.left - groupRect.left + filterGroup.scrollLeft;
+    const nextWidth = Math.max(buttonRect.width, 1);
+
+    filterGroup.classList.toggle("is-measuring", !animate);
+    filterGroup.style.setProperty("--filter-indicator-x", `${nextX}px`);
+    filterGroup.style.setProperty("--filter-indicator-scale", String(nextWidth));
+    filterGroup.style.setProperty("--filter-indicator-opacity", "1");
+  };
+
   const setActiveFilter = (selectedBtn) => {
     filterButtons.forEach((btn) => {
       const isActive = btn === selectedBtn;
@@ -138,7 +157,22 @@ export function setupFilterControls(filterGroup, filterButtons, onSelectFilter) 
       btn.setAttribute("aria-selected", String(isActive));
       btn.setAttribute("tabindex", isActive ? "0" : "-1");
     });
+
+    updateActiveIndicator(selectedBtn, true);
   };
+
+  const syncIndicatorWithoutMotion = () => {
+    const activeBtn = filterGroup.querySelector(".filter-btn.active") || filterButtons[0];
+    updateActiveIndicator(activeBtn, false);
+  };
+
+  syncIndicatorWithoutMotion();
+  window.addEventListener("resize", syncIndicatorWithoutMotion, { passive: true });
+  filterGroup.addEventListener("scroll", syncIndicatorWithoutMotion, { passive: true });
+
+  if (document.fonts?.ready) {
+    document.fonts.ready.then(syncIndicatorWithoutMotion).catch(() => {});
+  }
 
   filterGroup.addEventListener("click", (event) => {
     const filterBtn = event.target.closest(".filter-btn");

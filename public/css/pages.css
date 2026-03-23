@@ -52,10 +52,9 @@
 }
 
 .about-spotlight {
-  font-family: "Space Grotesk", sans-serif;
   font-size: clamp(1.55rem, 2.6vw, 2.35rem);
   line-height: 1.12;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.022em;
   max-width: 19ch;
   margin-bottom: 14px;
   margin-left: auto;
@@ -115,9 +114,8 @@
 .about-point-label {
   display: inline-flex;
   margin-bottom: 7px;
-  font-family: "Space Grotesk", sans-serif;
   font-size: 0.95rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.012em;
 }
 
 .stack-headline {
@@ -218,9 +216,8 @@
 
 .stack-folder-title {
   display: block;
-  font-family: "Space Grotesk", sans-serif;
   font-size: clamp(1.38rem, 2.3vw, 1.78rem);
-  letter-spacing: -0.04em;
+  letter-spacing: -0.022em;
   margin-bottom: 12px;
   font-weight: 800;
 }
@@ -272,7 +269,6 @@
 }
 
 .stack-modal-title {
-  font-family: "Space Grotesk", sans-serif;
   font-size: clamp(1.3rem, 2.2vw, 1.8rem);
   margin-bottom: 4px;
 }

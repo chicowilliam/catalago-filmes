@@ -73,9 +73,8 @@ body.is-filter-transitioning .section-block {
 }
 
 .section-title {
-  font-family: "Space Grotesk", sans-serif;
   font-size: clamp(1.25rem, 1.8vw, 1.5rem);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.014em;
   position: relative;
   display: inline-block;
 }
@@ -620,7 +619,6 @@ body.is-filter-transitioning .section-block {
 }
 
 .login-title {
-  font-family: "Space Grotesk", sans-serif;
   font-size: 1.45rem;
   text-align: center;
   margin-bottom: 6px;
@@ -646,7 +644,6 @@ body.is-filter-transitioning .section-block {
   border-radius: 11px;
   padding: 12px;
   font-weight: 700;
-  font-family: "Space Grotesk", sans-serif;
   background: var(--accent-gradient);
   color: #fff;
   cursor: pointer;
@@ -873,7 +870,13 @@ body.is-filter-transitioning .section-block {
     width: 100%;
     overflow-x: auto;
     flex-wrap: nowrap;
-    padding-bottom: 4px;
+    gap: 4px;
+    padding-bottom: 10px;
+    scrollbar-width: none;
+  }
+
+  .filter-group::-webkit-scrollbar {
+    display: none;
   }
 
   .search-box {
@@ -900,7 +903,8 @@ body.is-filter-transitioning .section-block {
 
   .filter-btn {
     flex: 0 0 auto;
-    min-width: 86px;
+    min-width: auto;
+    padding-inline: 10px;
   }
 
   .featured-card {

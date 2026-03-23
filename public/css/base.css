@@ -6,6 +6,7 @@
   ======================================================================== */
 
 :root {
+  --font-sans: "PT Sans", "Segoe UI", sans-serif;
   --bg-primary: #121212;
   --bg-secondary: #1b1b1b;
   --bg-tertiary: #242424;
@@ -53,15 +54,53 @@ html {
 }
 
 body {
-  font-family: "Outfit", "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   min-height: 100vh;
   line-height: 1.6;
+  letter-spacing: 0.012em;
   color: var(--text-primary);
   background:
     radial-gradient(1100px 520px at 88% -14%, rgba(229, 9, 20, 0.18), transparent 68%),
     radial-gradient(920px 460px at 0% 8%, rgba(255, 255, 255, 0.04), transparent 62%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0%, transparent 22%),
     var(--bg-primary);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.section-title,
+.featured-card h3,
+.stack-folder-title,
+.about-spotlight,
+.stack-modal-title,
+.login-title,
+.logo {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.018em;
+}
+
+p,
+span,
+label,
+button,
+input,
+textarea,
+li,
+a {
+  letter-spacing: 0.012em;
 }
 
 body::before {
