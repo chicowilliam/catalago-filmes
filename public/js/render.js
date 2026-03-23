@@ -120,6 +120,12 @@ export function toggleSection(sectionElement, show, options = {}) {
   }
 
   if (show) {
+    if (state.disableSectionFade) {
+      sectionElement.classList.remove("is-hidden");
+      sectionElement.classList.remove("section-fade-hidden");
+      return;
+    }
+
     if (sectionElement.classList.contains("is-hidden")) {
       sectionElement.classList.add("section-fade-hidden");
       sectionElement.classList.remove("is-hidden");
@@ -136,7 +142,7 @@ export function toggleSection(sectionElement, show, options = {}) {
 
   if (sectionElement.classList.contains("is-hidden")) return;
 
-  if (immediateHide) {
+  if (immediateHide || state.disableSectionFade) {
     sectionElement.classList.add("section-fade-hidden");
     sectionElement.classList.add("is-hidden");
     return;
@@ -505,26 +511,55 @@ export function applyFilterState(nextType) {
 }
 
 export function applyFilterWithTransition(nextType) {
-  if (nextType === state.currentType) return;
+  if (nextType === state.currentType && !state.isFilterTransitioning) return;
 
   if (prefersReducedMotion) {
+    document.body.classList.remove("is-filter-transitioning", "tab-exit-active", "tab-enter-active");
+    state.isFilterTransitioning = false;
     applyFilterState(nextType);
-    return;
-  }
-
-  if (typeof document.startViewTransition === "function") {
-    document.startViewTransition(() => applyFilterState(nextType));
     return;
   }
 
   if (state.filterTransitionTimer) clearTimeout(state.filterTransitionTimer);
+  if (state.filterTransitionEnterTimer) clearTimeout(state.filterTransitionEnterTimer);
 
-  document.body.classList.add("is-filter-transitioning");
+  const runId = state.filterTransitionRunId + 1;
+  state.filterTransitionRunId = runId;
+  state.isFilterTransitioning = true;
+
+  const totalMs = Math.max(FILTER_TRANSITION_MS, 380);
+  const exitMs = Math.round(totalMs * 0.36);
+  const enterMs = Math.max(totalMs - exitMs, 220);
+
+  document.body.classList.remove("tab-enter-active");
+  document.body.classList.add("is-filter-transitioning", "tab-exit-active");
+
   state.filterTransitionTimer = setTimeout(() => {
+    if (runId !== state.filterTransitionRunId) return;
+
+    state.disableSectionFade = true;
     applyFilterState(nextType);
-    document.body.classList.remove("is-filter-transitioning");
+    state.disableSectionFade = false;
+
+    document.body.classList.remove("tab-exit-active");
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (runId !== state.filterTransitionRunId) return;
+
+        document.body.classList.add("tab-enter-active");
+        state.filterTransitionEnterTimer = setTimeout(() => {
+          if (runId !== state.filterTransitionRunId) return;
+
+          document.body.classList.remove("is-filter-transitioning", "tab-enter-active");
+          state.isFilterTransitioning = false;
+          state.filterTransitionEnterTimer = null;
+        }, enterMs);
+      });
+    });
+
     state.filterTransitionTimer = null;
-  }, FILTER_TRANSITION_MS);
+  }, exitMs);
 }
 
 // ---------------------------------------------------------------------------

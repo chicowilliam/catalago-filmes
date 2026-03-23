@@ -3,7 +3,7 @@ export const REQUEST_TIMEOUT_MS = 12000;
 export const AUTO_REFRESH_MS = 5 * 60 * 1000;
 export const LOGIN_MIN_LOADING_MS = 1000;
 export const LOGIN_TRANSITION_MS = 320;
-export const FILTER_TRANSITION_MS = 200;
+export const FILTER_TRANSITION_MS = 520;
 export const SECTION_FADE_MS = 260;
 export const MODAL_ANIMATION_DELAY_MS = 60;
 

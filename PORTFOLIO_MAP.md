@@ -10,7 +10,8 @@
 **Ajustes aplicados:**
 - `public/css/layout.css`
   - Removido comportamento visual que podia sugerir track fixa no container (`background` e `border-bottom` zerados no grupo).
-  - Underline mantido como unico indicador em `.filter-group::after`, com largura dinamica por variavel CSS.
+  - Scrollbar horizontal da navegação ocultada em todos os breakpoints para evitar leitura visual de linha fixa.
+  - Underline mantido como unico indicador em `.filter-indicator`, com largura dinamica por largura da aba ativa.
   - Timing padronizado para faixa pedida (`0.3s` a `0.4s`) com easing `cubic-bezier(0.4, 0, 0.2, 1)`.
   - Estilo minimalista cinza com glow discreto e altura fina (`2px`).
 - `public/js/portfolio-sections.js`
@@ -18,6 +19,55 @@
   - Posicao calculada via `offsetLeft` (com compensacao de scroll horizontal) e largura via `offsetWidth`.
   - Duracao dinamica com clamp entre `300ms` e `400ms` para manter continuidade sem teleporte.
   - Recalculo em `resize`, `scroll` e apos carregamento de fontes para manter alinhamento responsivo.
+
+**Refino adicional (mesma sessao):**
+- `public/index.html`
+  - Indicador migrado para elemento real no DOM (`.filter-indicator`) dentro da `filter-group`.
+- `public/css/layout.css`
+  - Indicador migrado de pseudo-elemento para classe dedicada `.filter-indicator`, evitando ambiguidades visuais.
+- `public/js/portfolio-sections.js`
+  - Atualizacao do indicador passou a atuar diretamente no elemento unico (sem recriar no clique), mantendo movimento continuo entre abas.
+
+**Ajuste fino de timing (mesma sessao):**
+- `public/js/portfolio-sections.js`
+  - Duracao dinamica da transicao aumentada para faixa entre `350ms` e `430ms`.
+- `public/css/layout.css`
+  - Duracao base do indicador ajustada para `380ms` com o mesmo easing `cubic-bezier(0.4, 0, 0.2, 1)`.
+
+**Ajuste fino de timing 2 (mesma sessao):**
+- `public/js/portfolio-sections.js`
+  - Duracao dinamica aumentada novamente para faixa entre `460ms` e `580ms`, mantendo fluidez e continuidade visual.
+- `public/css/layout.css`
+  - Duracao base visual do underline ajustada para `500ms`.
+
+**Correcoes de estabilidade da transicao (mesma sessao):**
+- `public/js/portfolio-sections.js`
+  - Removida sincronizacao do indicador no evento `scroll` da nav para evitar snap/teleporte no meio da animacao.
+  - Posicionamento do underline passou a usar `offsetLeft` direto, sem compensacao por `scrollLeft`.
+  - Ao trocar de aba, o botao ativo usa `scrollIntoView` para permanecer visivel sem quebrar a continuidade do underline.
+- `public/css/layout.css`
+  - `filter-group` padronizada em linha unica (`flex-wrap: nowrap` + `white-space: nowrap`) para eliminar conflito de quebra de linha com calculo do indicador.
+- `public/js/config.js`
+  - `FILTER_TRANSITION_MS` ajustado para `520ms` para sincronizar melhor troca de conteudo com deslocamento do underline.
+- `public/css/animations.css`
+  - `::view-transition-old/new(root)` ajustado para `520ms`, reduzindo descompasso perceptivo entre animacoes.
+
+**Refino de microinteracao (mesma sessao):**
+- `public/js/portfolio-sections.js`
+  - Underline passou a animar por keyframes atraves das tabs intermediarias ao pular entre itens distantes (ex.: Início -> Sobre).
+  - Ao final da animacao, o indicador permanece somente na tab selecionada.
+  - Cancelamento de animacoes anteriores tratado para evitar estado quebrado em cliques rapidos.
+
+**Transicao premium entre conteudos das tabs (mesma sessao):**
+- `public/js/render.js`
+  - `applyFilterWithTransition()` reestruturado para fluxo em duas fases (`exit` -> `enter`) com controle por `runId`, evitando glitches em cliques rapidos.
+  - Sincronizacao via `requestAnimationFrame` para garantir entrada suave apos troca de estado.
+  - `toggleSection()` ganhou caminho de operacao sem fade interno durante transicao faseada, evitando sobreposicao visual de seções.
+- `public/js/state.js`
+  - Adicionados campos de estado para timers e controle de concorrencia da transicao de filtros.
+- `public/css/components.css`
+  - Novas classes globais (`tab-exit-active` e `tab-enter-active`) com motion de fade + slide + blur leve.
+  - Entrada com easing cinematografico para sensacao mais fluida estilo streaming.
 
 **Resultado esperado:**
 - Nenhuma linha estatica abaixo de toda a nav.

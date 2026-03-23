@@ -41,20 +41,22 @@
 }
 
 .filter-group {
-  --filter-indicator-x: 0px;
-  --filter-indicator-width: 0px;
-  --filter-indicator-opacity: 0;
-  --filter-indicator-duration: 340ms;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 2px;
   position: relative;
   padding: 2px 0 10px;
   border-bottom: 0;
   background: none;
   overflow-x: auto;
+  white-space: nowrap;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.filter-group::-webkit-scrollbar {
+  display: none;
 }
 
 .filter-btn {
@@ -91,24 +93,24 @@
   transform: translate3d(0, 0, 0) scale(0.985);
 }
 
-.filter-group::after {
-  content: "";
+.filter-indicator {
   position: absolute;
   left: 0;
   bottom: 0;
-  width: var(--filter-indicator-width);
+  width: 0;
   height: 2px;
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(170, 177, 186, 0.92), rgba(205, 212, 222, 0.92));
   box-shadow: 0 0 8px rgba(206, 214, 224, 0.2);
-  opacity: var(--filter-indicator-opacity);
-  transform: translate3d(var(--filter-indicator-x), 0, 0);
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
   transition:
-    transform var(--filter-indicator-duration) cubic-bezier(0.4, 0, 0.2, 1),
-    width var(--filter-indicator-duration) cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 180ms ease;
+    transform 500ms cubic-bezier(0.4, 0, 0.2, 1),
+    width 500ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 220ms ease;
   pointer-events: none;
   will-change: transform, width;
+  z-index: 2;
 }
 
 .search-box {
