@@ -2,6 +2,28 @@
 
 ## 0) Historico de Sessoes
 
+### 23/03/2026 - Correcao do Underline Dinamico das Tabs (sem track fixa)
+**Objetivo:**
+- Remover qualquer barra fixa no fundo da navegacao por tabs.
+- Garantir apenas um underline dinamico que desliza com continuidade entre as abas.
+
+**Ajustes aplicados:**
+- `public/css/layout.css`
+  - Removido comportamento visual que podia sugerir track fixa no container (`background` e `border-bottom` zerados no grupo).
+  - Underline mantido como unico indicador em `.filter-group::after`, com largura dinamica por variavel CSS.
+  - Timing padronizado para faixa pedida (`0.3s` a `0.4s`) com easing `cubic-bezier(0.4, 0, 0.2, 1)`.
+  - Estilo minimalista cinza com glow discreto e altura fina (`2px`).
+- `public/js/portfolio-sections.js`
+  - Reescrita da sincronizacao do indicador para usar apenas `transform: translate3d(...)` + `width` dinamico.
+  - Posicao calculada via `offsetLeft` (com compensacao de scroll horizontal) e largura via `offsetWidth`.
+  - Duracao dinamica com clamp entre `300ms` e `400ms` para manter continuidade sem teleporte.
+  - Recalculo em `resize`, `scroll` e apos carregamento de fontes para manter alinhamento responsivo.
+
+**Resultado esperado:**
+- Nenhuma linha estatica abaixo de toda a nav.
+- Apenas um underline que se move suavemente entre Início, Filmes, Séries, Favoritos e Sobre.
+- Movimento continuo, sem sumir/reaparecer, com alinhamento correto em desktop e mobile.
+
 ### 22/03/2026 - Revisao Tecnica Completa (Back + Front + DX)
 **Objetivo:**
 - Revisar o projeto de ponta a ponta (arquitetura, UX, dados, seguranca e performance).
