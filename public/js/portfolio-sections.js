@@ -131,8 +131,29 @@ export function setupFilterControls(filterGroup, filterButtons, onSelectFilter) 
     return;
   }
 
-  let lastIndicatorX = null;
+  // Track do estado anterior do indicador para cálculo de distância
+  let indicatorState = { x: 0, width: 0, initialized: false };
+  let isFirstRender = true;
 
+  /**
+   * Calcula duração natural baseada em distância percorrida
+   * Usa uma velocidade perceptiva de ~600px/s para distâncias curtas
+   * e desacelera gracefully para distâncias maiores
+   */
+  const calculateTransitionDuration = (distance) => {
+    // Mín: 200ms (muito perto)
+    // Máx: 480ms (muito longe)
+    // Fórmula: base + factor proporcional à distância (efeito natural)
+    const baseDuration = 200;
+    const speedFactor = Math.min(distance * 0.35, 280); // curve suavizada
+    return Math.min(480, baseDuration + speedFactor);
+  };
+
+  /**
+   * Atualiza a posição e largura do indicador
+   * @param {HTMLElement} selectedBtn - Botão selecionado
+   * @param {boolean} animate - Se deve animar a transição
+   */
   const updateActiveIndicator = (selectedBtn, animate = false) => {
     const activeBtn = selectedBtn || filterGroup.querySelector(".filter-btn.active") || filterButtons[0];
     if (!activeBtn) {
@@ -141,23 +162,34 @@ export function setupFilterControls(filterGroup, filterButtons, onSelectFilter) 
       return;
     }
 
-    const nextX = Math.max(activeBtn.offsetLeft - filterGroup.scrollLeft, 0);
+    // Calcular posição X (relativa ao container, sem scroll)
+    const nextX = activeBtn.offsetLeft;
+    // Calcular largura (sempre baseado na largura do botão)
     const nextWidth = Math.max(activeBtn.offsetWidth, 1);
 
-    const prevX = lastIndicatorX === null ? nextX : lastIndicatorX;
+    // Cálculo de distância para timing natural
+    const prevX = indicatorState.x;
     const distance = Math.abs(nextX - prevX);
-    const transitionDurationMs = animate
-      ? Math.min(520, Math.max(320, 280 + distance * 0.55))
-      : 0;
 
-    filterGroup.classList.toggle("is-measuring", !animate);
-    filterGroup.style.setProperty("--filter-indicator-duration", `${transitionDurationMs}ms`);
+    // No primeiro render, não anima para evitar jump inicial
+    // Depois, sempre anima suavemente
+    let shouldAnimate = animate && indicatorState.initialized;
+    const durationMs = shouldAnimate ? calculateTransitionDuration(distance) : 0;
+
+    // Aplicar transição suavemente
+    filterGroup.style.setProperty("--filter-indicator-duration", `${durationMs}ms`);
     filterGroup.style.setProperty("--filter-indicator-x", `${nextX}px`);
     filterGroup.style.setProperty("--filter-indicator-width", `${nextWidth}px`);
     filterGroup.style.setProperty("--filter-indicator-opacity", "1");
-    lastIndicatorX = nextX;
+
+    // Atualizar estado
+    indicatorState = { x: nextX, width: nextWidth, initialized: true };
+    isFirstRender = false;
   };
 
+  /**
+   * Define o filtro ativo e anima o indicador
+   */
   const setActiveFilter = (selectedBtn) => {
     filterButtons.forEach((btn) => {
       const isActive = btn === selectedBtn;
@@ -166,22 +198,49 @@ export function setupFilterControls(filterGroup, filterButtons, onSelectFilter) 
       btn.setAttribute("tabindex", isActive ? "0" : "-1");
     });
 
-    updateActiveIndicator(selectedBtn, true);
+    // Animar indicador se não for a primeira vez
+    updateActiveIndicator(selectedBtn, !isFirstRender);
   };
 
+  /**
+   * Sincroniza indicador com a tab ativa (sem animação)
+   * Usado em resize e scroll
+   */
   const syncIndicatorWithoutMotion = () => {
     const activeBtn = filterGroup.querySelector(".filter-btn.active") || filterButtons[0];
-    updateActiveIndicator(activeBtn, false);
+    // Recalcular sem movimento para garantir alinhamento em resizes
+    const nextX = activeBtn.offsetLeft;
+    const nextWidth = Math.max(activeBtn.offsetWidth, 1);
+    
+    filterGroup.style.setProperty("--filter-indicator-duration", "0ms");
+    filterGroup.style.setProperty("--filter-indicator-x", `${nextX}px`);
+    filterGroup.style.setProperty("--filter-indicator-width", `${nextWidth}px`);
+    filterGroup.style.setProperty("--filter-indicator-opacity", "1");
+    
+    indicatorState = { x: nextX, width: nextWidth, initialized: true };
   };
 
+  // Inicializar indicador na primeira carga (sem delay, sem animação)
   syncIndicatorWithoutMotion();
-  window.addEventListener("resize", syncIndicatorWithoutMotion, { passive: true });
-  filterGroup.addEventListener("scroll", syncIndicatorWithoutMotion, { passive: true });
 
+  // Sincronizar em resize (importante para responsividade)
+  window.addEventListener("resize", syncIndicatorWithoutMotion, { passive: true });
+
+  // Esperar por Fonts API estar pronta antes de qualquer sincronização adicional
   if (document.fonts?.ready) {
-    document.fonts.ready.then(syncIndicatorWithoutMotion).catch(() => {});
+    document.fonts.ready
+      .then(() => {
+        // Pequeno delay para garantir que o layout foi recalculado
+        requestAnimationFrame(() => {
+          syncIndicatorWithoutMotion();
+        });
+      })
+      .catch(() => {
+        // Ignorar erros da Fonts API
+      });
   }
 
+  // Gerenciador de cliques em botões
   filterGroup.addEventListener("click", (event) => {
     const filterBtn = event.target.closest(".filter-btn");
     if (!filterBtn) {
@@ -193,6 +252,7 @@ export function setupFilterControls(filterGroup, filterButtons, onSelectFilter) 
     onSelectFilter(nextType);
   });
 
+  // Navegação por teclado (Arrow keys)
   filterGroup.addEventListener("keydown", (event) => {
     const currentIndex = filterButtons.indexOf(document.activeElement);
     if (currentIndex === -1) {

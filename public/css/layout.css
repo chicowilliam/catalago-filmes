@@ -44,13 +44,15 @@
   --filter-indicator-x: 0px;
   --filter-indicator-width: 0px;
   --filter-indicator-opacity: 0;
-  --filter-indicator-duration: 380ms;
+  --filter-indicator-duration: 300ms;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 2px;
   position: relative;
   padding: 2px 0 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .filter-btn {
@@ -93,21 +95,38 @@
   left: 0;
   bottom: 0;
   width: var(--filter-indicator-width);
-  height: 2px;
+  height: 2.5px;
   border-radius: 999px;
-  background: linear-gradient(90deg, rgba(176, 182, 191, 0.9), rgba(216, 221, 228, 0.9));
-  box-shadow: 0 0 8px rgba(214, 220, 230, 0.18);
+  
+  /* Gradiente minimalista: cinza neutral com variação sutil */
+  background: linear-gradient(
+    90deg,
+    rgba(169, 176, 185, 0.95),
+    rgba(189, 196, 205, 0.95),
+    rgba(169, 176, 185, 0.95)
+  );
+  
+  /* Glow sutil e elegante */
+  box-shadow:
+    0 0 1px rgba(255, 255, 255, 0.4),
+    0 0 8px rgba(206, 214, 224, 0.25);
+  
   opacity: var(--filter-indicator-opacity);
+  
+  /* Movimento suave usando transform (GPU accelerated, zero layout shift) */
   transform: translate3d(var(--filter-indicator-x), 0, 0);
+  
+  /* Easing natural: ease-out-expo proporciona sensação de "chegada" elegante
+     - Começa devagar e acelera
+     - Finalmente desacelera suavemente no destino
+     Isto é perceptualmente mais natural que linear ou cubic-bezier simples */
   transition:
-    transform var(--filter-indicator-duration) cubic-bezier(0.22, 1, 0.36, 1),
-    width var(--filter-indicator-duration) cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 220ms ease;
+    transform var(--filter-indicator-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    width var(--filter-indicator-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 240ms ease-out;
+  
   pointer-events: none;
-}
-
-.filter-group.is-measuring::after {
-  transition: none;
+  will-change: transform, width;
 }
 
 .search-box {
