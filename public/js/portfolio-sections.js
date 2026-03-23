@@ -131,23 +131,31 @@ export function setupFilterControls(filterGroup, filterButtons, onSelectFilter) 
     return;
   }
 
+  let lastIndicatorX = null;
+
   const updateActiveIndicator = (selectedBtn, animate = false) => {
     const activeBtn = selectedBtn || filterGroup.querySelector(".filter-btn.active") || filterButtons[0];
     if (!activeBtn) {
-      filterGroup.style.setProperty("--filter-indicator-scale", "0");
+      filterGroup.style.setProperty("--filter-indicator-width", "0px");
       filterGroup.style.setProperty("--filter-indicator-opacity", "0");
       return;
     }
 
-    const groupRect = filterGroup.getBoundingClientRect();
-    const buttonRect = activeBtn.getBoundingClientRect();
-    const nextX = buttonRect.left - groupRect.left + filterGroup.scrollLeft;
-    const nextWidth = Math.max(buttonRect.width, 1);
+    const nextX = Math.max(activeBtn.offsetLeft - filterGroup.scrollLeft, 0);
+    const nextWidth = Math.max(activeBtn.offsetWidth, 1);
+
+    const prevX = lastIndicatorX === null ? nextX : lastIndicatorX;
+    const distance = Math.abs(nextX - prevX);
+    const transitionDurationMs = animate
+      ? Math.min(520, Math.max(320, 280 + distance * 0.55))
+      : 0;
 
     filterGroup.classList.toggle("is-measuring", !animate);
+    filterGroup.style.setProperty("--filter-indicator-duration", `${transitionDurationMs}ms`);
     filterGroup.style.setProperty("--filter-indicator-x", `${nextX}px`);
-    filterGroup.style.setProperty("--filter-indicator-scale", String(nextWidth));
+    filterGroup.style.setProperty("--filter-indicator-width", `${nextWidth}px`);
     filterGroup.style.setProperty("--filter-indicator-opacity", "1");
+    lastIndicatorX = nextX;
   };
 
   const setActiveFilter = (selectedBtn) => {
