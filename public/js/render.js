@@ -559,8 +559,9 @@ export function renderCurrentView() {
     return;
   }
 
-  toggleSection(heroPanel, true);
-  renderFeatured(movies, series, favorites);
+  const isHomeView = state.currentType === "all";
+  toggleSection(heroPanel, isHomeView, { immediateHide: true });
+  if (isHomeView) renderFeatured(movies, series, favorites);
   toggleSection(aboutSection, false);
   toggleSection(stackSection, false);
 
