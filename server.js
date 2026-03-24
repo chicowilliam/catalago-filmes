@@ -4,6 +4,7 @@ const express = require("express");
 const session = require("express-session");
 const helmet = require("helmet");
 const path = require("path");
+const fs = require("fs");
 const rateLimit = require("express-rate-limit");
 
 const authRoutes = require("./backend/routes/auth.routes");
@@ -105,9 +106,21 @@ app.get("/api/health", (req, res) => {
 });
 
 /* =========================
-   FRONTEND (PUBLIC)
+    FRONTEND (React com fallback legado)
 ========================= */
-app.use(express.static(path.join(__dirname, "public")));
+const reactDistPath = path.join(__dirname, "catalog-projeto", "dist");
+const reactIndexPath = path.join(reactDistPath, "index.html");
+const legacyPublicPath = path.join(__dirname, "public");
+const hasReactBuild = fs.existsSync(reactIndexPath);
+
+if (hasReactBuild) {
+   app.use(express.static(reactDistPath));
+   app.get(/^\/(?!api).*/, (req, res) => {
+      res.sendFile(reactIndexPath);
+   });
+} else {
+   app.use(express.static(legacyPublicPath));
+}
 
 /* =========================
    TRATAMENTO DE ERROS (DEVE SER POR ÚLTIMO!)
@@ -121,6 +134,7 @@ const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
   console.log(`🚀 Server rodando em http://localhost:${PORT}`);
   console.log(`🔐 Modo: ${process.env.NODE_ENV}`);
+   console.log(`🖥️ Frontend ativo: ${hasReactBuild ? "react-dist" : "public-legado"}`);
 });
 
 server.on("error", (err) => {

@@ -2,6 +2,177 @@
 
 ## 0) Historico de Sessoes
 
+### 24/03/2026 - Migracao Fase 5 (switch de entrega para React + fallback seguro)
+**Objetivo:**
+- Finalizar a transicao de entrega do frontend no backend Express, priorizando o build React em producao.
+- Manter fallback para frontend legado para evitar indisponibilidade quando `catalog-projeto/dist` nao existir.
+
+**Ajustes aplicados:**
+- `server.js`
+  - Adicionado detector de build React (`catalog-projeto/dist/index.html`).
+  - Quando build existe: servidor entrega arquivos de `catalog-projeto/dist` e aplica fallback SPA para rotas nao-API.
+  - Quando build nao existe: servidor volta automaticamente para `public/` (legado).
+  - Log adicional de bootstrap para indicar frontend ativo (`react-dist` ou `public-legado`).
+- `package.json` (raiz)
+  - Script `build:frontend` para construir o app React a partir da raiz.
+  - Script `build` para centralizar o build da fase de frontend.
+
+**Validacao esperada:**
+- API continua respondendo em `/api/*` sem alteracao de contrato.
+- Rotas de interface passam a usar React build quando disponivel.
+- Ambiente local continua funcional sem build (fallback legado ativo).
+
+### 24/03/2026 - Migracao Fase 4 (robustez de UX, feedback e atualizacao automatica)
+**Objetivo:**
+- Melhorar a experiencia final de uso com feedback imediato, mais acessibilidade e sincronizacao automatica do catalogo.
+
+**Ajustes aplicados:**
+- `catalog-projeto/src/hooks/useCatalog.ts`
+  - Incluida autoatualizacao silenciosa do catalogo a cada 5 minutos.
+  - Incluido estado `lastUpdated` para exibir o horario da ultima sincronizacao.
+- `catalog-projeto/src/hooks/useToast.ts`
+  - Novo hook para notificacoes temporarias (toasts) com remocao automatica.
+- `catalog-projeto/src/components/layout/ToastHost.tsx`
+  - Novo host de notificacoes com animacao de entrada e saida via Framer Motion.
+- `catalog-projeto/src/components/catalog/MovieModal.tsx`
+  - Fechamento por tecla ESC.
+  - Bloqueio/desbloqueio de rolagem do body enquanto modal estiver aberto.
+  - Melhorias de acessibilidade com `role="dialog"` e `aria-modal="true"`.
+- `catalog-projeto/src/pages/CatalogPage.tsx`
+  - Integracao de toasts para favoritos e avaliacao por estrelas.
+  - Exibicao de status de autoatualizacao e horario da ultima atualizacao.
+- `catalog-projeto/src/styles/components.css`
+  - Novos estilos para notificacoes (`toast-host`, `toast-item`, variantes de cor por tipo).
+
+**Validacao:**
+- Checagem de TypeScript sem erros no frontend (`No errors found`).
+- Build executado em terminal isolado sem mensagens de erro visiveis.
+
+**Resultado esperado:**
+- Interacoes com feedback imediato e experiencia mais profissional.
+- Catalogo mais confiavel em sessoes longas por conta da sincronizacao periodica.
+
+### 24/03/2026 - Migracao Fase 3 (cleanup tecnico, consolidacao de estilos e validacao)
+**Objetivo:**
+- Remover boilerplate remanescente do template e consolidar a arquitetura de estilos do app React.
+- Garantir que a base migrada siga limpa para manutencao e evolucao da Fase 4.
+
+**Ajustes aplicados:**
+- `catalog-projeto/src/App.tsx`
+  - Removidos imports diretos de CSS para evitar acoplamento visual na camada de pagina.
+- `catalog-projeto/src/index.css`
+  - Arquivo redefinido como ponto unico de entrada de estilos (`base.css`, `layout.css`, `components.css`).
+- `catalog-projeto/src/App.css`
+  - Removido por nao estar sendo utilizado apos a migracao para o novo sistema de estilos.
+
+**Validacao:**
+- Checagem de TypeScript no frontend executada sem erros (`No errors found`).
+
+**Resultado esperado:**
+- Estrutura visual mais previsivel, com menor risco de regressao por estilos duplicados.
+- Projeto pronto para fase seguinte (otimizacoes, testes adicionais e eventual remocao de legado final no `public/` quando houver paridade completa confirmada).
+
+### 24/03/2026 - Migracao Fase 2 para React + TypeScript (favoritos, ratings, modal, sobre, animacoes)
+**Objetivo:**
+- Adicionar as funcionalidades interativas que faltavam para atingir paridade com o frontend legado.
+- Integrar Framer Motion para animacoes fluidas sem CSS puro.
+
+**Ajustes aplicados:**
+- `catalog-projeto/src/hooks/`
+  - `useRatings` — avaliacao de 1-5 estrelas por item, persistida no localStorage.
+  - `useModal` — controle de qual item tem o modal aberto.
+  - `useCatalog` — adicionado `toggleFavorite` e exposicao de `favoriteIds` no retorno.
+- `catalog-projeto/src/components/catalog/`
+  - `MovieCard` — reescrito com Framer Motion (`motion.article`, `whileHover`, `variants` para stagger), botao de favorito e exibicao de estrelas.
+  - `CatalogGrid` — reescrito com `AnimatePresence` e `motion.section` com `staggerChildren` para entrada dos cards.
+  - `MovieModal` — modal com iframe YouTube (trailer), seletor de 1-5 estrelas e animacao de entrada/saida com Framer Motion.
+  - `AboutSection` — secao de stack com pastas de categoria clicaveis e detalhes animados (Framer Motion `AnimatePresence`).
+  - `FilterTabs` — adicionada aba "Sobre" (valor `about`).
+- `catalog-projeto/src/pages/CatalogPage` — conecta `useRatings`, `useModal`, `favoriteIds` e `toggleFavorite`; renderiza `MovieModal` e `AboutSection`.
+- `catalog-projeto/src/styles/components.css` — estilos para modal, fav-btn, star-row, star-selector, about-section e stack.
+- `catalog-projeto/index.html` — adicionado CDN do devicons, lang pt-BR e titulo do projeto.
+
+### 24/03/2026 - Migracao Fase 1 para React + TypeScript (estrutura + integracao inicial)
+**Objetivo:**
+- Iniciar migracao controlada do frontend legado para React + TypeScript sem quebrar backend atual.
+- Entregar base funcional com login e listagem de catalogo orientados a estado (sem manipulacao direta de DOM).
+
+**Ajustes aplicados:**
+- `catalog-projeto/src/types/`
+  - Novos tipos para `auth` e `catalog`.
+- `catalog-projeto/src/services/`
+  - Cliente HTTP tipado com tratamento de erro (`ApiClientError`).
+  - Services de autenticacao (`login`, `logout`, `me`) e catalogo (`listCatalog`).
+- `catalog-projeto/src/hooks/`
+  - `useAuth` para sessao, login e logout com estado de carregamento e erro.
+  - `useCatalog` para carregamento, busca, filtros e contadores iniciais.
+- `catalog-projeto/src/components/`
+  - Componentes base da fase 1: login, tabs de filtro, busca, card, grid e shell da aplicacao.
+- `catalog-projeto/src/pages/CatalogPage.tsx`
+  - Primeira pagina funcional de catalogo em React, consumindo hooks e componentes.
+- `catalog-projeto/src/App.tsx`
+  - Entrada principal migrada para fluxo React de autenticacao e catalogo.
+- `catalog-projeto/src/styles/`
+  - Criados estilos base/layout/components para visual inicial da fase 1.
+- `catalog-projeto/vite.config.ts`
+  - Adicionado proxy de desenvolvimento para `/api -> http://localhost:3000`.
+
+**Decisoes tecnicas da fase:**
+- Backend e contratos de API preservados.
+- Sem `querySelector`/DOM imperativo no novo frontend React.
+- Reaproveito visual com CSS proprio da fase 1 para acelerar validacao da arquitetura.
+
+**Resultado esperado:**
+- App React inicial capaz de autenticar em `/api/auth/*` e carregar catalogo de `/api/catalog`.
+- Base pronta para Fase 2 (paridade de funcionalidades: modal, favoritos, rating, sobre e animacoes com Framer Motion).
+
+### 24/03/2026 - Instalacao do Framer Motion no React + TypeScript
+**Objetivo:**
+- Adicionar a biblioteca `framer-motion` no subprojeto React com Vite e TypeScript.
+
+**Ajustes aplicados:**
+- `catalog-projeto/package.json`
+  - Dependencia `framer-motion` adicionada em `dependencies`.
+- `catalog-projeto/package-lock.json`
+  - Lockfile atualizado com resolucao da nova dependencia.
+
+**Resultado esperado:**
+- Projeto React pronto para importar componentes animados via `framer-motion`.
+
+### 24/03/2026 - Setup do shadcn/ui no Subprojeto React (Vite + TypeScript)
+**Objetivo:**
+- Resolver falha ao executar `npx shadcn@latest init` no subprojeto React.
+- Configurar requisitos de Tailwind e alias de import exigidos pela CLI.
+
+**Causa raiz identificada:**
+- Comando inicialmente executado fora do contexto correto do app React (`catalog-projeto`).
+- Dentro do subprojeto, a CLI falhava por dois motivos:
+  - Tailwind nao configurado (`Validating Tailwind CSS` falhando).
+  - Alias `@/*` ausente no `tsconfig.json` (`Validating import alias` falhando).
+
+**Ajustes aplicados:**
+- `catalog-projeto/vite.config.ts`
+  - Adicionado plugin `@tailwindcss/vite`.
+  - Adicionado alias `@` apontando para `./src`.
+- `catalog-projeto/tsconfig.app.json`
+  - Adicionados `baseUrl` e `paths` com `@/* -> ./src/*`.
+- `catalog-projeto/tsconfig.json`
+  - Adicionados `baseUrl` e `paths` para satisfazer validacao direta da CLI.
+- `catalog-projeto/src/index.css`
+  - Import do Tailwind (`@import "tailwindcss";`) para habilitar estilos utilitarios.
+- `catalog-projeto/package.json`
+  - Dependencias de Tailwind/Vite instaladas e deps do ecossistema shadcn adicionadas pela CLI.
+- `catalog-projeto/components.json`
+  - Arquivo de configuracao do shadcn gerado com aliases e preset.
+- `catalog-projeto/src/components/ui/button.tsx`
+  - Primeiro componente base gerado automaticamente pela CLI.
+- `catalog-projeto/src/lib/utils.ts`
+  - Utilitario `cn()` gerado automaticamente para composicao de classes.
+
+**Resultado esperado:**
+- `npx shadcn@latest init` executa com sucesso no subprojeto React.
+- Projeto pronto para adicionar componentes com `npx shadcn@latest add ...`.
+
 ### 23/03/2026 - Correcao do Underline Dinamico das Tabs (sem track fixa)
 **Objetivo:**
 - Remover qualquer barra fixa no fundo da navegacao por tabs.
