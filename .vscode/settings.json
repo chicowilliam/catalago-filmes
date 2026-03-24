@@ -26,6 +26,11 @@
         "/^node -e \"const svc=require\\('\\./backend/services/catalog\\.service'\\); \\(async\\(\\)=>\\{ const a=await svc\\.listCatalog\\('all',''\\); const b=await svc\\.listCatalog\\('all',''\\); console\\.log\\('ok', Array\\.isArray\\(a\\.data\\), a\\.data\\.length, Array\\.isArray\\(b\\.data\\), b\\.data\\.length\\); \\}\\)\\(\\)\\.catch\\(err=>\\{ console\\.error\\(err\\.message\\); process\\.exit\\(1\\); \\}\\);\"$/": {
             "approve": true,
             "matchCommandLine": true
-        }
+        },
+        "/^node --check public/js/portfolio-sections\\.js$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "npx shadcn@latest": true
     }
 }
