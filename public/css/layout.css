@@ -217,7 +217,7 @@
   overflow: hidden;
   isolation: isolate;
   border-radius: 18px;
-  height: clamp(140px, 24vh, 240px);
+  height: clamp(194px, 33vh, 331px);
   border: 1px solid color-mix(in srgb, var(--card-border) 72%, transparent);
   color: #ffffff;
   animation: featureReveal 800ms cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -248,11 +248,10 @@
   position: relative;
   overflow: hidden;
   background-image:
-    linear-gradient(180deg, rgba(6, 8, 14, 0.08) 0%, rgba(6, 8, 14, 0.58) 88%),
-    linear-gradient(90deg, rgba(6, 8, 14, 0.44) 0%, rgba(6, 8, 14, 0.12) 56%, transparent 100%),
-    var(--slide-image, none),
+    linear-gradient(180deg, rgba(6, 8, 14, 0.12) 0%, rgba(6, 8, 14, 0.64) 88%),
+    linear-gradient(90deg, rgba(6, 8, 14, 0.56) 0%, rgba(6, 8, 14, 0.2) 56%, transparent 100%),
     linear-gradient(135deg, #2d0f13, #090909);
-  background-size: 100% 100%, 100% 100%, cover, cover;
+  background-size: 100% 100%, 100% 100%, cover;
   background-position: center, center, center center, center;
   background-repeat: no-repeat;
   display: flex;
@@ -265,26 +264,38 @@
 .featured-slide::before {
   content: "";
   position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(130% 95% at 84% -14%, rgba(255, 255, 255, 0.2), transparent 58%),
-    linear-gradient(114deg, rgba(0, 0, 0, 0.52) 0%, rgba(0, 0, 0, 0.22) 54%, rgba(0, 0, 0, 0.46) 100%);
+  inset: -8%;
+  background-image: var(--slide-image, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(18px) saturate(1.08) brightness(0.64);
+  transform: scale(1.08);
   pointer-events: none;
-  animation: heroOverlayBreath 8s ease-in-out infinite alternate;
+  animation: heroBackgroundDrift 16s ease-in-out infinite alternate;
 }
 
 .featured-slide::after {
   content: "";
   position: absolute;
-  inset: -12%;
+  inset: 0;
   background:
-    radial-gradient(42% 40% at 16% 18%, rgba(229, 9, 20, 0.18), transparent 76%),
-    radial-gradient(34% 36% at 82% 76%, rgba(255, 255, 255, 0.1), transparent 76%);
-  filter: blur(10px);
-  transform: translate3d(0, 0, 0) scale(1.03);
-  opacity: 0.58;
+    radial-gradient(120% 90% at 82% -12%, rgba(255, 255, 255, 0.18), transparent 56%),
+    linear-gradient(110deg, rgba(3, 4, 10, 0.66) 0%, rgba(3, 4, 10, 0.24) 56%, rgba(3, 4, 10, 0.56) 100%);
   pointer-events: none;
-  animation: heroBackgroundDrift 16s ease-in-out infinite alternate;
+  animation: heroOverlayBreath 8s ease-in-out infinite alternate;
+}
+
+.featured-poster-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: var(--slide-image, none);
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 16px 34px rgba(0, 0, 0, 0.36));
 }
 
 .featured-slide > * {
@@ -421,7 +432,7 @@
 
 @media (max-width: 1024px) {
   .featured-card {
-    height: clamp(120px, 22vh, 210px);
+    height: clamp(166px, 30vh, 290px);
   }
 
   .featured-slide {
@@ -432,7 +443,7 @@
 @media (max-width: 680px) {
   .featured-card {
     border-radius: 14px;
-    height: clamp(110px, 20vh, 180px);
+    height: clamp(152px, 28vh, 248px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.28);
   }
 

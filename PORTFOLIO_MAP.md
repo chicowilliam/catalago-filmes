@@ -2,6 +2,53 @@
 
 ## 0) Historico de Sessoes
 
+### 24/03/2026 - Hero Slider em modo premium (harmonizacao de imagens)
+**Objetivo:**
+- Harmonizar visual do destaque sem recorte agressivo e sem distorcao perceptivel.
+- Manter o hero preenchido com aparencia cinematografica.
+
+**Ajustes aplicados:**
+- `public/js/render.js`
+  - Adicionada camada dedicada da imagem principal no slide (`featured-poster-layer`) para exibir poster central sem corte.
+- `public/css/layout.css`
+  - Hero passou a usar composicao premium em camadas:
+    - Fundo desfocado com a propria imagem (cover + blur) para preencher toda a area.
+    - Poster nitido centralizado em `contain` para preservar proporcao.
+    - Overlay refinado para legibilidade do titulo, sinopse e CTA.
+
+**Resultado esperado:**
+- Hero visualmente mais elegante e coerente com streaming.
+- Sem esticar imagem e sem recorte principal do poster.
+- Melhor equilibrio entre impacto visual e legibilidade de conteudo.
+
+### 24/03/2026 - Refino 2 do Hero Slider (preenchimento total + aumento adicional de 15%)
+**Objetivo:**
+- Fazer as imagens ocuparem toda a area do hero sem recorte.
+- Aumentar novamente o destaque para maior impacto visual.
+
+**Ajustes aplicados:**
+- `public/css/layout.css`
+  - Camada da imagem do slide alterada para preenchimento total do banner (`background-size: 100% 100%` na imagem principal).
+  - Altura do hero aumentada em mais 15% sobre a versao anterior em desktop, tablet e mobile.
+
+**Resultado esperado:**
+- Hero totalmente preenchido por imagem em todos os slides.
+- Area de destaque maior e mais dominante na home.
+
+### 24/03/2026 - Ajuste classico do Hero Slider (sem corte de imagem + banner 20% maior)
+**Objetivo:**
+- Deixar o destaque principal mais classico e coerente com a proposta de catalogo streaming.
+- Evitar corte visual dos posters no banner e ampliar o hero para maior presenca.
+
+**Ajustes aplicados:**
+- `public/css/layout.css`
+  - Banner do hero (`.featured-card`) aumentado em aproximadamente 20% em desktop, tablet e mobile.
+  - Slides do destaque (`.featured-slide`) alterados para `background-size: contain` na camada da imagem, evitando recorte do poster.
+
+**Resultado esperado:**
+- Imagem completa no destaque, preservando enquadramento original do poster.
+- Hero slider mais impactante visualmente sem perder legibilidade dos textos e CTA.
+
 ### 24/03/2026 - Migracao Fase 5 (switch de entrega para React + fallback seguro)
 **Objetivo:**
 - Finalizar a transicao de entrega do frontend no backend Express, priorizando o build React em producao.

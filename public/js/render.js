@@ -363,6 +363,10 @@ function buildFeaturedSlider(candidates) {
     slide.style.setProperty("--slide-image", bannerImg ? `url('${bannerImg}')` : "none");
     if (!safeImg) slide.classList.add("featured-no-image");
 
+    const posterLayer = document.createElement("div");
+    posterLayer.className = "featured-poster-layer";
+    slide.appendChild(posterLayer);
+
     const content = document.createElement("div");
     content.className = "featured-motion-content";
 
