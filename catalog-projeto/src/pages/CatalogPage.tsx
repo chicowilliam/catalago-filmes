@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { AboutSection } from "@/components/catalog/AboutSection";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
@@ -9,15 +10,21 @@ import { useCatalog } from "@/hooks/useCatalog";
 import { useModal } from "@/hooks/useModal";
 import { useRatings } from "@/hooks/useRatings";
 import { useToast } from "@/hooks/useToast";
+import type { Variants } from "framer-motion";
 import type { CatalogType } from "@/types/catalog";
 
-const pagePoseByType: Record<CatalogType, { x: number; y: number; rotate: number }> = {
-  all: { x: 0, y: 0, rotate: 0 },
-  movie: { x: 16, y: -4, rotate: 0.8 },
-  series: { x: -16, y: 4, rotate: -0.8 },
-  favorites: { x: 0, y: 10, rotate: 0.5 },
-  about: { x: 0, y: -10, rotate: -0.5 },
+const pushVariants: Variants = {
+  enter: (direction: number) => ({ x: direction >= 0 ? "100%" : "-100%" }),
+  center: { x: 0 },
+  exit: (direction: number) => ({ x: direction >= 0 ? "-100%" : "100%" }),
 };
+
+const TAB_ORDER: CatalogType[] = ["all", "movie", "series", "favorites", "about"];
+
+function getTabIndex(type: CatalogType) {
+  const index = TAB_ORDER.indexOf(type);
+  return index === -1 ? 0 : index;
+}
 
 export function CatalogPage() {
   const {
@@ -39,8 +46,22 @@ export function CatalogPage() {
   const { getRating, setRating } = useRatings();
   const { openItem, open, close } = useModal();
   const { toasts, pushToast, removeToast } = useToast();
+  const [direction, setDirection] = useState(1);
+  const previousTabIndexRef = useRef(getTabIndex(activeType));
 
   const showCatalog = activeType !== "about";
+
+  function handleTabChange(nextType: CatalogType) {
+    const nextIndex = getTabIndex(nextType);
+    const previousIndex = previousTabIndexRef.current;
+
+    if (nextIndex !== previousIndex) {
+      setDirection(nextIndex > previousIndex ? 1 : -1);
+      previousTabIndexRef.current = nextIndex;
+    }
+
+    setActiveType(nextType);
+  }
 
   function handleToggleFavorite(itemId: number) {
     const item = items.find((entry) => entry.id === itemId);
@@ -68,10 +89,8 @@ export function CatalogPage() {
     <>
       <section className="catalog-page">
         <div className="catalog-toolbar">
-          <FilterTabs activeType={activeType} onChange={setActiveType} />
-          {showCatalog && (
-            <SearchBar defaultValue={search} isLoading={isLoading} onSearch={submitSearch} />
-          )}
+          <FilterTabs activeType={activeType} onChange={handleTabChange} />
+          <SearchBar open={showCatalog} defaultValue={search} onSearch={submitSearch} />
         </div>
 
         {showCatalog && (
@@ -88,54 +107,35 @@ export function CatalogPage() {
           </div>
         )}
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeType}
-            initial={{
-              opacity: 0,
-              x: pagePoseByType[activeType].x,
-              y: pagePoseByType[activeType].y,
-              rotate: pagePoseByType[activeType].rotate,
-              filter: "blur(6px)",
-            }}
-            animate={{
-              opacity: 1,
-              x: 0,
-              y: 0,
-              rotate: 0,
-              filter: "blur(0px)",
-            }}
-            exit={{
-              opacity: 0,
-              x: -pagePoseByType[activeType].x * 0.6,
-              y: -pagePoseByType[activeType].y * 0.6,
-              rotate: -pagePoseByType[activeType].rotate,
-              filter: "blur(4px)",
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 280,
-              damping: 28,
-              mass: 0.9,
-            }}
-            style={{ transformOrigin: "50% 50%" }}
-          >
-            {activeType === "about" ? (
-              <AboutSection />
-            ) : (
-              <CatalogGrid
-                items={items}
-                isLoading={isLoading}
-                error={error}
-                onRetry={retry}
-                favoriteIds={favoriteIds}
-                onFavoriteToggle={(item) => handleToggleFavorite(item.id)}
-                onOpenModal={open}
-                getRating={getRating}
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
+        <div className="tab-transition-viewport" aria-live="polite">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activeType}
+              className="tab-transition-panel"
+              custom={direction}
+              variants={pushVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+            >
+              {activeType === "about" ? (
+                <AboutSection />
+              ) : (
+                <CatalogGrid
+                  items={items}
+                  isLoading={isLoading}
+                  error={error}
+                  onRetry={retry}
+                  favoriteIds={favoriteIds}
+                  onFavoriteToggle={(item) => handleToggleFavorite(item.id)}
+                  onOpenModal={open}
+                  getRating={getRating}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </section>
 
       <MovieModal

@@ -87,9 +87,27 @@
   font-size: 14px;
 }
 
-.search-form {
+.search-animated-wrapper {
+  width: min(340px, 100%);
+  transform-origin: center right;
+}
+
+.search-box {
   display: flex;
-  gap: 8px;
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text);
+}
+
+.search-input::placeholder {
+  color: var(--text-soft);
 }
 
 .filter-tabs {

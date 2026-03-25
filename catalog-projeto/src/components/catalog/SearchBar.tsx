@@ -1,15 +1,19 @@
-import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 
 interface SearchBarProps {
+  open: boolean;
   defaultValue: string;
-  isLoading: boolean;
-  meta: string;
   onSearch: (value: string) => Promise<void>;
 }
 
-export function SearchBar({ defaultValue, isLoading, meta, onSearch }: SearchBarProps) {
+export function SearchBar({ open, defaultValue, onSearch }: SearchBarProps) {
   const [value, setValue] = useState(defaultValue);
+
+  useEffect(() => {
+    setValue(defaultValue);
+  }, [defaultValue]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -17,17 +21,28 @@ export function SearchBar({ defaultValue, isLoading, meta, onSearch }: SearchBar
   }
 
   return (
-    <form className="search-box" onSubmit={handleSubmit}>
-      <input
-        type="text"
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
-        placeholder="Buscar por titulo..."
-        className="search-input"
-      />
-      <p className={`search-meta${isLoading ? " is-loading" : ""}`} aria-live="polite">
-        {meta}
-      </p>
-    </form>
+    <AnimatePresence initial={false}>
+      {open && (
+        <motion.div
+          key="search-bar"
+          className="search-animated-wrapper"
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.95, opacity: 0 }}
+          transition={{ duration: 0.25 }}
+        >
+          <form className="search-box" onSubmit={handleSubmit}>
+            <input
+              type="text"
+              value={value}
+              onChange={(event) => setValue(event.target.value)}
+              placeholder="Buscar..."
+              className="search-input"
+              aria-label="Buscar no catalogo"
+            />
+          </form>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

@@ -85,6 +85,16 @@
   font-size: 14px;
 }
 
+.tab-transition-viewport {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.tab-transition-panel {
+  width: 100%;
+}
+
 .catalog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

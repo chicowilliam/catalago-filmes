@@ -2,6 +2,53 @@
 
 ## 0) Historico de Sessoes
 
+### 25/03/2026 - Push Transition horizontal entre abas no React
+**Objetivo:**
+- Implementar transicao de navegacao estilo app mobile (efeito push) ao trocar abas/secoes do portfolio.
+
+**Diagnostico de erro da API no frontend:**
+- `catalog-projeto/src/hooks/useCatalog.ts`
+  - Tratamento de erro passou a exibir causa real da falha da API no React.
+  - Em `TMDB_NOT_CONFIGURED`, a interface agora orienta diretamente a configurar `TMDB_API_KEY` ou `TMDB_BEARER_TOKEN`.
+  - Em erros 5xx, a mensagem mostra status e detalhe retornado pela API para facilitar debug.
+
+**Substituicao da barra de pesquisa por AnimatePresence:**
+- `catalog-projeto/src/components/catalog/SearchBar.tsx`
+  - Busca refeita com `AnimatePresence` e `motion.div` no mesmo padrao solicitado:
+    - `initial: { scale: 0.95, opacity: 0 }`
+    - `animate: { scale: 1, opacity: 1 }`
+    - `exit: { scale: 0.95, opacity: 0 }`
+    - `transition: { duration: 0.25 }`
+  - Removidos metadados/estado visual extra (`meta` e loading local da barra) para manter o componente enxuto.
+- `catalog-projeto/src/pages/CatalogPage.tsx`
+  - A SearchBar agora usa `open={activeType !== "about"}` para animar entrada/saida ao trocar a secao.
+- `catalog-projeto/src/styles/components.css`
+  - Classes antigas da busca foram substituidas por estilos da nova estrutura (`search-animated-wrapper`, `search-box`, `search-input`).
+
+**Refino direcional na navbar:**
+- `catalog-projeto/src/pages/CatalogPage.tsx`
+  - A direcao do slide agora segue a ordem das abas da navbar (`Início` → `Filmes` → `Séries` → `Favoritos` → `Sobre`).
+  - Ao avancar de aba, o painel entra da direita e sai para a esquerda.
+  - Ao voltar de aba, o painel entra da esquerda e sai para a direita.
+  - Implementado com `custom` nas variants para manter tipagem e legibilidade.
+
+**Ajustes aplicados:**
+- `catalog-projeto/src/pages/CatalogPage.tsx`
+  - Substituida animacao anterior por `AnimatePresence` com variantes horizontais:
+    - `enter: { x: "100%" }`
+    - `center: { x: 0 }`
+    - `exit: { x: "-100%" }`
+  - Cada secao renderizada em `motion.div` com `initial="enter"`, `animate="center"` e `exit="exit"`.
+  - Transicao suave com `duration: 0.5` e `ease: "easeInOut"`.
+  - Mantido `key={activeType}` para disparar enter/exit corretamente por aba.
+- `catalog-projeto/src/styles/layout.css`
+  - Criado viewport de transicao com `overflow: hidden` para evitar quebra e vazamento visual durante o slide.
+  - Painel animado ajustado para `width: 100%`.
+
+**Resultado esperado:**
+- Troca entre `Início`, `Filmes`, `Séries`, `Favoritos` e `Sobre` com deslizamento da direita para a esquerda.
+- Apenas um painel visivel por vez, sem artefatos de layout durante a animacao.
+
 ### 25/03/2026 - Hover do card consolidado no React (wrapper correto + grid com respiro)
 **Objetivo:**
 - Fazer a animacao aparecer no card inteiro do React, exatamente na area externa destacada pelo usuario.

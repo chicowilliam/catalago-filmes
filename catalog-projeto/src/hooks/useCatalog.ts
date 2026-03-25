@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { ApiClientError } from "@/services/apiClient";
 import { listCatalog } from "@/services/catalogService";
 import type { CatalogItem, CatalogType } from "@/types/catalog";
 
@@ -38,8 +39,18 @@ export function useCatalog() {
       setItems(response.data);
       setSource(response.source);
       setLastUpdated(new Date());
-    } catch {
-      setError("Nao foi possivel carregar o catalogo agora.");
+    } catch (err) {
+      if (err instanceof ApiClientError) {
+        if (err.code === "TMDB_NOT_CONFIGURED") {
+          setError("TMDB nao configurada no backend. Verifique TMDB_API_KEY ou TMDB_BEARER_TOKEN no .env.");
+        } else if (err.status >= 500) {
+          setError(`Falha da API (${err.status}). ${err.message}`);
+        } else {
+          setError(err.message || "Erro ao consultar catalogo.");
+        }
+      } else {
+        setError("Nao foi possivel carregar o catalogo agora.");
+      }
     } finally {
       if (!silent) {
         setIsLoading(false);
