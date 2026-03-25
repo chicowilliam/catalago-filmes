@@ -4,7 +4,7 @@ import { ApiClientError } from "@/services/apiClient";
 import * as authService from "@/services/authService";
 import type { AuthUser } from "@/types/auth";
 
-type AuthStatus = "checking" | "authenticated" | "guest";
+type AuthStatus = "checking" | "authenticated" | "guest" | "unauthenticated";
 
 interface LoginInput {
   username: string;
@@ -27,12 +27,12 @@ export function useAuth() {
     } catch (err) {
       if (err instanceof ApiClientError && err.status === 401) {
         setUser(null);
-        setStatus("guest");
+        setStatus("unauthenticated");
         return;
       }
 
       setUser(null);
-      setStatus("guest");
+      setStatus("unauthenticated");
       setError("Nao foi possivel validar sua sessao no servidor.");
     }
   }, []);
@@ -57,7 +57,7 @@ export function useAuth() {
         setError("Erro inesperado ao fazer login.");
       }
 
-      setStatus("guest");
+      setStatus("unauthenticated");
       return false;
     } finally {
       setIsSubmitting(false);
@@ -71,8 +71,14 @@ export function useAuth() {
       // Mesmo com erro de rede, limpamos o estado local para nao travar UI.
     } finally {
       setUser(null);
-      setStatus("guest");
+      setStatus("unauthenticated");
     }
+  }, []);
+
+  const enterAsGuest = useCallback(() => {
+    setUser(null);
+    setError(null);
+    setStatus("guest");
   }, []);
 
   return useMemo(
@@ -82,10 +88,12 @@ export function useAuth() {
       error,
       isSubmitting,
       isAuthenticated: status === "authenticated",
+      isGuest: status === "guest",
       login,
       logout,
+      enterAsGuest,
       retrySessionCheck: checkSession,
     }),
-    [status, user, error, isSubmitting, login, logout, checkSession]
+    [status, user, error, isSubmitting, login, logout, enterAsGuest, checkSession]
   );
 }

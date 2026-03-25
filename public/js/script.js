@@ -40,7 +40,38 @@ import { validateRuntimeContext, setupLoginForm } from "./auth.js";
 
 const filterGroup = document.querySelector(".filter-group");
 const filterButtons = Array.from(document.querySelectorAll(".filter-btn"));
-setupFilterControls(filterGroup, filterButtons, applyFilterWithTransition);
+const headerContainer = document.querySelector(".header-container");
+const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+
+const closeMobileMenu = () => {
+  if (!headerContainer || !mobileMenuToggle) return;
+  headerContainer.classList.remove("menu-open");
+  mobileMenuToggle.setAttribute("aria-expanded", "false");
+};
+
+setupFilterControls(filterGroup, filterButtons, (nextType) => {
+  applyFilterWithTransition(nextType);
+  closeMobileMenu();
+});
+
+if (headerContainer && mobileMenuToggle) {
+  mobileMenuToggle.addEventListener("click", () => {
+    const isOpen = headerContainer.classList.toggle("menu-open");
+    mobileMenuToggle.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  document.addEventListener("click", (event) => {
+    if (window.innerWidth > 768) return;
+    if (headerContainer.contains(event.target)) return;
+    closeMobileMenu();
+  });
+
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 768) {
+      closeMobileMenu();
+    }
+  });
+}
 
 // ---------------------------------------------------------------------------
 // Busca com debounce
@@ -96,6 +127,7 @@ document.addEventListener("keydown", (event) => {
   }
 
   if (event.key === "Escape") closeModal();
+  if (event.key === "Escape") closeMobileMenu();
 });
 
 // ---------------------------------------------------------------------------

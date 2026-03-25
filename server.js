@@ -114,22 +114,26 @@ app.use(express.static(path.join(__dirname, "public")));
 ========================= */
 app.use(errorHandler);
 
+module.exports = app;
+
 /* =========================
-   SERVER
+   SERVER (apenas ambiente local)
 ========================= */
-const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Server rodando em http://localhost:${PORT}`);
-  console.log(`🔐 Modo: ${process.env.NODE_ENV}`);
-   console.log(`🖥️ Frontend ativo: public/`);
-});
+if (require.main === module) {
+   const PORT = process.env.PORT || 3000;
+   const server = app.listen(PORT, () => {
+      console.log(`🚀 Server rodando em http://localhost:${PORT}`);
+      console.log(`🔐 Modo: ${process.env.NODE_ENV}`);
+      console.log("🖥️ Frontend ativo: public/");
+   });
 
-server.on("error", (err) => {
-   if (err.code === "EADDRINUSE") {
-      console.error(`❌ Porta ${PORT} já está em uso. Feche a instância anterior ou altere a variável PORT no .env.`);
+   server.on("error", (err) => {
+      if (err.code === "EADDRINUSE") {
+         console.error(`❌ Porta ${PORT} já está em uso. Feche a instância anterior ou altere a variável PORT no .env.`);
+         process.exit(1);
+      }
+
+      console.error("❌ Erro ao iniciar servidor:", err.message);
       process.exit(1);
-   }
-
-   console.error("❌ Erro ao iniciar servidor:", err.message);
-   process.exit(1);
-});
+   });
+}

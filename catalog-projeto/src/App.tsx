@@ -5,23 +5,28 @@ import { CatalogPage } from "@/pages/CatalogPage";
 
 function App() {
   const auth = useAuth();
+  const canAccessCatalog = auth.isAuthenticated || auth.isGuest;
 
   if (auth.status === "checking") {
     return <section className="login-screen">Validando sessao...</section>;
   }
 
-  if (!auth.isAuthenticated) {
+  if (!canAccessCatalog) {
     return (
       <LoginForm
         isSubmitting={auth.isSubmitting}
         error={auth.error}
         onSubmit={auth.login}
+        onGuestAccess={auth.enterAsGuest}
       />
     );
   }
 
   return (
-    <AppShell username={auth.user?.username} onLogout={auth.logout}>
+    <AppShell
+      username={auth.user?.username ?? (auth.isGuest ? "Visitante" : undefined)}
+      onLogout={auth.isAuthenticated ? auth.logout : undefined}
+    >
       <CatalogPage />
     </AppShell>
   );

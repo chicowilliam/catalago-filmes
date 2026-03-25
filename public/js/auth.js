@@ -1,5 +1,5 @@
 import { LOGIN_MIN_LOADING_MS, LOGIN_TRANSITION_MS } from "./config.js";
-import { loginForm, loginScreen, loginError, loginButton } from "./dom.js";
+import { loginForm, loginScreen, loginError, loginButton, guestAccessButton } from "./dom.js";
 import { wait, ensureMinimumDelay, showToast } from "./utils.js";
 import { loadCatalog, startAutoCatalogRefresh } from "./catalog.js";
 import { setupMotionEnhancements } from "./motion.js";
@@ -39,6 +39,31 @@ async function animateLoginSuccess() {
   loginScreen.classList.remove("is-exiting");
 }
 
+function setAccessButtonsLoading(activeButton, isLoading) {
+  const buttons = [loginButton, guestAccessButton].filter(Boolean);
+
+  buttons.forEach((button) => {
+    button.disabled = isLoading;
+    button.classList.remove("loading");
+  });
+
+  if (isLoading && activeButton) {
+    activeButton.classList.add("loading");
+  }
+}
+
+async function prepareCatalogAccess() {
+  initLazyLoading();
+  await loadCatalog();
+}
+
+async function finishAccessFlow(message, type = "success") {
+  await animateLoginSuccess();
+  setupMotionEnhancements();
+  startAutoCatalogRefresh();
+  showToast(message, type);
+}
+
 // ---------------------------------------------------------------------------
 // Registro do listener de submit do formulário de login
 // ---------------------------------------------------------------------------
@@ -60,11 +85,7 @@ export function setupLoginForm() {
 
     const loginStartTime = performance.now();
     loginError.textContent = "";
-    if (loginButton) {
-      loginButton.classList.add("loading");
-      loginButton.disabled = true;
-    }
-
+    setAccessButtonsLoading(loginButton, true);
     let loginSucceeded = false;
 
     try {
@@ -87,26 +108,42 @@ export function setupLoginForm() {
         return;
       }
 
-      initLazyLoading();
-      await loadCatalog();
+      await prepareCatalogAccess();
       loginSucceeded = true;
     } catch {
       loginError.textContent =
         "Erro ao conectar com o servidor. Verifique se o backend esta rodando em http://localhost:3000.";
     } finally {
       await ensureMinimumDelay(loginStartTime, LOGIN_MIN_LOADING_MS);
-
       if (loginSucceeded) {
-        await animateLoginSuccess();
-        setupMotionEnhancements();
-        startAutoCatalogRefresh();
-        showToast("Login realizado com sucesso", "success");
+        await finishAccessFlow("Login realizado com sucesso", "success");
       }
+      setAccessButtonsLoading(null, false);
+    }
+  });
 
-      if (loginButton) {
-        loginButton.classList.remove("loading");
-        loginButton.disabled = false;
+  if (!guestAccessButton) return;
+
+  guestAccessButton.addEventListener("click", async () => {
+    if (!validateRuntimeContext()) return;
+
+    const accessStartTime = performance.now();
+    loginError.textContent = "";
+    setAccessButtonsLoading(guestAccessButton, true);
+    let guestAccessSucceeded = false;
+
+    try {
+      await prepareCatalogAccess();
+      guestAccessSucceeded = true;
+    } catch {
+      loginError.textContent =
+        "Nao foi possivel carregar o catalogo agora. Tente novamente em alguns segundos.";
+    } finally {
+      await ensureMinimumDelay(accessStartTime, LOGIN_MIN_LOADING_MS);
+      if (guestAccessSucceeded) {
+        await finishAccessFlow("Acesso visitante liberado", "info");
       }
+      setAccessButtonsLoading(null, false);
     }
   });
 }

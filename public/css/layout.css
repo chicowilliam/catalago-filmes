@@ -28,6 +28,53 @@
   white-space: nowrap;
 }
 
+.header-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mobile-menu-toggle {
+  display: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  transition: transform 0.22s ease, background-color 0.22s ease;
+}
+
+.mobile-menu-toggle:hover {
+  transform: translateY(-1px);
+}
+
+.mobile-menu-bar {
+  width: 17px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transition: transform 0.22s ease, opacity 0.2s ease;
+}
+
+.header-container.menu-open .mobile-menu-bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.header-container.menu-open .mobile-menu-bar:nth-child(2) {
+  opacity: 0;
+}
+
+.header-container.menu-open .mobile-menu-bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
 .header-center {
   flex: 1;
   display: flex;
@@ -453,6 +500,63 @@
 
   .featured-slide > * {
     max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    width: 100%;
+    padding: 20px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .logo {
+    font-size: 28px;
+  }
+
+  .mobile-menu-toggle {
+    display: inline-flex;
+  }
+
+  .header-center {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid color-mix(in srgb, var(--card-border) 80%, transparent);
+    background: color-mix(in srgb, var(--bg-secondary) 82%, transparent);
+  }
+
+  .header-container.menu-open .header-center {
+    display: flex;
+  }
+
+  .nav {
+    width: 100%;
+  }
+
+  .filter-group {
+    padding-bottom: 8px;
+  }
+
+  .search-box {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .header-actions {
+    justify-content: flex-end;
+  }
+
+  .main {
+    width: 100%;
+    margin: 16px 0 64px;
+    padding: 0 20px;
   }
 }
 

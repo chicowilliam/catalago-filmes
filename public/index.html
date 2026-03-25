@@ -38,6 +38,11 @@
       <span class="login-spinner"></span>
     </button>
 
+    <button type="button" class="login-btn login-btn-guest" id="guestAccessBtn">
+      <span class="login-text">Acessar como visitante</span>
+      <span class="login-spinner"></span>
+    </button>
+
     <p class="login-error" id="loginError"></p>
   </form>
 </div>
@@ -50,9 +55,23 @@
 <!-- HEADER -->
 <header class="header">
   <div class="header-container">
-    <h1 class="logo">Catalogo X</h1>
+    <div class="header-brand-row">
+      <h1 class="logo">Catalogo X</h1>
+      <button
+        id="mobileMenuToggle"
+        class="mobile-menu-toggle"
+        type="button"
+        aria-label="Abrir menu"
+        aria-expanded="false"
+        aria-controls="headerMenuPanel"
+      >
+        <span class="mobile-menu-bar"></span>
+        <span class="mobile-menu-bar"></span>
+        <span class="mobile-menu-bar"></span>
+      </button>
+    </div>
 
-    <div class="header-center">
+    <div class="header-center" id="headerMenuPanel">
       <nav class="nav" aria-label="Filtro de catalogo">
         <div class="filter-group" role="tablist" aria-label="Tipos de conteudo">
           <button class="filter-btn active" data-type="all" role="tab" aria-selected="true" tabindex="0">Início</button>

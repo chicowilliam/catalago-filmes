@@ -694,6 +694,17 @@ body.tab-enter-active .section-block:not(.is-hidden) {
   transform: translateY(-1px);
 }
 
+.login-btn-guest {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--accent) 56%, #ffffff 44%);
+  color: color-mix(in srgb, var(--text-primary) 82%, #ffffff 18%);
+}
+
+.login-btn-guest:hover {
+  border-color: color-mix(in srgb, var(--accent) 72%, #ffffff 28%);
+  background: color-mix(in srgb, var(--accent-soft) 34%, transparent);
+}
+
 .login-spinner {
   position: relative;
   width: 54px;
