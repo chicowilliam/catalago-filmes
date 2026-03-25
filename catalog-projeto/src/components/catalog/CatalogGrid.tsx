@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 
 import { MovieCard } from "@/components/catalog/MovieCard";
 import type { CatalogItem } from "@/types/catalog";
@@ -49,32 +49,23 @@ export function CatalogGrid({
   }
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.section
-        key={activeKey(items)}
-        layout
-        className="catalog-grid"
-        aria-live="polite"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        exit={{ opacity: 0, transition: { duration: 0.15 } }}
-      >
-        {items.map((item) => (
-          <MovieCard
-            key={item.id}
-            item={item}
-            isFavorite={favoriteIds.has(item.id)}
-            rating={getRating(item.id)}
-            onFavoriteToggle={onFavoriteToggle}
-            onOpenModal={onOpenModal}
-          />
-        ))}
-      </motion.section>
-    </AnimatePresence>
+    <motion.section
+      className="catalog-grid"
+      aria-live="polite"
+      variants={containerVariants}
+      initial={false}
+      animate="visible"
+    >
+      {items.map((item) => (
+        <MovieCard
+          key={item.id}
+          item={item}
+          isFavorite={favoriteIds.has(item.id)}
+          rating={getRating(item.id)}
+          onFavoriteToggle={onFavoriteToggle}
+          onOpenModal={onOpenModal}
+        />
+      ))}
+    </motion.section>
   );
-}
-
-function activeKey(items: CatalogItem[]) {
-  return items.slice(0, 6).map((i) => i.id).join("-");
 }

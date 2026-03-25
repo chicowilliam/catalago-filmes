@@ -89,10 +89,19 @@
   position: relative;
   width: 100%;
   overflow: hidden;
+  isolation: isolate;
+  display: block;
+}
+
+.tab-transition-stage {
+  position: relative;
+  width: 100%;
 }
 
 .tab-transition-panel {
+  position: relative;
   width: 100%;
+  will-change: transform, opacity;
 }
 
 .catalog-grid {

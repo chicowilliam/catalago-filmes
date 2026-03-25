@@ -14,9 +14,18 @@ import type { Variants } from "framer-motion";
 import type { CatalogType } from "@/types/catalog";
 
 const pushVariants: Variants = {
-  enter: (direction: number) => ({ x: direction >= 0 ? "100%" : "-100%" }),
-  center: { x: 0 },
-  exit: (direction: number) => ({ x: direction >= 0 ? "-100%" : "100%" }),
+  enter: (direction: number) => ({
+    x: direction >= 0 ? "100%" : "-100%",
+    opacity: 0.85,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction >= 0 ? "-100%" : "100%",
+    opacity: 0.85,
+  }),
 };
 
 const TAB_ORDER: CatalogType[] = ["all", "movie", "series", "favorites", "about"];
@@ -108,33 +117,35 @@ export function CatalogPage() {
         )}
 
         <div className="tab-transition-viewport" aria-live="polite">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={activeType}
-              className="tab-transition-panel"
-              custom={direction}
-              variants={pushVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-            >
-              {activeType === "about" ? (
-                <AboutSection />
-              ) : (
-                <CatalogGrid
-                  items={items}
-                  isLoading={isLoading}
-                  error={error}
-                  onRetry={retry}
-                  favoriteIds={favoriteIds}
-                  onFavoriteToggle={(item) => handleToggleFavorite(item.id)}
-                  onOpenModal={open}
-                  getRating={getRating}
-                />
-              )}
-            </motion.div>
-          </AnimatePresence>
+          <div className="tab-transition-stage">
+            <AnimatePresence initial={false} mode="sync">
+              <motion.div
+                key={activeType}
+                className="tab-transition-panel"
+                custom={direction}
+                variants={pushVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.75, ease: "easeInOut" }}
+              >
+                {activeType === "about" ? (
+                  <AboutSection />
+                ) : (
+                  <CatalogGrid
+                    items={items}
+                    isLoading={isLoading}
+                    error={error}
+                    onRetry={retry}
+                    favoriteIds={favoriteIds}
+                    onFavoriteToggle={(item) => handleToggleFavorite(item.id)}
+                    onOpenModal={open}
+                    getRating={getRating}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
       </section>
 

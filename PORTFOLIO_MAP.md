@@ -12,6 +12,22 @@
   - Em `TMDB_NOT_CONFIGURED`, a interface agora orienta diretamente a configurar `TMDB_API_KEY` ou `TMDB_BEARER_TOKEN`.
   - Em erros 5xx, a mensagem mostra status e detalhe retornado pela API para facilitar debug.
 
+**Correcao de conflito na transicao entre abas:**
+- `catalog-projeto/src/components/catalog/CatalogGrid.tsx`
+  - Removido `AnimatePresence` interno e a troca de `key` por lista para nao concorrer com a transicao principal da navbar.
+- `catalog-projeto/src/pages/CatalogPage.tsx`
+  - Variants do push horizontal reforcadas com opacidade para deixar o movimento mais perceptivel.
+  - `AnimatePresence` principal passou a atuar sem disputa com a remontagem interna do grid.
+- `catalog-projeto/src/styles/layout.css`
+  - Viewport da transicao recebeu isolamento e `will-change` para melhorar estabilidade visual.
+
+**Melhoria estrutural da troca de telas:**
+- `catalog-projeto/src/pages/CatalogPage.tsx`
+  - A troca entre abas passou a ocorrer dentro de um "palco" unico de transicao, com entrada e saida simultaneas (`mode="sync"`).
+- `catalog-projeto/src/styles/layout.css`
+  - Criada camada `tab-transition-stage` em grid sobreposto para os painéis dividirem o mesmo espaco durante o slide.
+  - Isso reduz o efeito de piscar e evita que o conteudo apareca separado em vez de deslizar.
+
 **Substituicao da barra de pesquisa por AnimatePresence:**
 - `catalog-projeto/src/components/catalog/SearchBar.tsx`
   - Busca refeita com `AnimatePresence` e `motion.div` no mesmo padrao solicitado:
