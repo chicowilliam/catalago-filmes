@@ -2,6 +2,214 @@
 
 ## 0) Historico de Sessoes
 
+### 25/03/2026 - Hover do card consolidado no React (wrapper correto + grid com respiro)
+**Objetivo:**
+- Fazer a animacao aparecer no card inteiro do React, exatamente na area externa destacada pelo usuario.
+- Evitar misturar a correcao entre React e `public/` sem necessidade tecnica.
+
+**Refino adicional:**
+- `catalog-projeto/src/components/catalog/CatalogGrid.tsx`
+  - Grid animado com `layout` para reduzir sensacao de quebra entre cards lado a lado.
+- `catalog-projeto/src/components/catalog/MovieCard.tsx`
+  - Hover alinhado ao padrao pedido: `scale: 1.08`, `y: -10` e `spring` mais firme.
+  - Adicionado reforco de sombra no hover para efeito mais proximo de streaming premium.
+
+**Refino visual premium:**
+- `catalog-projeto/src/components/catalog/MovieCard.tsx`
+  - Hover passou para `scale: 1.085` e `y: -12`, com sombra mais profunda.
+- `catalog-projeto/src/styles/components.css`
+  - Card ganhou glow visivel no hover, borda mais destacada e leve valorizacao da imagem.
+  - Conteudo interno recebe realce sutil para aproximar o efeito de interfaces estilo streaming premium.
+
+**Causa raiz identificada:**
+- O hover estava aplicado no `motion.article` correto, mas com escala agressiva demais (`1.2`) para um grid compacto.
+- O grid tinha pouco respiro para a expansao visual, deixando a animacao parecer cortada ou abafada pelos cards vizinhos.
+
+**Ajustes aplicados:**
+- `catalog-projeto/src/components/catalog/MovieCard.tsx`
+  - Hover recalibrado para o card inteiro com `whileHover` mais estavel (`scale: 1.06`, `y: -8`, `zIndex: 12`).
+  - `whileTap` suavizado para clique/toque realista (`scale: 0.98`).
+  - Respeito a `prefers-reduced-motion` para acessibilidade.
+- `catalog-projeto/src/styles/layout.css`
+  - Grid ampliado para cards maiores (`minmax(280px, 1fr)`) e com mais espacamento.
+  - Adicionado padding vertical no grid para o hover respirar sem parecer cortado.
+- `catalog-projeto/src/styles/components.css`
+  - Card estruturado para ocupar toda a caixa visual do item.
+  - `focus-within` recebeu prioridade de empilhamento para manter consistencia ao navegar por teclado.
+
+**Decisao tecnica sobre `public/`:**
+- Nao foi movido TypeScript para `public/`.
+- Motivo: `public/` hoje e frontend estatico legado; colocar TS ali exigiria pipeline de build proprio ou duplicacao de logica.
+- Para esta correcao, o caminho mais limpo e confiavel e manter a animacao no React (`catalog-projeto`), que ja tem Vite + Framer Motion.
+
+### 25/03/2026 - Remocao de conflito de hover nos cards (Motion-only)
+**Objetivo:**
+- Corrigir conflito entre animacoes CSS e Framer Motion no hover dos cards.
+- Manter exclusivamente a animacao de gesture solicitada no card.
+
+**Ajustes aplicados:**
+- `catalog-projeto/src/components/catalog/MovieCard.tsx`
+  - Card passou a usar apenas:
+    - `whileHover={{ scale: 1.2 }}`
+    - `whileTap={{ scale: 0.8 }}`
+- `catalog-projeto/src/styles/components.css`
+  - Removidas regras de hover/focus que também transformavam o card (`transform`, zoom da imagem, fundo do info e glow em hover), evitando sobreposição com Motion.
+
+**Resultado esperado:**
+- A interacao dos cards agora segue somente a animacao enviada pelo usuario, sem conflito de efeitos concorrentes.
+
+### 25/03/2026 - Gestures nos cards React (hover/tap estilo motion)
+**Objetivo:**
+- Aplicar animacao de gesto inspirada no exemplo de `whileHover` e `whileTap` para deixar os cards mais vivos.
+
+**Ajustes aplicados:**
+- `catalog-projeto/src/components/catalog/MovieCard.tsx`
+  - Hover ajustado para escala mais perceptivel com elevacao (`whileHover: scale 1.08 + y -10`).
+  - Toque/click com compressao visual (`whileTap: scale 0.94`).
+  - Spring recalibrado para resposta rapida e natural.
+- `catalog-projeto/src/styles/components.css`
+  - Card recebeu `z-index` e `will-change` para estabilidade no grid durante escala.
+  - Estado hover/focus do card inteiro reforcado com elevacao e prioridade visual (`z-index: 12`).
+
+**Resultado esperado:**
+- Interacao de hover/click mais evidente em toda a superficie do card.
+- Sensacao de gesto moderna sem quebrar o layout do grid.
+
+### 25/03/2026 - Cards maiores no grid React + hover no card inteiro
+**Objetivo:**
+- Aumentar presença visual dos cards no grid de filmes/séries.
+- Aplicar animação de hover no card completo (não apenas na área da imagem).
+
+**Ajustes aplicados:**
+- `catalog-projeto/src/styles/layout.css`
+  - Grid principal ampliado para cards maiores (`minmax(250px, 1fr)`) com maior espaçamento.
+  - Em mobile (`max-width: 720px`), ajuste responsivo para manter boa densidade (`minmax(210px, 1fr)`).
+- `catalog-projeto/src/styles/components.css`
+  - `movie-card` ganhou transição de elevação/escala, borda dinâmica e sombra premium.
+  - Adicionada camada de glow (`::after`) para reforço de profundidade no hover/focus.
+  - Imagem agora recebe zoom suave no hover do card inteiro.
+  - Bloco de infos também reage no hover do card para feedback visual mais consistente.
+- `catalog-projeto/src/components/catalog/MovieCard.tsx`
+  - Ajustado `whileHover`/`whileTap` do Framer Motion para sincronizar com o novo comportamento do card completo.
+
+**Resultado esperado:**
+- Cards maiores e mais legíveis no catálogo.
+- Hover percebido em toda a superfície do card, com sensação mais premium e fluida.
+
+### 25/03/2026 - Correcao de fonte TMDB apos modo API-only
+**Objetivo:**
+- Restaurar carregamento do catalogo e destaque apos remocao do fallback local.
+
+**Causa raiz identificada:**
+- Ambiente estava com `CATALOG_SOURCE=local`, enquanto o catalogo local havia sido removido.
+
+**Ajustes aplicados:**
+- `backend/config/catalog.config.js`
+  - `isTmdbEnabled()` passou a habilitar TMDB sempre que existir `TMDB_BEARER_TOKEN` ou `TMDB_API_KEY` (modo API-only), sem depender de `CATALOG_SOURCE`.
+- `backend/services/catalog.service.js`
+  - Mensagem de erro de configuracao atualizada para orientar apenas variaveis TMDB.
+
+**Validacao:**
+- Execucao direta do service retornou com sucesso:
+  - `source=tmdb`
+  - `count=20`
+  - logs indicando retorno de itens validos com imagem.
+
+**Resultado esperado:**
+- Catalogo volta a carregar exclusivamente da TMDB.
+- Hero slider volta a exibir destaque atualizado com base nos itens da API.
+
+### 25/03/2026 - Catalogo somente API externa (remocao total do acervo local)
+**Objetivo:**
+- Remover completamente filmes/series locais antigos.
+- Forcar o backend a operar apenas com fonte externa (TMDB), sem fallback local.
+
+**Ajustes aplicados:**
+- `backend/services/catalog.service.js`
+  - Fluxo de listagem agora exige TMDB configurada (`CATALOG_SOURCE=tmdb` + chave/token).
+  - Removido fallback `local` e `local-fallback`.
+  - Operacoes de escrita local (`create/update/delete`) desativadas com erro `CATALOG_READ_ONLY`.
+- `backend/data/catalog.json`
+  - Arquivo local de catalogo removido.
+- `backend/repositories/catalog.repository.js`
+  - Camada de persistencia local em JSON removida.
+- `backend/routes/catalog.routes.js`
+  - Comentario tecnico atualizado para refletir integracao direta com servico externo.
+
+**Resultado esperado:**
+- Nenhum item antigo local e mais utilizado pelo projeto.
+- Catalogo exibido exclusivamente via API externa (TMDB).
+
+### 25/03/2026 - Transicao de abas no React com pose x/y/rotate (inspirada em motion)
+**Objetivo:**
+- Substituir a transicao anterior de troca de abas por uma animacao mais fluida e menos agressiva para os cards.
+- Aplicar conceito de estado animado por `x`, `y` e `rotate` conforme exemplo de motion.
+
+**Ajustes aplicados:**
+- `catalog-projeto/src/pages/CatalogPage.tsx`
+  - Adicionado mapa de poses por aba (`all`, `movie`, `series`, `favorites`, `about`) com valores sutis de `x`, `y` e `rotate`.
+  - Troca de conteudo mantida com `AnimatePresence mode="wait"`.
+  - Wrapper animado passou a usar:
+    - `initial`: pose da aba + `opacity: 0` + blur leve.
+    - `animate`: retorno para centro (`x:0`, `y:0`, `rotate:0`) + `opacity: 1`.
+    - `exit`: direcao oposta suavizada + blur leve.
+  - Transicao padronizada com `spring` para resposta mais organica.
+
+**Resultado esperado:**
+- Navegacao entre `Início`, `Filmes`, `Séries`, `Favoritos` e `Sobre` com sensacao de continuidade.
+- Menos conflito visual com hover e animacoes internas dos cards.
+
+### 25/03/2026 - Responsividade mobile (768px) + menu hamburguer
+**Objetivo:**
+- Melhorar a usabilidade em celular com breakpoint ate `768px`.
+- Aplicar fonte maior no branding, espacamento consistente e menu hamburguer para navegacao.
+
+**Ajustes aplicados:**
+- `public/index.html`
+  - Header ganhou estrutura `header-brand-row` com botao `#mobileMenuToggle` (hamburguer) e painel controlado por `aria-controls`.
+- `public/css/layout.css`
+  - Adicionados estilos do hamburguer (3 barras + estado aberto em X).
+  - Novo bloco `@media (max-width: 768px)` com:
+    - `header-container` em coluna com `padding: 20px`.
+    - `logo` com `font-size: 28px`.
+    - painel do menu (`header-center`) colapsado por padrao e expansivel ao abrir menu.
+    - `main` com `padding` lateral para melhor respiro no mobile.
+- `public/js/script.js`
+  - Implementado controle de abrir/fechar menu mobile com classe `menu-open`.
+  - Fechamento automatico ao trocar aba de filtro, clicar fora, redimensionar para desktop e pressionar `ESC`.
+
+**Resultado esperado:**
+- Header mais legivel no celular.
+- Navegacao limpa e funcional com menu hamburguer em telas pequenas.
+- Melhor espacamento geral na versao mobile sem afetar o desktop.
+
+### 25/03/2026 - Preparacao para deploy no Vercel + acesso visitante com animacao
+**Objetivo:**
+- Publicar o portfolio na Vercel para compartilhamento com recrutadores.
+- Permitir exploracao do catalogo sem credenciais, com botao dedicado de visitante na tela de acesso.
+
+**Ajustes aplicados:**
+- `server.js`
+  - Backend passou a exportar `app` e a iniciar `listen` apenas em execucao local (`require.main === module`), evitando conflito em ambiente serverless.
+- `api/index.js`
+  - Novo entrypoint serverless para Vercel, reutilizando o app Express existente.
+- `vercel.json`
+  - Configurado build de API Node (`api/index.js`) e entrega de arquivos estaticos de `public/`.
+  - Rotas definidas para `/api/*` na funcao serverless e fallback da interface para `public/index.html`.
+- `public/index.html`
+  - Adicionado botao `Acessar como visitante` na tela de login, com estrutura visual identica ao botao principal (`login-text` + `login-spinner`).
+- `public/js/dom.js`
+  - Nova referencia de DOM para o botao visitante (`guestAccessBtn`).
+- `public/js/auth.js`
+  - Refatorado fluxo de autenticacao para compartilhar a mesma animacao de loading entre login tradicional e acesso visitante.
+  - Criado fluxo de entrada visitante com carregamento do catalogo, transicao da tela de acesso e toast informativo.
+- `public/css/components.css`
+  - Estilo visual do botao visitante com variacao secundaria, mantendo comportamento e animacao do estado `loading`.
+
+**Resultado esperado:**
+- Projeto pronto para deploy na Vercel mantendo API e frontend no mesmo dominio.
+- Recrutador pode entrar sem credenciais via botao de visitante, com a mesma experiencia de animacao do login original.
+
 ### 24/03/2026 - Hero Slider em modo premium (harmonizacao de imagens)
 **Objetivo:**
 - Harmonizar visual do destaque sem recorte agressivo e sem distorcao perceptivel.
