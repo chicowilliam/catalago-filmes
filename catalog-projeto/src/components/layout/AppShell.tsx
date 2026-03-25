@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 interface AppShellProps {
   children: ReactNode;
@@ -17,6 +18,7 @@ export function AppShell({ children, username, onLogout }: AppShellProps) {
 
         <div className="header-actions">
           {username ? <span className="user-chip">{username}</span> : null}
+          <ThemeToggle />
           <button type="button" className="secondary-btn" onClick={onLogout}>
             Sair
           </button>

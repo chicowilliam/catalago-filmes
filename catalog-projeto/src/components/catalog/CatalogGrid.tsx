@@ -52,6 +52,7 @@ export function CatalogGrid({
     <AnimatePresence mode="wait">
       <motion.section
         key={activeKey(items)}
+        layout
         className="catalog-grid"
         aria-live="polite"
         variants={containerVariants}

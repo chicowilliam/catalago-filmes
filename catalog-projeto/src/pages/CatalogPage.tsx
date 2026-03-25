@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { AboutSection } from "@/components/catalog/AboutSection";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
 import { FilterTabs } from "@/components/catalog/FilterTabs";
@@ -8,6 +9,15 @@ import { useCatalog } from "@/hooks/useCatalog";
 import { useModal } from "@/hooks/useModal";
 import { useRatings } from "@/hooks/useRatings";
 import { useToast } from "@/hooks/useToast";
+import type { CatalogType } from "@/types/catalog";
+
+const pagePoseByType: Record<CatalogType, { x: number; y: number; rotate: number }> = {
+  all: { x: 0, y: 0, rotate: 0 },
+  movie: { x: 16, y: -4, rotate: 0.8 },
+  series: { x: -16, y: 4, rotate: -0.8 },
+  favorites: { x: 0, y: 10, rotate: 0.5 },
+  about: { x: 0, y: -10, rotate: -0.5 },
+};
 
 export function CatalogPage() {
   const {
@@ -78,20 +88,54 @@ export function CatalogPage() {
           </div>
         )}
 
-        {activeType === "about" ? (
-          <AboutSection />
-        ) : (
-          <CatalogGrid
-            items={items}
-            isLoading={isLoading}
-            error={error}
-            onRetry={retry}
-            favoriteIds={favoriteIds}
-            onFavoriteToggle={(item) => handleToggleFavorite(item.id)}
-            onOpenModal={open}
-            getRating={getRating}
-          />
-        )}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeType}
+            initial={{
+              opacity: 0,
+              x: pagePoseByType[activeType].x,
+              y: pagePoseByType[activeType].y,
+              rotate: pagePoseByType[activeType].rotate,
+              filter: "blur(6px)",
+            }}
+            animate={{
+              opacity: 1,
+              x: 0,
+              y: 0,
+              rotate: 0,
+              filter: "blur(0px)",
+            }}
+            exit={{
+              opacity: 0,
+              x: -pagePoseByType[activeType].x * 0.6,
+              y: -pagePoseByType[activeType].y * 0.6,
+              rotate: -pagePoseByType[activeType].rotate,
+              filter: "blur(4px)",
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 280,
+              damping: 28,
+              mass: 0.9,
+            }}
+            style={{ transformOrigin: "50% 50%" }}
+          >
+            {activeType === "about" ? (
+              <AboutSection />
+            ) : (
+              <CatalogGrid
+                items={items}
+                isLoading={isLoading}
+                error={error}
+                onRetry={retry}
+                favoriteIds={favoriteIds}
+                onFavoriteToggle={(item) => handleToggleFavorite(item.id)}
+                onOpenModal={open}
+                getRating={getRating}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </section>
 
       <MovieModal

@@ -62,14 +62,60 @@ export function AboutSection() {
 
   return (
     <section className="about-section">
-      <header className="about-header">
-        <h2 className="about-title">Sobre este projeto</h2>
-        <p className="about-description">
-          Catálogo de filmes e séries inspirado em serviços de streaming.
-          Desenvolvido como portfólio full-stack com Node.js, Express e React + TypeScript.
-          Clique em uma categoria abaixo para ver as tecnologias usadas.
-        </p>
-      </header>
+      <div className="section-headline about-headline">
+        <div>
+          <h2 className="section-title">Sobre o projeto</h2>
+          <span className="section-subtitle">
+            Catalogo full stack inspirado em streaming, com foco em UX, integracao com API e
+            arquitetura limpa.
+          </span>
+        </div>
+      </div>
+
+      <div className="about-layout">
+        <article className="about-copy-block">
+          <span className="about-kicker">Portfolio case</span>
+          <h3 className="about-spotlight">
+            Interface com linguagem de streaming, arquitetura leve e foco em sensacao de produto
+            final.
+          </h3>
+          <p className="about-copy-text">
+            Este projeto combina backend em Node.js + Express, autenticacao por sessao, integracao
+            com TMDB e um frontend em React + TypeScript remodelado para manter a mesma presenca
+            visual do portfolio original.
+          </p>
+          <div className="about-signal-row" aria-label="Caracteristicas do projeto">
+            <span className="about-signal">UX focada em catalogo</span>
+            <span className="about-signal">TMDB via backend</span>
+            <span className="about-signal">Sessoes e favoritos</span>
+          </div>
+        </article>
+
+        <div className="about-facts" aria-label="Destaques do projeto">
+          <article className="about-fact-card">
+            <span className="about-point-label">Front-end</span>
+            <p>React, TypeScript, Vite, animacoes com Motion e interface inspirada em streaming.</p>
+          </article>
+          <article className="about-fact-card">
+            <span className="about-point-label">Back-end</span>
+            <p>Express com sessoes, validacao, erros padronizados e consumo protegido da TMDB.</p>
+          </article>
+          <article className="about-fact-card">
+            <span className="about-point-label">Experiencia</span>
+            <p>Busca, favoritos, trailers, modal, destaque dinamico e layout pensado para portfolio.</p>
+          </article>
+        </div>
+      </div>
+
+      <div className="section-headline stack-headline">
+        <div>
+          <h3 className="section-title">Tecnologias utilizadas</h3>
+          <span className="section-subtitle">
+            Disponiveis na aba Sobre para manter a home limpa e cinematografica.
+          </span>
+        </div>
+        <span className="stack-tip">Toque para abrir cada pasta</span>
+      </div>
 
       <div className="stack-grid">
         {stackCategories.map((cat) => (

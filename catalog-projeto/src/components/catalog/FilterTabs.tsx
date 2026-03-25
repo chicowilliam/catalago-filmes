@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import type { CatalogType } from "@/types/catalog";
 
 const FILTERS: Array<{ value: CatalogType; label: string }> = [
@@ -28,6 +29,13 @@ export function FilterTabs({ activeType, onChange }: FilterTabsProps) {
             onClick={() => onChange(filter.value)}
           >
             {filter.label}
+            {isActive && (
+              <motion.div
+                className="filter-underline"
+                layoutId="filter-underline"
+                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+              />
+            )}
           </button>
         );
       })}

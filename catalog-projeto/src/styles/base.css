@@ -1,16 +1,61 @@
-:root {
-  --bg: #0f1118;
-  --panel: #151926;
-  --panel-2: #1c2235;
-  --text: #e8ecff;
-  --text-soft: #a8b0cf;
-  --border: #2a3048;
-  --accent: #df3c3c;
-  --accent-soft: rgba(223, 60, 60, 0.16);
+@import url("https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap");
+@import url("https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css");
 
-  color: var(--text);
-  background: radial-gradient(circle at top, #1a2035 0%, var(--bg) 55%);
-  font-family: "PT Sans", "Segoe UI", sans-serif;
+:root {
+  --font-sans: "PT Sans", "Segoe UI", sans-serif;
+  --bg-primary: #121212;
+  --bg-secondary: #1b1b1b;
+  --bg-tertiary: #242424;
+  --surface-glass: rgba(18, 18, 18, 0.82);
+  --text-primary: #f5f5f1;
+  --text-secondary: #cccccc;
+  --text-tertiary: #8f8f8f;
+  --card-bg: #1a1a1a;
+  --card-border: #2d2d2d;
+  --input-bg: #202020;
+  --input-border: #383838;
+  --accent: #e50914;
+  --accent-hover: #f6121d;
+  --accent-soft: rgba(229, 9, 20, 0.16);
+  --accent-gradient: linear-gradient(135deg, #e50914 0%, #b20710 100%);
+  --bg: var(--bg-primary);
+  --panel: var(--bg-secondary);
+  --panel-2: var(--bg-tertiary);
+  --text: var(--text-primary);
+  --text-soft: var(--text-secondary);
+  --border: var(--card-border);
+
+  color: var(--text-primary);
+  background:
+    radial-gradient(1100px 520px at 88% -14%, rgba(229, 9, 20, 0.18), transparent 68%),
+    radial-gradient(920px 460px at 0% 8%, rgba(255, 255, 255, 0.04), transparent 62%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0%, transparent 22%),
+    var(--bg-primary);
+  font-family: var(--font-sans);
+}
+
+[data-theme="light"] {
+  --bg-primary: #f4f1ea;
+  --bg-secondary: #f8f4ee;
+  --bg-tertiary: #efe6db;
+  --surface-glass: rgba(248, 244, 238, 0.82);
+  --text-primary: #1f1715;
+  --text-secondary: #5d4f4c;
+  --text-tertiary: #7a6c67;
+  --card-bg: #fffaf4;
+  --card-border: #ddcfc5;
+  --input-bg: #ffffff;
+  --input-border: #d7c8bd;
+  --accent: #e50914;
+  --accent-hover: #c90b14;
+  --accent-soft: rgba(229, 9, 20, 0.12);
+  --accent-gradient: linear-gradient(135deg, #e50914 0%, #a10812 100%);
+  --bg: var(--bg-primary);
+  --panel: var(--bg-secondary);
+  --panel-2: var(--bg-tertiary);
+  --text: var(--text-primary);
+  --text-soft: var(--text-secondary);
+  --border: var(--card-border);
 }
 
 * {
@@ -20,6 +65,14 @@
 body {
   margin: 0;
   min-height: 100vh;
+  line-height: 1.6;
+  letter-spacing: 0.012em;
+  color: var(--text-primary);
+  background:
+    radial-gradient(1100px 520px at 88% -14%, rgba(229, 9, 20, 0.18), transparent 68%),
+    radial-gradient(920px 460px at 0% 8%, rgba(255, 255, 255, 0.04), transparent 62%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0%, transparent 22%),
+    var(--bg-primary);
 }
 
 #root {
@@ -29,6 +82,23 @@ body {
 h1,
 h2,
 h3,
-p {
+p,
+button,
+input,
+textarea,
+span,
+label {
   margin: 0;
+}
+
+h1,
+h2,
+h3,
+.section-title,
+.featured-title,
+.brand-title,
+.login-title {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.018em;
 }

@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 import type { CatalogItem } from "@/types/catalog";
 
@@ -22,12 +22,26 @@ export function MovieCard({
   onFavoriteToggle,
   onOpenModal,
 }: MovieCardProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <motion.article
+      layout
       className="movie-card"
       variants={cardVariants}
-      whileHover={{ scale: 1.03, y: -4 }}
-      transition={{ type: "spring", stiffness: 300, damping: 22 }}
+      whileHover={
+        prefersReducedMotion
+          ? undefined
+          : {
+              scale: 1.085,
+              y: -12,
+              zIndex: 12,
+              boxShadow: "0px 26px 54px rgba(0, 0, 0, 0.34)",
+            }
+      }
+      whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 280, damping: 18 }}
+      style={{ transformOrigin: "center top" }}
     >
       <button
         type="button"
