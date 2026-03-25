@@ -1,10 +1,10 @@
 // backend/routes/catalog.routes.js
 //
-// Este arquivo só registra as rotas.
-// Toda a lógica foi movida para:
+// Este arquivo sï¿½ registra as rotas.
+// Toda a lï¿½gica foi movida para:
 //   -> backend/controllers/catalog.controller.js  (HTTP)
 //   -> backend/services/catalog.service.js        (regras de negocio)
-//   -> backend/repositories/catalog.repository.js (acesso a dados)
+//   -> backend/services/tmdb.service.js           (integracao com API externa)
 
 const express = require("express");
 const router = express.Router();

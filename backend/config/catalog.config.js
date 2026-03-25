@@ -38,14 +38,11 @@ function getTmdbAutoPages() {
 }
 
 /**
- * Retorna true se a TMDB estiver habilitada no .env.
- * Requer: CATALOG_SOURCE=tmdb e TMDB_BEARER_TOKEN ou TMDB_API_KEY definidos.
+ * Retorna true se a TMDB estiver habilitada no ambiente.
+ * Em modo API-only, basta haver TMDB_BEARER_TOKEN ou TMDB_API_KEY.
  */
 function isTmdbEnabled() {
-  return (
-    process.env.CATALOG_SOURCE === "tmdb" &&
-    !!(process.env.TMDB_BEARER_TOKEN || process.env.TMDB_API_KEY)
-  );
+  return !!(process.env.TMDB_BEARER_TOKEN || process.env.TMDB_API_KEY);
 }
 
 module.exports = {
