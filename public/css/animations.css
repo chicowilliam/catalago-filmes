@@ -88,13 +88,11 @@
   from {
     opacity: 0;
     transform: translateY(14px) scale(0.985);
-    filter: blur(5px);
   }
 
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
-    filter: blur(0);
   }
 }
 

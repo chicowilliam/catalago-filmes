@@ -379,15 +379,14 @@ export function animateTabSwitch(hiding, onSwap) {
 
     gsapInstance.fromTo(
       entering,
-      { opacity: 0, y: 20, filter: "blur(6px)" },
+      { opacity: 0, y: 20 },
       {
         opacity: 1,
         y: 0,
-        filter: "blur(0px)",
         duration: 0.44,
         stagger: 0.055,
         ease: "expo.out",
-        clearProps: "transform,opacity,filter",
+        clearProps: "transform,opacity",
         overwrite: "auto",
       }
     );
@@ -404,7 +403,6 @@ export function animateTabSwitch(hiding, onSwap) {
   gsapInstance.to(validHiding, {
     opacity: 0,
     y: -12,
-    filter: "blur(4px)",
     duration: 0.22,
     ease: "power2.in",
     overwrite: true,
