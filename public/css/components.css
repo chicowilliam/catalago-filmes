@@ -141,17 +141,6 @@ body.about-view-active .movie-card {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent), 0 24px 40px rgba(0, 0, 0, 0.34);
 }
 
-@keyframes cardReveal {
-  from {
-    opacity: 0;
-    transform: translateY(18px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 .movie-card:hover {
   transform: translate3d(0, -5px, 0) scale(1.04);
   box-shadow:
@@ -199,12 +188,6 @@ body.about-view-active .movie-card {
   background: rgba(8, 12, 24, 0.55);
   backdrop-filter: blur(14px) saturate(1.8);
   -webkit-backdrop-filter: blur(14px) saturate(1.8);
-}
-
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 260ms;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .movie-media {

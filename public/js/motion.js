@@ -257,7 +257,7 @@ export function setupRevealAnimations() {
   if (state.revealObserver) state.revealObserver.disconnect();
 
   const revealTargets = Array.from(
-    document.querySelectorAll(".hero-copy, .featured-card, .section-block, .movie-card, .footer")
+    document.querySelectorAll(".hero-copy, .featured-card, .section-block, .footer")
   );
 
   revealTargets.forEach((el, index) => {

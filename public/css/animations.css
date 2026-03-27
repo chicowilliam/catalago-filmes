@@ -148,7 +148,6 @@
 
 @supports (animation-timeline: view()) {
   .section-block,
-  .movie-card,
   .stack-folder,
   .about-fact-card,
   .footer {
