@@ -8,7 +8,7 @@ const rateLimit = require("express-rate-limit");
 
 const authRoutes = require("./backend/routes/auth.routes");
 const catalogRoutes = require("./backend/routes/catalog.routes");
-const errorHandler = require("./backend/middlewares/errorHandler"); // ← ADICIONE
+const errorHandler = require("./backend/middlewares/errorHandler");
 
 const app = express();
 const isProduction = process.env.NODE_ENV === "production";
@@ -53,14 +53,13 @@ app.use(helmet({
    },
    frameguard: { action: "sameorigin" },
    noSniff: true,
-   xssFilter: true,
    referrerPolicy: { policy: "strict-origin-when-cross-origin" }
 }));
 app.use(globalLimiter);
 
-// Validação: exigir Content-Type correto em POST/PUT/DELETE
+// Validação: exigir Content-Type correto em POST/PUT
 app.use((req, res, next) => {
-   if (["POST", "PUT", "DELETE"].includes(req.method)) {
+   if (["POST", "PUT"].includes(req.method)) {
       const contentType = req.headers["content-type"] || "";
       if (!contentType.includes("application/json")) {
          return res.status(415).json({
