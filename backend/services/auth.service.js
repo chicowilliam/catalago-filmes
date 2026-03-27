@@ -36,6 +36,7 @@ function getAdminCredentials() {
  * Constant-time comparison para evitar timing attacks.
  */
 function constantTimeCompare(a, b) {
+  if (!a || !b || typeof a !== "string" || typeof b !== "string") return false;
   if (a.length !== b.length) return false;
   let result = 0;
   for (let i = 0; i < a.length; i++) {

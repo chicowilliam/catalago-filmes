@@ -72,7 +72,9 @@ function httpGetJson(url) {
 // --- Transformação: formato TMDB → formato do nosso catálogo ---
 
 function mapItem(tmdbItem) {
-  const isMovie = tmdbItem.media_type === "movie" || !!tmdbItem.title;
+  const isMovie =
+    tmdbItem.media_type === "movie" ||
+    (!tmdbItem.media_type && !!tmdbItem.title && !tmdbItem.name);
   const posterPath = tmdbItem.poster_path;
   
   // Debug: Log se poster_path está vazio (pode indicar problema com chave TMDB)

@@ -206,7 +206,9 @@ export function setupFilterControls(filterGroup, filterButtons, onSelectFilter) 
     });
 
     const durationMs = Math.max(500, Math.min(900, (steps.length - 1) * 180 + 180));
-    indicator.getAnimations().forEach((animation) => animation.cancel());
+    if (typeof indicator.getAnimations === "function") {
+      indicator.getAnimations().forEach((animation) => animation.cancel());
+    }
 
     const animation = indicator.animate(keyframes, {
       duration: durationMs,
@@ -253,7 +255,9 @@ export function setupFilterControls(filterGroup, filterButtons, onSelectFilter) 
 
   const syncIndicatorWithoutMotion = () => {
     const activeBtn = filterGroup.querySelector(".filter-btn.active") || filterButtons[0];
-    indicator.getAnimations().forEach((animation) => animation.cancel());
+    if (typeof indicator.getAnimations === "function") {
+      indicator.getAnimations().forEach((animation) => animation.cancel());
+    }
     updateActiveIndicator(activeBtn, false);
     previousActiveIndex = Math.max(0, filterButtons.indexOf(activeBtn));
   };

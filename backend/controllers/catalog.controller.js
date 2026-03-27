@@ -36,6 +36,9 @@ function parseAndValidateBody(body) {
 async function list(req, res, next) {
   try {
     const { type, search } = req.query;
+    if (type && !["movie", "series", "all"].includes(type)) {
+      throw new AppError('Tipo inválido. Use "movie", "series" ou "all"', 400, "INVALID_TYPE");
+    }
     const result = await catalogService.listCatalog(type, search);
 
     res.json({
