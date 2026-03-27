@@ -108,6 +108,14 @@ app.get("/api/health", (req, res) => {
 ========================= */
 app.use(express.static(path.join(__dirname, "public")));
 
+// Rotas de API não encontradas
+app.use("/api/*", (req, res) => {
+   res.status(404).json({
+      status: "error",
+      message: "Rota não encontrada"
+   });
+});
+
 /* =========================
    TRATAMENTO DE ERROS (DEVE SER POR ÚLTIMO!)
 ========================= */
