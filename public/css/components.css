@@ -47,34 +47,6 @@ body.about-view-active .movie-card {
   display: none;
 }
 
-body.is-filter-transitioning .section-block {
-  opacity: 0.52;
-  transform: translateY(10px) scale(0.995);
-  filter: blur(4px);
-}
-
-body.is-filter-transitioning .hero-panel,
-body.is-filter-transitioning .section-block {
-  will-change: opacity, transform, filter;
-}
-
-body.tab-exit-active .hero-panel:not(.is-hidden),
-body.tab-exit-active .section-block:not(.is-hidden) {
-  opacity: 0;
-  transform: translate3d(0, 14px, 0) scale(0.988);
-  filter: blur(7px);
-  pointer-events: none;
-  transition:
-    opacity 190ms cubic-bezier(0.4, 0, 0.2, 1),
-    transform 230ms cubic-bezier(0.4, 0, 0.2, 1),
-    filter 220ms ease;
-}
-
-body.tab-enter-active .hero-panel:not(.is-hidden),
-body.tab-enter-active .section-block:not(.is-hidden) {
-  animation: tabContentEnter 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
 @keyframes sectionReveal {
   from {
     opacity: 0;
@@ -83,20 +55,6 @@ body.tab-enter-active .section-block:not(.is-hidden) {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes tabContentEnter {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 16px, 0) scale(0.986);
-    filter: blur(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-    filter: blur(0);
   }
 }
 

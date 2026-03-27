@@ -344,3 +344,77 @@ export function setupMotionEnhancements() {
   setupRevealAnimations();
   setupHeroParallax();
 }
+
+// ---------------------------------------------------------------------------
+// Transição entre abas (Início / Filmes / Séries / Favoritos / Sobre)
+// ---------------------------------------------------------------------------
+
+/**
+ * Anima a SAÍDA das seções visíveis, executa o callback que troca o DOM,
+ * e em seguida anima a ENTRADA das seções que ficaram visíveis.
+ *
+ * Sequência correta:  exit ──► swap ──► enter
+ * Isso evita o "piscar" que acontecia quando o grid era destruído
+ * antes da animação de saída terminar.
+ *
+ * @param {Element[]} hiding   - seções atualmente visíveis que devem sair
+ * @param {() => void} onSwap  - callback executado entre saída e entrada
+ */
+export function animateTabSwitch(hiding, onSwap) {
+  const validHiding = hiding.filter(Boolean);
+
+  // Sem GSAP ou com "prefere menos movimento": troca instantânea sem animação
+  if (!canUseAdvancedMotion()) {
+    validHiding.forEach((el) => el.classList.add("is-hidden"));
+    onSwap?.();
+    return;
+  }
+
+  // Anima a entrada das seções que ficaram visíveis após o swap
+  const triggerEnter = () => {
+    const entering = Array.from(
+      document.querySelectorAll(".section-block:not(.is-hidden), .hero-panel:not(.is-hidden)")
+    );
+    if (!entering.length) return;
+
+    gsapInstance.fromTo(
+      entering,
+      { opacity: 0, y: 20, filter: "blur(6px)" },
+      {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        duration: 0.44,
+        stagger: 0.055,
+        ease: "expo.out",
+        clearProps: "transform,opacity,filter",
+        overwrite: "auto",
+      }
+    );
+  };
+
+  // Nada para esconder: pula direto para a entrada
+  if (!validHiding.length) {
+    onSwap?.();
+    triggerEnter();
+    return;
+  }
+
+  // Anima a saída e só então faz o swap
+  gsapInstance.to(validHiding, {
+    opacity: 0,
+    y: -12,
+    filter: "blur(4px)",
+    duration: 0.22,
+    ease: "power2.in",
+    overwrite: true,
+    onComplete: () => {
+      validHiding.forEach((el) => {
+        el.classList.add("is-hidden");
+        gsapInstance.set(el, { clearProps: "all" });
+      });
+      onSwap?.();
+      triggerEnter();
+    },
+  });
+}

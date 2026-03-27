@@ -13,18 +13,30 @@ import { useToast } from "@/hooks/useToast";
 import type { Variants } from "framer-motion";
 import type { CatalogType } from "@/types/catalog";
 
-const pushVariants: Variants = {
+const pageSlideVariants: Variants = {
   enter: (direction: number) => ({
     x: direction >= 0 ? "100%" : "-100%",
-    opacity: 0.85,
+    rotateY: direction >= 0 ? -9 : 9,
+    opacity: 0.78,
+    filter: "blur(4px)",
+    zIndex: 1,
+    transformOrigin: direction >= 0 ? "100% 50%" : "0% 50%",
   }),
   center: {
     x: 0,
+    rotateY: 0,
     opacity: 1,
+    filter: "blur(0px)",
+    zIndex: 2,
+    transformOrigin: "50% 50%",
   },
   exit: (direction: number) => ({
     x: direction >= 0 ? "-100%" : "100%",
-    opacity: 0.85,
+    rotateY: direction >= 0 ? 9 : -9,
+    opacity: 0.78,
+    filter: "blur(4px)",
+    zIndex: 1,
+    transformOrigin: direction >= 0 ? "0% 50%" : "100% 50%",
   }),
 };
 
@@ -61,6 +73,8 @@ export function CatalogPage() {
   const showCatalog = activeType !== "about";
 
   function handleTabChange(nextType: CatalogType) {
+    if (nextType === activeType) return;
+
     const nextIndex = getTabIndex(nextType);
     const previousIndex = previousTabIndexRef.current;
 
@@ -118,16 +132,16 @@ export function CatalogPage() {
 
         <div className="tab-transition-viewport" aria-live="polite">
           <div className="tab-transition-stage">
-            <AnimatePresence initial={false} mode="sync">
+            <AnimatePresence initial={false} mode="sync" custom={direction}>
               <motion.div
                 key={activeType}
                 className="tab-transition-panel"
                 custom={direction}
-                variants={pushVariants}
+                variants={pageSlideVariants}
                 initial="enter"
                 animate="center"
                 exit="exit"
-                transition={{ duration: 0.75, ease: "easeInOut" }}
+                transition={{ duration: 0.58, ease: "easeInOut" }}
               >
                 {activeType === "about" ? (
                   <AboutSection />

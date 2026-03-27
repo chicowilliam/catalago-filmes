@@ -2,6 +2,105 @@
 
 ## 0) Historico de Sessoes
 
+### 26/03/2026 - Transicao entre abas no frontend vanilla (GSAP, sem piscar)
+**Objetivo:**
+- Corrigir o "piscar" ao trocar de aba no frontend legado (`public/`).
+- Garantir que o DOM so e trocado DEPOIS que a animacao de saida termina.
+
+**Ajustes aplicados:**
+- `public/js/motion.js`
+  - Adicionada funcao `animateTabSwitch(hiding, onSwap)`: anima saida GSAP, executa callback de troca, anima entrada.
+  - Exportada junto com `canUseAdvancedMotion` para uso em `render.js`.
+  - Corrigido fechamento de bloco que havia ficado incorreto apos edicao anterior.
+- `public/js/render.js`
+  - `applyFilterWithTransition` reescrita para usar `animateTabSwitch` via GSAP.
+  - Removidos timers de transicao baseados em CSS (`setTimeout`, `tab-exit-active`, etc).
+  - Coleta as secoes visiveis antes da troca e as passa como `hiding` para animacao coordenada.
+  - Import de `FILTER_TRANSITION_MS` removido (nao mais utilizado).
+- `public/css/components.css`
+  - Removidos blocos de regras CSS das classes de transicao que nao sao mais usadas:
+    - `body.is-filter-transitioning`
+    - `body.tab-exit-active`
+    - `body.tab-enter-active`
+    - `@keyframes tabContentEnter`
+
+**Resultado esperado:**
+- Troca entre abas (Inicio, Filmes, Series, Favoritos, Sobre) sem piscar no frontend vanilla.
+- Animacao de saida termina antes da nova aba aparecer, garantindo continuidade visual.
+
+### 26/03/2026 - Hover coordenado nos cards React (Framer Motion)
+**Objetivo:**
+- Aplicar hover moderno nos cards com zoom suave e elevacao.
+- Reduzir opacidade dos cards vizinhos enquanto um card estiver ativo.
+
+**Ajustes aplicados:**
+- `catalog-projeto/src/components/catalog/CatalogGrid.tsx`
+  - Adicionado estado `hoveredId` no topo do componente para controlar foco visual do card ativo.
+  - Cada item do `.map` agora e envolvido por `motion.div` com:
+    - `scale` e `y` no card ativo.
+    - `opacity` reduzida nos demais cards durante hover.
+    - transicao suave com `easeInOut`.
+- `catalog-projeto/src/components/catalog/MovieCard.tsx`
+  - Removido hover interno de escala para evitar efeito duplicado.
+  - Conteudo interno do card foi preservado integralmente.
+
+**Resultado esperado:**
+- Card em hover flutua com leve zoom.
+- Cards ao redor ficam discretamente transparentes.
+- Interacao mais limpa e cinematografica no grid, sem alterar API/dados.
+
+### 27/03/2026 - Refatoracao da transicao de abas no frontend legado (public/)
+**Objetivo:**
+- Corrigir o "piscar" ao trocar abas (Inicio, Filmes, Series, Favoritos, Sobre) no frontend vanilla.
+- Substituir o sistema de classes CSS (tab-exit-active/tab-enter-active) por animacoes GSAP sequenciadas.
+
+**Diagnostico:**
+- O DOM era destruido e recriado no meio da animacao CSS de saida, causando flash visual.
+
+**Ajustes aplicados:**
+- `public/js/motion.js`
+  - Nova funcao `animateTabSwitch(hiding, onSwap)`:
+    - Anima a saida das secoes visiveis via GSAP.
+    - Executa o callback `onSwap` (troca de DOM) somente apos a saida terminar.
+    - Anima a entrada das novas secoes em seguida.
+    - Fallback instantaneo para usuarios com `prefers-reduced-motion`.
+  - `setupMotionEnhancements` mantido com fechamento correto.
+- `public/js/render.js`
+  - `applyFilterWithTransition` reescrito para usar `animateTabSwitch`.
+  - Removidos timers e flags de controle que causavam condicoes de corrida.
+  - Import `FILTER_TRANSITION_MS` removido (nao era mais necessario).
+- `public/css/components.css`
+  - Removidos blocos CSS obsoletos: `is-filter-transitioning`, `tab-exit-active`, `tab-enter-active` e `@keyframes tabContentEnter`.
+
+**Resultado esperado:**
+- Troca entre abas no site vanilla sem piscar.
+- Saida animada (GSAP) -> DOM atualizado -> entrada animada.
+- Compatibilidade com `prefers-reduced-motion`.
+
+### 26/03/2026 - Transicao horizontal estilo "virar pagina" no React (abas)
+**Objetivo:**
+- Tornar a troca entre `Início`, `Filmes`, `Séries`, `Favoritos` e `Sobre` mais fluida e profissional.
+- Simular efeito de pagina horizontal com direcao baseada na navegacao (forward/back), sem reload.
+
+**Ajustes aplicados:**
+- `catalog-projeto/src/pages/CatalogPage.tsx`
+  - Variants de transicao refinadas para estados `enter`, `center` e `exit` com:
+    - deslizamento horizontal (x)
+    - inclinacao 3D leve (`rotateY`) para reforcar efeito de pagina
+    - opacidade e blur suaves para continuidade visual
+  - Direcao mantida por ordem da navbar, com inversao automatica ao voltar.
+  - Protecao para evitar reanimar quando o usuario clica na mesma aba.
+  - `AnimatePresence` mantido para controlar entrada/saida no fluxo SPA.
+- `catalog-projeto/src/styles/layout.css`
+  - Viewport de transicao com `perspective` para sensação de profundidade.
+  - Stage ajustado para sobrepor paineis no mesmo plano (`display: grid`) durante a animacao.
+  - Painel com `backface-visibility` e `will-change` para estabilidade e suavidade.
+
+**Resultado esperado:**
+- Navegacao entre abas com comportamento de "carousel de paginas" horizontal, mais natural e sem piscar.
+- Ao avancar: aba atual sai para esquerda e nova entra da direita.
+- Ao voltar: direcao invertida.
+
 ### 25/03/2026 - Push Transition horizontal entre abas no React
 **Objetivo:**
 - Implementar transicao de navegacao estilo app mobile (efeito push) ao trocar abas/secoes do portfolio.

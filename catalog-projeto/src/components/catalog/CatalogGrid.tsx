@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 
 import { MovieCard } from "@/components/catalog/MovieCard";
@@ -29,6 +30,8 @@ export function CatalogGrid({
   onOpenModal,
   getRating,
 }: CatalogGridProps) {
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
+
   if (isLoading) {
     return <p className="feedback">Carregando catálogo...</p>;
   }
@@ -57,14 +60,26 @@ export function CatalogGrid({
       animate="visible"
     >
       {items.map((item) => (
-        <MovieCard
+        <motion.div
           key={item.id}
-          item={item}
-          isFavorite={favoriteIds.has(item.id)}
-          rating={getRating(item.id)}
-          onFavoriteToggle={onFavoriteToggle}
-          onOpenModal={onOpenModal}
-        />
+          onHoverStart={() => setHoveredId(item.id)}
+          onHoverEnd={() => setHoveredId(null)}
+          animate={{
+            scale: hoveredId === item.id ? 1.08 : 1,
+            y: hoveredId === item.id ? -8 : 0,
+            opacity: hoveredId && hoveredId !== item.id ? 0.55 : 1,
+          }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          style={{ transformOrigin: "center top" }}
+        >
+          <MovieCard
+            item={item}
+            isFavorite={favoriteIds.has(item.id)}
+            rating={getRating(item.id)}
+            onFavoriteToggle={onFavoriteToggle}
+            onOpenModal={onOpenModal}
+          />
+        </motion.div>
       ))}
     </motion.section>
   );

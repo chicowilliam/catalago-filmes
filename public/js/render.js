@@ -1,4 +1,4 @@
-import { SECTION_FADE_MS, FILTER_TRANSITION_MS } from "./config.js";
+import { SECTION_FADE_MS } from "./config.js";
 import { prefersReducedMotion } from "./config.js";
 import { state } from "./state.js";
 import {
@@ -25,6 +25,8 @@ import {
   animateStackFoldersReveal,
   setupMotionHoverBindings,
   setupRevealAnimations,
+  animateTabSwitch,
+  canUseAdvancedMotion,
 } from "./motion.js";
 import { openModal } from "./modal.js";
 
@@ -515,55 +517,52 @@ export function applyFilterState(nextType) {
 }
 
 export function applyFilterWithTransition(nextType) {
-  if (nextType === state.currentType && !state.isFilterTransitioning) return;
+  if (nextType === state.currentType) return;
 
+  // Limpar timers legados (caso restem de versões anteriores)
+  if (state.filterTransitionTimer) {
+    clearTimeout(state.filterTransitionTimer);
+    state.filterTransitionTimer = null;
+  }
+  if (state.filterTransitionEnterTimer) {
+    clearTimeout(state.filterTransitionEnterTimer);
+    state.filterTransitionEnterTimer = null;
+  }
+  document.body.classList.remove("is-filter-transitioning", "tab-exit-active", "tab-enter-active");
+
+  // Sem animação: troca direta
   if (prefersReducedMotion) {
-    document.body.classList.remove("is-filter-transitioning", "tab-exit-active", "tab-enter-active");
-    state.isFilterTransitioning = false;
     applyFilterState(nextType);
     return;
   }
 
-  if (state.filterTransitionTimer) clearTimeout(state.filterTransitionTimer);
-  if (state.filterTransitionEnterTimer) clearTimeout(state.filterTransitionEnterTimer);
+  // Se GSAP não estiver disponível, troca com CSS fade padrão
+  if (!canUseAdvancedMotion()) {
+    applyFilterState(nextType);
+    return;
+  }
 
-  const runId = state.filterTransitionRunId + 1;
-  state.filterTransitionRunId = runId;
+  // Coletar seções atualmente visíveis para animar a saída
+  const allSections = [
+    heroPanel,
+    moviesSection,
+    seriesSection,
+    favoritesSection,
+    aboutSection,
+    stackSection,
+  ].filter(Boolean);
+
+  const currentlyVisible = allSections.filter((s) => !s.classList.contains("is-hidden"));
+
   state.isFilterTransitioning = true;
 
-  const totalMs = Math.max(FILTER_TRANSITION_MS, 380);
-  const exitMs = Math.round(totalMs * 0.36);
-  const enterMs = Math.max(totalMs - exitMs, 220);
-
-  document.body.classList.remove("tab-enter-active");
-  document.body.classList.add("is-filter-transitioning", "tab-exit-active");
-
-  state.filterTransitionTimer = setTimeout(() => {
-    if (runId !== state.filterTransitionRunId) return;
-
+  // Sequência: saída → troca de DOM → entrada
+  animateTabSwitch(currentlyVisible, () => {
     state.disableSectionFade = true;
-    applyFilterState(nextType);
+    applyFilterState(nextType);       // renderCurrentView mostra as novas seções
     state.disableSectionFade = false;
-
-    document.body.classList.remove("tab-exit-active");
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (runId !== state.filterTransitionRunId) return;
-
-        document.body.classList.add("tab-enter-active");
-        state.filterTransitionEnterTimer = setTimeout(() => {
-          if (runId !== state.filterTransitionRunId) return;
-
-          document.body.classList.remove("is-filter-transitioning", "tab-enter-active");
-          state.isFilterTransitioning = false;
-          state.filterTransitionEnterTimer = null;
-        }, enterMs);
-      });
-    });
-
-    state.filterTransitionTimer = null;
-  }, exitMs);
+    state.isFilterTransitioning = false;
+  });
 }
 
 // ---------------------------------------------------------------------------

@@ -91,17 +91,22 @@
   overflow: hidden;
   isolation: isolate;
   display: block;
+  perspective: 1400px;
 }
 
 .tab-transition-stage {
   position: relative;
   width: 100%;
+  display: grid;
+  transform-style: preserve-3d;
 }
 
 .tab-transition-panel {
+  grid-area: 1 / 1;
   position: relative;
   width: 100%;
   will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 .catalog-grid {
