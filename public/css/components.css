@@ -125,7 +125,6 @@ body.about-view-active .movie-card {
   transform: translate3d(0, 0, 0) scale(1);
   opacity: 1;
   will-change: transform, box-shadow;
-  backface-visibility: hidden;
   transition:
     transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.55s ease,
@@ -236,14 +235,14 @@ body.about-view-active .movie-card {
 .card-face-front {
   width: 100%;
   opacity: 1;
-  transform: scale(1) rotate(0deg);
-  transition: opacity 0.38s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(0) scale(1);
+  transition: opacity 0.32s ease, transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .movie-card:hover .card-face-front,
 .movie-card:focus-visible .card-face-front {
   opacity: 0;
-  transform: scale(0.86) rotate(-8deg);
+  transform: translateY(-6%) scale(0.94);
 }
 
 .card-face-back {
@@ -259,10 +258,10 @@ body.about-view-active .movie-card {
   background: linear-gradient(155deg, #1a0608 0%, #0e1020 55%, #12141e 100%);
   border: 1px solid rgba(229, 9, 20, 0.22);
   opacity: 0;
-  transform: rotate(90deg) scaleX(-1);
+  transform: translateY(100%);
   transition:
-    opacity 0.38s ease 0.07s,
-    transform 0.44s cubic-bezier(0.22, 1, 0.36, 1) 0.07s;
+    opacity 0.36s ease 0.05s,
+    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.05s;
   pointer-events: none;
   overflow: hidden;
 }
@@ -279,7 +278,7 @@ body.about-view-active .movie-card {
 .movie-card:hover .card-face-back,
 .movie-card:focus-visible .card-face-back {
   opacity: 1;
-  transform: rotate(0deg) scaleX(1);
+  transform: translateY(0);
   pointer-events: auto;
 }
 
