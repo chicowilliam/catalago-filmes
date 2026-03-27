@@ -205,6 +205,15 @@ export function createMovieCard(item) {
   card.setAttribute("role", "button");
   card.setAttribute("aria-label", `Abrir detalhes de ${item.title}`);
   card.style.setProperty("--card-pop-delay", `${Math.round(Math.random() * 140)}ms`);
+  if (item.image) card.style.setProperty("--card-poster", `url("${item.image}")`);
+
+  // ── FLIP WRAPPER ─────────────────────────────────────────────────────────
+  const cardInner = document.createElement("div");
+  cardInner.className = "card-inner";
+
+  // ── FACE DA FRENTE ───────────────────────────────────────────────────────
+  const cardFront = document.createElement("div");
+  cardFront.className = "card-face card-front";
 
   const mediaDiv = document.createElement("div");
   mediaDiv.className = "movie-media";
@@ -254,8 +263,43 @@ export function createMovieCard(item) {
   infoDiv.appendChild(title);
   infoDiv.appendChild(meta);
 
-  card.appendChild(mediaDiv);
-  card.appendChild(infoDiv);
+  cardFront.appendChild(mediaDiv);
+  cardFront.appendChild(infoDiv);
+
+  // ── FACE DO VERSO ────────────────────────────────────────────────────────
+  const cardBack = document.createElement("div");
+  cardBack.className = "card-face card-back";
+
+  const backBody = document.createElement("div");
+  backBody.className = "card-back-body";
+
+  const backBadge = document.createElement("span");
+  backBadge.className = "badge badge--back";
+  backBadge.textContent = item.type === "movie" ? "Filme" : "Série";
+
+  const backTitle = document.createElement("h3");
+  backTitle.className = "card-back-title";
+  backTitle.textContent = item.title;
+
+  const backSynopsis = document.createElement("p");
+  backSynopsis.className = "card-back-synopsis";
+  backSynopsis.textContent = item.synopsis || "Sinopse indisponível.";
+
+  const backCta = document.createElement("span");
+  backCta.className = "card-back-cta";
+  backCta.setAttribute("aria-hidden", "true");
+  backCta.textContent = "Ver detalhes";
+
+  backBody.appendChild(backBadge);
+  backBody.appendChild(backTitle);
+  backBody.appendChild(backSynopsis);
+  backBody.appendChild(backCta);
+  cardBack.appendChild(backBody);
+
+  // ── MONTAGEM ─────────────────────────────────────────────────────────────
+  cardInner.appendChild(cardFront);
+  cardInner.appendChild(cardBack);
+  card.appendChild(cardInner);
 
   return card;
 }
