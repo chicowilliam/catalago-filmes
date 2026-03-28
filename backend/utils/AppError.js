@@ -11,6 +11,7 @@ class AppError extends Error {
     this.status = status;
     this.code = code;
     this.timestamp = new Date().toISOString();
+    this.isOperational = true;
   }
 }
 

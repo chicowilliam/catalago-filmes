@@ -36,6 +36,7 @@ function login(req, res, next) {
 function logout(req, res, next) {
   req.session.destroy((err) => {
     if (err) return next(new AppError("Erro ao fazer logout", 500, "LOGOUT_ERROR"));
+    res.clearCookie("portfolio.sid");
     res.json({ status: "success", message: "Logged out successfully" });
   });
 }

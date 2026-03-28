@@ -4,15 +4,30 @@
 // Processa TODOS os erros da aplicação de forma centralizada.
 // Deve ser o ÚLTIMO middleware registrado no server.js.
 
+const logger = require("../utils/logger");
+const isProduction = process.env.NODE_ENV === "production";
+
 function errorHandler(err, req, res, next) {
   const status = err.status || 500;
-  const message = err.message || "Internal Server Error";
-  const code = err.code || "INTERNAL_ERROR";
-  // Reutiliza o timestamp já criado no AppError; cria um novo só se não existir
   const timestamp = err.timestamp || new Date().toISOString();
 
-  // Log estruturado para debug — visível apenas no servidor, nunca no cliente
-  console.error(`[${timestamp}] ${code} (${status}): ${message}`);
+  // Erros não planejados (bugs): em produção, esconder detalhes do cliente
+  const isOperational = err.isOperational === true;
+  const message = isOperational
+    ? err.message
+    : isProduction
+      ? "Ocorreu um erro interno. Tente novamente mais tarde."
+      : err.message || "Internal Server Error";
+  const code = isOperational
+    ? err.code || "INTERNAL_ERROR"
+    : "INTERNAL_ERROR";
+
+  // Log sempre no servidor — em produção inclui stack para debugging
+  if (!isOperational) {
+    logger.error("Unexpected error", { status, stack: err.stack || err.message });
+  } else {
+    logger.error(`${code} (${status}): ${err.message}`);
+  }
 
   res.status(status).json({
     status: "error",
