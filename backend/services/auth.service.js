@@ -7,6 +7,7 @@
 // Quando você migrar para banco de dados, só este arquivo muda:
 //   Troca a verificação hardcoded por: SELECT * FROM users WHERE username = ?
 
+const crypto = require("crypto");
 const AppError = require("../utils/AppError");
 
 function getAdminCredentials() {
@@ -33,24 +34,23 @@ function getAdminCredentials() {
  * @returns {{ username: string, role: string }}
  */
 /**
- * Constant-time comparison para evitar timing attacks.
+ * Comparação em tempo constante usando crypto nativo do Node.js.
+ * Evita timing attacks ao comparar credenciais.
  */
-function constantTimeCompare(a, b) {
-  if (!a || !b || typeof a !== "string" || typeof b !== "string") return false;
-  if (a.length !== b.length) return false;
-  let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
-  return result === 0;
+function timingSafeStringEqual(a, b) {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  // timingSafeEqual lança erro se os buffers tiverem tamanhos diferentes
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
 }
 
 function verifyCredentials(username, password) {
   const adminUser = getAdminCredentials();
 
-  // Usa constant-time para evitar timing attacks
-  const usernameMatches = constantTimeCompare(username, adminUser.username);
-  const passwordMatches = constantTimeCompare(password, adminUser.password);
+  const usernameMatches = timingSafeStringEqual(username, adminUser.username);
+  const passwordMatches = timingSafeStringEqual(password, adminUser.password);
   
   if (!usernameMatches || !passwordMatches) {
     throw new AppError("Usuário ou senha incorretos", 401, "INVALID_CREDENTIALS");
