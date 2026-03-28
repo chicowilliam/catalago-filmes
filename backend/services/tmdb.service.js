@@ -205,7 +205,7 @@ async function resolvePosterForTitle(title, type) {
  * @param {string} search - texto de busca (opcional)
  * @returns {Promise<{ items: Array, stale: boolean }>}
  */
-async function fetch(type, search) {
+async function fetchFromTmdb(type, search) {
   const safeSearch = (search || "").trim();
   const autoPages = getTmdbAutoPages();
   const limit = getCatalogLimit();
@@ -294,4 +294,4 @@ async function fetch(type, search) {
   }
 }
 
-module.exports = { fetch, attachTrailers, resolvePosterForTitle };
+module.exports = { fetchFromTmdb, attachTrailers, resolvePosterForTitle };

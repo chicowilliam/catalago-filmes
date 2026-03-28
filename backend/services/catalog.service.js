@@ -34,7 +34,7 @@ async function listCatalog(type, search) {
     );
   }
 
-  const { items, stale } = await tmdbService.fetch(type, search);
+  const { items, stale } = await tmdbService.fetchFromTmdb(type, search);
 
   if (!search && items.length === 0) {
     throw new AppError(
@@ -53,24 +53,4 @@ async function listCatalog(type, search) {
   };
 }
 
-function unsupportedLocalMutation() {
-  throw new AppError(
-    "Operacao desativada: o catalogo agora e somente leitura via API externa (TMDB).",
-    501,
-    "CATALOG_READ_ONLY"
-  );
-}
-
-async function createItem() {
-  unsupportedLocalMutation();
-}
-
-async function updateItem() {
-  unsupportedLocalMutation();
-}
-
-async function deleteItem() {
-  unsupportedLocalMutation();
-}
-
-module.exports = { listCatalog, createItem, updateItem, deleteItem };
+module.exports = { listCatalog };
