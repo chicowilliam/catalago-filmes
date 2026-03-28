@@ -2,6 +2,65 @@
 
 ## 0) Historico de Sessoes
 
+### 28/03/2026 - Backend quality and test coverage improvements (session 2)
+
+**Objective:**
+Apply remaining medium-priority fixes: centralize logging, remove dead write routes, upgrade crypto comparison, fix naming collision, and significantly expand test coverage.
+
+**Changes applied:**
+
+- `backend/middlewares/errorHandler.js`
+  - Replaced direct `console.error` calls with centralized `logger.error` from `backend/utils/logger.js` — all backend log output is now consistent and structured.
+
+- `backend/routes/catalog.routes.js`
+  - Removed POST, PUT and DELETE routes — catalog is read-only via TMDB. Only `GET /api/catalog` remains.
+
+- `backend/controllers/catalog.controller.js`
+  - Removed `parseAndValidateBody`, `create`, `update` and `remove` handlers — no longer needed after removing write routes.
+  - Removed unused import of `catalog.validator`.
+
+- `backend/services/catalog.service.js`
+  - Removed `unsupportedLocalMutation`, `createItem`, `updateItem` and `deleteItem` — dead code eliminated.
+
+- `backend/services/auth.service.js`
+  - Replaced hand-rolled `constantTimeCompare` with Node.js native `crypto.timingSafeEqual` — more robust, auditable, and future-proof.
+
+- `backend/services/tmdb.service.js`
+  - Renamed exported function `fetch` → `fetchFromTmdb` to avoid shadowing the Node.js 18+ global `fetch`.
+
+- `backend/controllers/auth.controller.js`
+  - `logout` now calls `res.clearCookie("portfolio.sid")` after destroying the session — cookie is removed from the browser immediately.
+
+- `backend/utils/AppError.js`
+  - Added `isOperational: true` flag — allows `errorHandler` to distinguish planned errors from unexpected bugs.
+
+- `backend/middlewares/errorHandler.js`
+  - Uses `isOperational` flag: unexpected errors are logged with full stack but the client only sees a generic message in production.
+
+- `public/index.html`
+  - Added Open Graph (`og:title`, `og:description`, `og:image`, `og:url`, `og:locale`) and Twitter Card meta tags — link previews now appear on LinkedIn, WhatsApp, etc.
+  - `<title>` updated to `"CatalogoX — Portfólio Full Stack | Vinicius William"`.
+
+- `public/favicon.svg` *(new file)*
+  - SVG favicon with "CX" initials on red background (#e50914) — replaces missing `favicon.ico` reference.
+
+- `backend/__tests__/catalog.routes.test.js`
+  - Mock updated from `fetch` to `fetchFromTmdb`.
+  - Removed obsolete `CATALOG_SOURCE=local` env var.
+  - Replaced POST/PUT tests (routes removed) with: 503 when TMDB not configured, 400 on invalid type.
+
+- `backend/__tests__/auth.routes.test.js`
+  - Added `GET /api/auth/me` test with active session.
+  - Replaced simple logout test with agent-based flow: login → confirm `/me` 200 → logout → confirm `/me` 401.
+
+- `backend/__tests__/tmdb.service.test.js` *(new file)*
+  - 10 unit tests with `https` module mocked via `jest.spyOn`.
+  - Covers: item mapping, type filter, search endpoint, in-memory cache, HTTP error 500, trailer attachment (Trailer/Teaser/fallback/already-filled), non-tmdb-id items.
+
+**Test results:** 37 tests, 5 suites — all passing.
+
+---
+
 ### 28/03/2026 - Security, UX and backend quality improvements
 
 **Objective:**
