@@ -5,8 +5,18 @@
 const request = require('supertest');
 const express = require('express');
 const session = require('express-session');
-const fs = require('fs');
-const path = require('path');
+
+// Mock do tmdb.service para desacoplar os testes da API real
+jest.mock('../services/tmdb.service', () => ({
+  fetchFromTmdb: jest.fn().mockResolvedValue({
+    items: [
+      { id: 'tmdb-1', title: 'Filme Teste', type: 'movie',  image: 'https://image.tmdb.org/t/p/w500/test.jpg', synopsis: 'Sinopse do filme de teste.', trailerId: '' },
+      { id: 'tmdb-2', title: 'Série Teste', type: 'series', image: 'https://image.tmdb.org/t/p/w500/test2.jpg', synopsis: 'Sinopse da série de teste.', trailerId: '' },
+    ],
+    stale: false,
+  }),
+  attachTrailers: jest.fn().mockImplementation((items) => Promise.resolve(items)),
+}));
 
 const catalogRoutes = require('../routes/catalog.routes');
 const authRoutes = require('../routes/auth.routes');
@@ -14,7 +24,8 @@ const errorHandler = require('../middlewares/errorHandler');
 
 process.env.ADMIN_USERNAME = 'admin';
 process.env.ADMIN_PASSWORD = 'admin123';
-process.env.CATALOG_SOURCE = 'local';
+// TMDB_BEARER_TOKEN precisa existir para isTmdbEnabled() retornar true
+process.env.TMDB_BEARER_TOKEN = 'test-token-mock';
 
 // Criar app de teste
 const app = express();
@@ -59,41 +70,26 @@ describe('Catalog Routes', () => {
     expect(response.body.status).toBe('success');
   });
 
-  // TESTE 4: Criar filme sem autenticação (deve falhar)
-  test('POST /api/catalog - deve rejeitar sem autenticação', async () => {
-    const response = await request(app)
-      .post('/api/catalog')
-      .send({
-        title: 'Novo Filme',
-        type: 'movie',
-        image: 'https://example.com/movie.jpg',
-        synopsis: 'Uma sinopse com mais de 10 caracteres'
-      });
+  // TESTE 4: TMDB não configurada deve retornar 503
+  test('GET /api/catalog - deve retornar 503 quando TMDB não está configurada', async () => {
+    const savedToken = process.env.TMDB_BEARER_TOKEN;
+    delete process.env.TMDB_BEARER_TOKEN;
+    delete process.env.TMDB_API_KEY;
 
-    expect(response.status).toBe(401);
-    expect(response.body.status).toBe('error');
+    const response = await request(app).get('/api/catalog');
+
+    process.env.TMDB_BEARER_TOKEN = savedToken;
+
+    expect(response.status).toBe(503);
+    expect(response.body.code).toBe('TMDB_NOT_CONFIGURED');
   });
 
-  // TESTE 5: Criar filme com dados inválidos
-  test('POST /api/catalog - deve rejeitar dados inválidos', async () => {
-    const agent = request.agent(app);
-
-    await agent
-      .post('/api/auth/login')
-      .send({
-        username: 'admin',
-        password: 'admin123'
-      });
-
-    const response = await agent
-      .post('/api/catalog')
-      .send({
-        title: 'A', // Muito curto
-        type: 'invalid',
-        image: 'nao_e_url'
-      });
+  // TESTE 5: Tipo inválido deve retornar 400
+  test('GET /api/catalog?type=invalido - deve retornar 400', async () => {
+    const response = await request(app)
+      .get('/api/catalog?type=invalido');
 
     expect(response.status).toBe(400);
-    expect(response.body.code).toBe('VALIDATION_ERROR');
+    expect(response.body.code).toBe('INVALID_TYPE');
   });
 });

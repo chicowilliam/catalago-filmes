@@ -78,21 +78,35 @@ describe('Auth Routes', () => {
     expect(response.body.status).toBe('error');
   });
 
-  // TESTE 5: Logout
-  test('POST /api/auth/logout - deve fazer logout', async () => {
-    // Primeiro faz login
-    await request(app)
-      .post('/api/auth/login')
-      .send({
-        username: 'admin',
-        password: 'admin123'
-      });
+  // TESTE 5: Ver quem está logado com sessão ativa
+  test('GET /api/auth/me - deve retornar dados do usuário autenticado', async () => {
+    const agent = request.agent(app);
+    await agent.post('/api/auth/login').send({ username: 'admin', password: 'admin123' });
 
-    // Depois faz logout
-    const response = await request(app)
-      .post('/api/auth/logout');
+    const response = await agent.get('/api/auth/me');
 
     expect(response.status).toBe(200);
     expect(response.body.status).toBe('success');
+    expect(response.body.user.role).toBe('admin');
+    expect(response.body.user.username).toBe('admin');
+  });
+
+  // TESTE 6: Logout com sessão ativa destrói a sessão
+  test('POST /api/auth/logout - deve encerrar sessão e bloquear /me', async () => {
+    const agent = request.agent(app);
+    await agent.post('/api/auth/login').send({ username: 'admin', password: 'admin123' });
+
+    // Confirmar que está logado
+    const meBeforeLogout = await agent.get('/api/auth/me');
+    expect(meBeforeLogout.status).toBe(200);
+
+    // Fazer logout
+    const logoutResponse = await agent.post('/api/auth/logout');
+    expect(logoutResponse.status).toBe(200);
+    expect(logoutResponse.body.status).toBe('success');
+
+    // Confirmar que sessão foi destruída
+    const meAfterLogout = await agent.get('/api/auth/me');
+    expect(meAfterLogout.status).toBe(401);
   });
 });
