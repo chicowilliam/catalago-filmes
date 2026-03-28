@@ -8,12 +8,9 @@
 
 const express = require("express");
 const router = express.Router();
-const isAdmin = require("../middlewares/isAdmin");
 const catalog = require("../controllers/catalog.controller");
 
-router.get("/",       catalog.list);
-router.post("/",      isAdmin, catalog.create);
-router.put("/:id",    isAdmin, catalog.update);
-router.delete("/:id", isAdmin, catalog.remove);
+// O catálogo é somente-leitura via TMDB. Apenas GET está disponível.
+router.get("/", catalog.list);
 
 module.exports = router;
