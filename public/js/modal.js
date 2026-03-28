@@ -63,7 +63,7 @@ function buildCatalogModalContent(item) {
   ratingDiv.appendChild(starsContainer);
   modalContent.appendChild(closeBtn);
 
-  if (item.trailerId) {
+  if (item.trailerId && /^[a-zA-Z0-9_-]+$/.test(item.trailerId)) {
     const iframe = document.createElement("iframe");
     iframe.src = `https://www.youtube.com/embed/${item.trailerId}`;
     iframe.allowFullscreen = true;

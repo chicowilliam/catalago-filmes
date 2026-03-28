@@ -34,10 +34,23 @@ async function listCatalog(type, search) {
     );
   }
 
-  const data = await tmdbService.fetch(type, search);
-  const limited = limitAndBalance(data, type, search);
+  const { items, stale } = await tmdbService.fetch(type, search);
+
+  if (!search && items.length === 0) {
+    throw new AppError(
+      "TMDB retornou catalogo vazio. Verifique se sua chave de API esta valida e tem acesso ao endpoint de trending.",
+      502,
+      "TMDB_EMPTY_CATALOG"
+    );
+  }
+
+  const limited = limitAndBalance(items, type, search);
   const withTrailers = await tmdbService.attachTrailers(limited, 12);
-  return { source: "tmdb", data: withTrailers };
+  return {
+    source: stale ? "tmdb-stale" : "tmdb",
+    data: withTrailers,
+    ...(stale && { warning: "Catalogo temporariamente em cache. TMDB pode estar indisponivel." }),
+  };
 }
 
 function unsupportedLocalMutation() {

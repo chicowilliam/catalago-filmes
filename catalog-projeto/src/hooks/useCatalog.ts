@@ -28,18 +28,19 @@ export function useCatalog() {
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const fetchCatalog = useCallback(async (searchValue = "", silent = false) => {
+  const fetchCatalog = useCallback(async (searchValue = "", silent = false, signal?: AbortSignal) => {
     if (!silent) {
       setIsLoading(true);
       setError(null);
     }
 
     try {
-      const response = await listCatalog(searchValue);
+      const response = await listCatalog(searchValue, signal);
       setItems(response.data);
       setSource(response.source);
       setLastUpdated(new Date());
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
       if (err instanceof ApiClientError) {
         if (err.code === "TMDB_NOT_CONFIGURED") {
           setError("TMDB nao configurada no backend. Verifique TMDB_API_KEY ou TMDB_BEARER_TOKEN no .env.");
@@ -60,7 +61,9 @@ export function useCatalog() {
 
   useEffect(() => {
     setFavoriteIds(readFavoriteIds());
-    void fetchCatalog();
+    const controller = new AbortController();
+    void fetchCatalog("", false, controller.signal);
+    return () => controller.abort();
   }, [fetchCatalog]);
 
   useEffect(() => {

@@ -11,7 +11,7 @@ export function parseStoredJSON(storageKey, fallbackValue) {
     const parsed = JSON.parse(raw);
     return parsed ?? fallbackValue;
   } catch {
-    localStorage.removeItem(storageKey);
+    try { localStorage.removeItem(storageKey); } catch { /* ignorar */ }
     return fallbackValue;
   }
 }
@@ -101,11 +101,19 @@ export class FavoritesManager {
   }
 
   save() {
-    localStorage.setItem("favorites", JSON.stringify(this.favorites));
+    try {
+      localStorage.setItem("favorites", JSON.stringify(this.favorites));
+    } catch {
+      /* localStorage indisponível (modo privado restrito ou storage cheio) */
+    }
   }
 
   getFavorites() {
     return this.favorites;
+  }
+
+  syncFromStorage() {
+    this.favorites = parseStoredJSON("favorites", []);
   }
 }
 
@@ -117,7 +125,11 @@ export class RatingManager {
   setRating(movieId, rating) {
     if (rating >= 1 && rating <= 5) {
       this.ratings[movieId] = rating;
-      localStorage.setItem("ratings", JSON.stringify(this.ratings));
+      try {
+        localStorage.setItem("ratings", JSON.stringify(this.ratings));
+      } catch {
+        /* localStorage indisponível */
+      }
       return true;
     }
     return false;

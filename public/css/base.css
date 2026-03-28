@@ -43,6 +43,16 @@
   --accent-gradient: linear-gradient(135deg, #e50914 0%, #7a0008 100%);
 }
 
+/* Transição suave ao trocar de tema — ativada temporariamente via JS */
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition:
+    background-color 300ms ease,
+    color 300ms ease,
+    border-color 300ms ease !important;
+}
+
 * {
   margin: 0;
   padding: 0;

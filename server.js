@@ -17,6 +17,13 @@ if (!process.env.SESSION_SECRET) {
    throw new Error("SESSION_SECRET nao definido. Configure no ambiente antes de iniciar o servidor.");
 }
 
+const REQUIRED_ENV_VARS = ["ADMIN_USERNAME", "ADMIN_PASSWORD", "TMDB_BEARER_TOKEN"];
+for (const varName of REQUIRED_ENV_VARS) {
+   if (!process.env[varName]) {
+      throw new Error(`${varName} nao definido. Configure no .env antes de iniciar o servidor.`);
+   }
+}
+
 if (isProduction) {
    app.set("trust proxy", 1);
 }
@@ -91,8 +98,16 @@ app.use(
 /* =========================
    ROTAS DA API
 ========================= */
+const catalogLimiter = rateLimit({
+   windowMs: 60 * 1000,
+   limit: 20,
+   standardHeaders: "draft-8",
+   legacyHeaders: false,
+   message: { status: "error", code: "RATE_LIMIT_EXCEEDED", message: "Muitas requisicoes ao catalogo. Aguarde antes de tentar novamente." }
+});
+
 app.use("/api/auth", authRoutes);
-app.use("/api/catalog", catalogRoutes);
+app.use("/api/catalog", catalogLimiter, catalogRoutes);
 
 app.get("/api/health", (req, res) => {
    res.json({

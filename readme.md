@@ -61,5 +61,5 @@
 
 1. **Clone o repositório**
    ```bash
-   git clone https://github.com/chicolindo/catalago-filmes.git
+   git clone https://github.com/chicowilliam/catalago-filmes.git
    cd catalago-filmes

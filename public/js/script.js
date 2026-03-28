@@ -20,9 +20,9 @@
 import { renderStackFolders, setupFilterControls } from "./portfolio-sections.js";
 import { state } from "./state.js";
 import { searchInput, stackFoldersContainer, themeToggle, modal, loader } from "./dom.js";
-import { setSearchFeedback } from "./utils.js";
+import { setSearchFeedback, favoritesManager } from "./utils.js";
 import { loadCatalog, stopAutoCatalogRefresh, updateCatalogSourceIndicator } from "./catalog.js";
-import { applyFilterWithTransition, getGridColumnCount, setupGridInteractions } from "./render.js";
+import { applyFilterWithTransition, getGridColumnCount, setupGridInteractions, renderCurrentView } from "./render.js";
 import { openStackModal, closeModal } from "./modal.js";
 import { setupMotionEnhancements, setupMotionHoverBindings } from "./motion.js";
 import {
@@ -158,6 +158,12 @@ document.addEventListener("DOMContentLoaded", initializeUi);
 window.addEventListener("load", initializeUi);
 
 window.addEventListener("beforeunload", stopAutoCatalogRefresh);
+
+window.addEventListener("storage", (event) => {
+  if (event.key !== "favorites") return;
+  favoritesManager.syncFromStorage();
+  renderCurrentView();
+});
 
 if (window.matchMedia) {
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (event) => {

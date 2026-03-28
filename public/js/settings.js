@@ -16,7 +16,16 @@ export function hasExplicitThemePreference() {
   return savedTheme === "dark" || savedTheme === "light";
 }
 
+function startThemeTransition() {
+  htmlElement.classList.add("theme-transition");
+  setTimeout(
+    () => htmlElement.classList.remove("theme-transition"),
+    350
+  );
+}
+
 export function applyTheme(theme) {
+  startThemeTransition();
   const normalizedTheme = theme === "dark" ? "dark" : "light";
   if (normalizedTheme === "dark") {
     htmlElement.setAttribute("data-theme", "dark");

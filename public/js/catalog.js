@@ -41,6 +41,37 @@ function renderInlineRetry(grid, message) {
 }
 
 // ---------------------------------------------------------------------------
+// Retry com backoff exponencial
+// ---------------------------------------------------------------------------
+
+const MAX_RETRIES = 3;
+const RETRY_BASE_DELAY_MS = 800;
+
+async function fetchCatalogWithRetry(url, signal) {
+  let lastError;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    if (attempt > 0) {
+      const delay = RETRY_BASE_DELAY_MS * 2 ** (attempt - 1);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      if (signal.aborted) throw new DOMException("Aborted", "AbortError");
+      if (attempt === 1) showToast("Reconectando ao catalogo...", "info");
+    }
+
+    try {
+      const res = await fetch(url, { signal });
+      if (!res.ok) throw new Error(`Erro ao carregar catálogo: ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      if (err.name === "AbortError") throw err;
+      lastError = err;
+    }
+  }
+
+  throw lastError;
+}
+
+// ---------------------------------------------------------------------------
 // Carregamento do catálogo via API
 // ---------------------------------------------------------------------------
 
@@ -66,13 +97,10 @@ export async function loadCatalog(search = "", options = {}) {
       renderSkeletons();
     }
 
-    const res = await fetch(`/api/catalog?type=all&search=${encodeURIComponent(search)}`, {
-      signal: controller.signal,
-    });
-
-    if (!res.ok) throw new Error(`Erro ao carregar catálogo: ${res.status}`);
-
-    const response = await res.json();
+    const response = await fetchCatalogWithRetry(
+      `/api/catalog?type=all&search=${encodeURIComponent(search)}`,
+      controller.signal
+    );
     if (requestId !== state.latestCatalogRequestId) return;
 
     state.allItems = Array.isArray(response.data) ? response.data : [];

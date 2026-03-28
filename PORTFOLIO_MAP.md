@@ -2,6 +2,71 @@
 
 ## 0) Historico de Sessoes
 
+### 28/03/2026 - Security, UX and backend quality improvements
+
+**Objective:**
+Apply a complete set of security fixes, UX improvements and backend quality enhancements across all three layers of the project (vanilla frontend, React frontend, backend).
+
+**Security fixes applied:**
+- `public/js/modal.js`
+  - YouTube `trailerId` is now validated against `/^[a-zA-Z0-9_-]+$/` before being inserted into the `iframe.src` — prevents XSS injection.
+- `public/js/utils.js`
+  - All `localStorage` calls (read/write) wrapped in `try/catch` to avoid crashes in browsers with storage disabled or in restricted private mode.
+- `catalog-projeto/src/components/ErrorBoundary.tsx` *(new file)*
+  - React `ErrorBoundary` class component created.
+- `catalog-projeto/src/main.tsx`
+  - `<App />` wrapped with `<ErrorBoundary>` so unhandled React errors show a fallback screen instead of a blank page.
+- `catalog-projeto/src/hooks/useCatalog.ts`
+  - `AbortController` added to the initial `useEffect` fetch — cancels in-flight requests when the component unmounts; prevents memory leak warnings.
+- `catalog-projeto/src/services/catalogService.ts`
+  - `listCatalog()` now accepts and forwards an optional `AbortSignal`.
+- `server.js`
+  - `ADMIN_USERNAME`, `ADMIN_PASSWORD` and `TMDB_BEARER_TOKEN` validated at startup — server refuses to boot if any is missing.
+
+**Vanilla frontend UX improvements:**
+- `public/css/base.css` + `public/js/settings.js`
+  - Dark mode theme switch now has a smooth 300ms transition instead of an instant flash.
+  - CSS class `html.theme-transition` temporarily applies background/color/border transitions only during the switch.
+- `public/css/components.css`
+  - Skeleton loading shimmer rebuilt using a `::after` pseudo-element with `translateX` animation — the shimmer is now actually visible to the user.
+  - Added `@media (prefers-reduced-motion: reduce)` to disable shimmer for users with motion sensitivity.
+- `public/js/utils.js`
+  - `FavoritesManager.syncFromStorage()` method added to reload favorites from `localStorage`.
+- `public/js/script.js`
+  - `window.addEventListener("storage")` listener added — favorites now sync in real time between multiple open browser tabs.
+- `public/js/catalog.js`
+  - Replaced single `fetch()` call with `fetchCatalogWithRetry()` which retries up to 3 times with exponential backoff (800ms → 1.6s → 3.2s) before showing the error button to the user.
+
+**Backend quality improvements:**
+- `backend/utils/logger.js` *(new file)*
+  - Centralized logger: human-readable in development, structured JSON in production (`NODE_ENV=production`). Replaces all `console.log/warn/error` in tmdb.service.js.
+- `backend/services/tmdb.service.js`
+  - Three `Map()` instances replaced by `CacheStore` class with `get()`, `getStale()` and `set()` — `getStale()` returns expired data as fallback when TMDB is unreachable.
+  - `fetch()` refactored: on TMDB failure, tries `cache.getStale()` before propagating the error; returns `{ items, stale }` instead of bare array.
+  - All `console.*` calls replaced with `logger.*`.
+- `backend/services/catalog.service.js`
+  - Consumes `{ items, stale }` from `tmdb.service`.
+  - If TMDB returns 0 items on a general (non-search) request, throws `AppError` with code `TMDB_EMPTY_CATALOG` and HTTP 502 — user gets a clear message instead of a silent empty catalog.
+  - When stale cache is used, response includes `source: "tmdb-stale"` and a `warning` field.
+- `server.js`
+  - Added `catalogLimiter` (20 req/min per IP) applied specifically to `POST /api/catalog` — protects the TMDB API key from exhaustion while keeping the global 100 req/min limit for other routes.
+
+**Expected results:**
+- No XSS vectors via YouTube trailer IDs.
+- App no longer crashes when localStorage is unavailable.
+- React shows a user-friendly fallback on unhandled component errors.
+- Fetch cancels cleanly when navigating away quickly.
+- Missing env vars are caught before the server ever starts.
+- Dark mode transitions smoothly without a flash.
+- Skeleton shimmer is visible and respects reduced-motion preference.
+- Favorites stay in sync across multiple open tabs.
+- Transient network failures are retried automatically before showing an error.
+- TMDB outages return stale cached data with a warning instead of crashing.
+- Backend logs are structured and consistent.
+- `/api/catalog` has its own stricter rate limit to protect the TMDB quota.
+
+---
+
 ### 26/03/2026 - Transicao entre abas no frontend vanilla (GSAP, sem piscar)
 **Objetivo:**
 - Corrigir o "piscar" ao trocar de aba no frontend legado (`public/`).
