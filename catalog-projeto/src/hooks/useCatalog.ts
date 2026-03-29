@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ApiClientError } from "@/services/apiClient";
+
+const AUTO_REFRESH_MS = 5 * 60 * 1000; // 5 minutos
+const PAGE_SIZE = 20;
+
 import { listCatalog } from "@/services/catalogService";
 import type { CatalogItem, CatalogType } from "@/types/catalog";
 
@@ -27,6 +31,7 @@ export function useCatalog() {
   const [source, setSource] = useState<string>("local");
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [page, setPage] = useState(1);
 
   const fetchCatalog = useCallback(async (searchValue = "", silent = false, signal?: AbortSignal) => {
     if (!silent) {
@@ -66,10 +71,15 @@ export function useCatalog() {
     return () => controller.abort();
   }, [fetchCatalog]);
 
+  // Reseta a página ao mudar tipo ou busca
+  useEffect(() => {
+    setPage(1);
+  }, [activeType, search]);
+
   useEffect(() => {
     const timer = window.setInterval(() => {
       void fetchCatalog(search, true);
-    }, 300000);
+    }, AUTO_REFRESH_MS);
 
     return () => window.clearInterval(timer);
   }, [fetchCatalog, search]);
@@ -98,6 +108,13 @@ export function useCatalog() {
       favorites,
     };
   }, [items, favoriteIds]);
+
+  const totalPages = Math.max(1, Math.ceil(visibleItems.length / PAGE_SIZE));
+
+  const pagedItems = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return visibleItems.slice(start, start + PAGE_SIZE);
+  }, [visibleItems, page]);
 
   const submitSearch = useCallback(
     async (nextSearch: string) => {
@@ -129,7 +146,7 @@ export function useCatalog() {
   );
 
   return {
-    items: visibleItems,
+    items: pagedItems,
     allItems: items,
     activeType,
     setActiveType,
@@ -142,6 +159,9 @@ export function useCatalog() {
     lastUpdated,
     favoriteIds,
     toggleFavorite,
+    page,
+    setPage,
+    totalPages,
     retry: () => fetchCatalog(search),
   };
 }

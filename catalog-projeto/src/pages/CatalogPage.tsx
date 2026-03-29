@@ -62,6 +62,9 @@ export function CatalogPage() {
     retry,
     favoriteIds,
     toggleFavorite,
+    page,
+    setPage,
+    totalPages,
   } = useCatalog();
 
   const { getRating, setRating } = useRatings();
@@ -146,16 +149,41 @@ export function CatalogPage() {
                 {activeType === "about" ? (
                   <AboutSection />
                 ) : (
-                  <CatalogGrid
-                    items={items}
-                    isLoading={isLoading}
-                    error={error}
-                    onRetry={retry}
-                    favoriteIds={favoriteIds}
-                    onFavoriteToggle={(item) => handleToggleFavorite(item.id)}
-                    onOpenModal={open}
-                    getRating={getRating}
-                  />
+                  <>
+                    <CatalogGrid
+                      items={items}
+                      isLoading={isLoading}
+                      error={error}
+                      onRetry={retry}
+                      favoriteIds={favoriteIds}
+                      onFavoriteToggle={(item) => handleToggleFavorite(item.id)}
+                      onOpenModal={open}
+                      getRating={getRating}
+                    />
+                    {!isLoading && !error && totalPages > 1 && (
+                      <nav className="catalog-pagination" aria-label="Paginação do catálogo">
+                        <button
+                          className="pagination-btn"
+                          disabled={page === 1}
+                          onClick={() => setPage(page - 1)}
+                          aria-label="Página anterior"
+                        >
+                          ←
+                        </button>
+                        <span className="pagination-info">
+                          {page} / {totalPages}
+                        </span>
+                        <button
+                          className="pagination-btn"
+                          disabled={page === totalPages}
+                          onClick={() => setPage(page + 1)}
+                          aria-label="Próxima página"
+                        >
+                          →
+                        </button>
+                      </nav>
+                    )}
+                  </>
                 )}
               </motion.div>
             </AnimatePresence>
