@@ -17,11 +17,20 @@ if (!process.env.SESSION_SECRET) {
    throw new Error("SESSION_SECRET nao definido. Configure no ambiente antes de iniciar o servidor.");
 }
 
-const REQUIRED_ENV_VARS = ["ADMIN_USERNAME", "ADMIN_PASSWORD", "TMDB_BEARER_TOKEN"];
+const REQUIRED_ENV_VARS = ["ADMIN_USERNAME", "ADMIN_PASSWORD"];
 for (const varName of REQUIRED_ENV_VARS) {
    if (!process.env[varName]) {
       throw new Error(`${varName} nao definido. Configure no .env antes de iniciar o servidor.`);
    }
+}
+
+if (!isProduction && !/^\$2[ab]\$\d{2}\$/.test(process.env.ADMIN_PASSWORD)) {
+   console.warn("⚠️  ADMIN_PASSWORD está em texto puro. Para maior segurança, use um hash bcrypt:");
+   console.warn("   node -e \"require('bcryptjs').hash(process.env.ADMIN_PASSWORD, 12).then(h => console.log(h))\"");
+}
+
+if (!process.env.TMDB_BEARER_TOKEN && !process.env.TMDB_API_KEY) {
+   throw new Error("TMDB_BEARER_TOKEN ou TMDB_API_KEY nao definido. Configure no .env antes de iniciar o servidor.");
 }
 
 if (isProduction) {
