@@ -10,5 +10,6 @@ export async function listCatalog(search = "", signal?: AbortSignal) {
   return apiRequest<CatalogResponse>(`/api/catalog?${params.toString()}`, {
     method: "GET",
     signal,
+    retry: true,
   });
 }
