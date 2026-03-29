@@ -1,6 +1,11 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 
 import type { CatalogItem } from "@/types/catalog";
+
+// Placeholder exibido quando a imagem original do TMDB não carrega
+const PLACEHOLDER_IMAGE =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 450'%3E%3Crect width='300' height='450' fill='%231e1e2e'/%3E%3Ctext x='150' y='225' font-size='16' fill='%23666' text-anchor='middle' dominant-baseline='middle' font-family='sans-serif'%3ESem imagem%3C/text%3E%3C/svg%3E";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 22 },
@@ -22,6 +27,8 @@ export function MovieCard({
   onFavoriteToggle,
   onOpenModal,
 }: MovieCardProps) {
+  const [imgSrc, setImgSrc] = useState(item.image);
+
   return (
     <motion.article
       layout
@@ -39,9 +46,10 @@ export function MovieCard({
       >
         <img
           className="movie-image"
-          src={item.image}
+          src={imgSrc}
           alt={item.title}
           loading="lazy"
+          onError={() => setImgSrc(PLACEHOLDER_IMAGE)}
         />
       </button>
 
