@@ -2,6 +2,64 @@
 
 ## 0) Historico de Sessoes
 
+### 29/03/2026 - Quality improvements items 1-12, README in English, 10 commits pushed
+
+**Objective:**
+Complete a 12-item improvement plan spanning security, UX, code quality, testing, and documentation across both frontends and the backend.
+
+**Commits pushed (10 new commits):**
+
+1. `feat(auth): add bcrypt password hashing support`
+   - `auth.service.js`: isBcryptHash() detection, comparePassword() auto-dispatch
+   - `server.js`: dev-mode warning when ADMIN_PASSWORD is plain text
+   - Installed `bcryptjs ^3.0.3`
+
+2. `fix(middleware): translate isAdmin error messages to Portuguese`
+   - "Not authenticated" → "Não autenticado"
+   - "Access denied" → "Acesso negado"
+
+3. `feat(tmdb): migrate from https.get to native Node.js fetch`
+   - `tmdb.service.js`: replaced manual Promise + body chunking with fetch() + AbortSignal.timeout()
+   - `tmdb.service.test.js`: replaced https.get spy with global.fetch spy
+   - All AppError codes preserved (TMDB_REQUEST_ERROR, TMDB_PARSE_ERROR, TMDB_TIMEOUT, TMDB_NETWORK_ERROR)
+
+4. `feat(catalog): add pagination support to catalog API`
+   - `catalog.controller.js`: reads page/pageSize from query with safe bounds (max 100)
+   - `catalog.service.js`: listCatalog() accepts { page, pageSize }; returns pagination metadata
+
+5. `feat(testing): configure Vitest for React component testing`
+   - `vite.config.ts`: test block with jsdom, globals, vmForks (Windows compatibility)
+   - `tsconfig.app.json`: added vitest/globals to types
+   - Created `src/test/setup.ts` and `src/test/MovieCard.test.tsx` (5 unit tests)
+
+6. `feat(ui): add SVG image fallback placeholder in MovieCard`
+   - Inline SVG "Sem imagem" placeholder swapped in via onError handler
+
+7. `feat(api-client): add retry logic with exponential backoff`
+   - `apiClient.ts`: withRetry() with 3 retries, 800/1600/3200ms backoff
+   - Only retries on 5xx or network errors
+   - `catalogService.ts`: retry: true on catalog request
+
+8. `feat(ui): add animated session validation screen`
+   - `App.tsx`: CheckingScreen component with Framer Motion spinner and pulsing text
+
+9. `feat(catalog): add client-side pagination to React frontend`
+   - `catalog.ts`: new PaginationInfo interface; CatalogResponse updated
+   - `useCatalog.ts`: PAGE_SIZE=20, page state, pagedItems, page auto-reset
+   - `CatalogPage.tsx`: prev/next buttons shown only when totalPages > 1
+   - `components.css`: pagination styles using CSS custom properties
+
+10. `chore: add .gitkeep to preserve empty backend directories`
+    - `backend/data/.gitkeep` and `backend/repositories/.gitkeep`
+
+11. `docs: rewrite README in English with full project documentation`
+    - Full professional English README with tech stack tables, API reference,
+      pagination docs, dual-frontend structure, Getting Started, env vars
+
+**Test results after all changes:** 37/37 backend tests passing (Jest + Supertest). 0 TypeScript errors in React frontend.
+
+---
+
 ### 28/03/2026 - Backend quality and test coverage improvements (session 2)
 
 **Objective:**
