@@ -21,7 +21,11 @@ async function list(req, res, next) {
     if (type && !["movie", "series", "all"].includes(type)) {
       throw new AppError('Tipo inválido. Use "movie", "series" ou "all"', 400, "INVALID_TYPE");
     }
-    const result = await catalogService.listCatalog(type, search);
+
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const pageSize = Math.min(100, Math.max(1, parseInt(req.query.pageSize, 10) || 20));
+
+    const result = await catalogService.listCatalog(type, search, { page, pageSize });
 
     res.json({
       status: "success",
@@ -29,14 +33,14 @@ async function list(req, res, next) {
       ...(result.warning && { warning: result.warning }),
       data: result.data,
       count: result.data.length,
+      pagination: result.pagination,
     });
   } catch (err) {
     next(err);
   }
 }
 
-/**
- * POST /api/catalog
- * Cria um novo item. Rota protegida por isAdmin.
- */
+// Nota: o catálogo é somente-leitura via TMDB.
+// Operações de escrita (POST/PUT/DELETE) não estão disponíveis enquanto
+// a fonte de dados for a API externa.
 module.exports = { list };

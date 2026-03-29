@@ -25,7 +25,7 @@ function limitAndBalance(items, type, search) {
   return result;
 }
 
-async function listCatalog(type, search) {
+async function listCatalog(type, search, { page = 1, pageSize = 20 } = {}) {
   if (!isTmdbEnabled()) {
     throw new AppError(
       "Catalogo local foi removido. Configure TMDB_BEARER_TOKEN ou TMDB_API_KEY no ambiente.",
@@ -45,10 +45,17 @@ async function listCatalog(type, search) {
   }
 
   const limited = limitAndBalance(items, type, search);
-  const withTrailers = await tmdbService.attachTrailers(limited, 12);
+
+  const total = limited.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const start = (page - 1) * pageSize;
+  const paged = limited.slice(start, start + pageSize);
+
+  const withTrailers = await tmdbService.attachTrailers(paged, 12);
   return {
     source: stale ? "tmdb-stale" : "tmdb",
     data: withTrailers,
+    pagination: { page, pageSize, total, totalPages },
     ...(stale && { warning: "Catalogo temporariamente em cache. TMDB pode estar indisponivel." }),
   };
 }
