@@ -4,7 +4,6 @@
 // Não conhece HTTP do Express (req/res), não conhece o banco de dados.
 // Só sabe buscar dados na TMDB e devolvê-los no formato do nosso catálogo.
 
-const https = require("https");
 const AppError = require("../utils/AppError");
 const {
   getCatalogLimit,
@@ -62,38 +61,31 @@ function withApiKey(urlString) {
   return url.toString();
 }
 
-// --- Requisição HTTP simples (sem dependências externas) ---
+// --- Requisição HTTP usando fetch nativo (disponível a partir do Node 18) ---
 
-function httpGetJson(url) {
-  return new Promise((resolve, reject) => {
-    const req = https.get(withApiKey(url), { headers: buildHeaders() }, (res) => {
-      let body = "";
-      res.on("data", (chunk) => { body += chunk; });
-      res.on("end", () => {
-        if (res.statusCode < 200 || res.statusCode >= 300) {
-          return reject(new AppError(`TMDB retornou status ${res.statusCode}`, 502, "TMDB_REQUEST_ERROR"));
-        }
-        try {
-          return resolve(JSON.parse(body));
-        } catch {
-          return reject(new AppError("Resposta inválida da TMDB", 502, "TMDB_PARSE_ERROR"));
-        }
-      });
+async function httpGetJson(url) {
+  let res;
+  try {
+    res = await fetch(withApiKey(url), {
+      headers: buildHeaders(),
+      signal: AbortSignal.timeout(getTmdbTimeoutMs()),
     });
+  } catch (err) {
+    if (err.name === "TimeoutError") {
+      throw new AppError("Tempo limite excedido ao consultar TMDB", 504, "TMDB_TIMEOUT");
+    }
+    throw new AppError("Falha de rede ao consultar TMDB", 502, "TMDB_NETWORK_ERROR");
+  }
 
-    req.setTimeout(getTmdbTimeoutMs(), () => {
-      req.destroy(new Error("TMDB request timeout"));
-    });
+  if (!res.ok) {
+    throw new AppError(`TMDB retornou status ${res.status}`, 502, "TMDB_REQUEST_ERROR");
+  }
 
-    req.on("error", (err) => {
-      if (err.message === "TMDB request timeout") {
-        return reject(new AppError("Tempo limite excedido ao consultar TMDB", 504, "TMDB_TIMEOUT"));
-      }
-      reject(new AppError("Falha de rede ao consultar TMDB", 502, "TMDB_NETWORK_ERROR"));
-    });
-
-    req.end();
-  });
+  try {
+    return await res.json();
+  } catch {
+    throw new AppError("Resposta inválida da TMDB", 502, "TMDB_PARSE_ERROR");
+  }
 }
 
 // --- Transformação: formato TMDB → formato do nosso catálogo ---
