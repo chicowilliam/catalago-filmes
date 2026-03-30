@@ -59,9 +59,6 @@ export function CatalogPage() {
     submitSearch,
     isLoading,
     error,
-    source,
-    counts,
-    lastUpdated,
     retry,
     favoriteIds,
     toggleFavorite,
@@ -197,20 +194,6 @@ export function CatalogPage() {
           <SearchBar open={showCatalog} defaultValue={search} onSearch={submitSearch} isLoading={isLoading} />
         </div>
 
-        {showCatalog && (
-          <div className="catalog-meta">
-            <span>Fonte: {source}</span>
-            <span>
-              Todos: {counts.all} | Filmes: {counts.movie} | Séries: {counts.series} | Favoritos:
-              {" "}{counts.favorites}
-            </span>
-            <span>
-              Atualização automática: 5 min
-              {lastUpdated ? ` | Última: ${lastUpdated.toLocaleTimeString("pt-BR")}` : ""}
-            </span>
-          </div>
-        )}
-
         <div className="tab-transition-viewport" aria-live="polite">
           <div className="tab-transition-stage">
             <AnimatePresence initial={false} mode="sync" custom={direction}>
@@ -228,6 +211,13 @@ export function CatalogPage() {
                   <AboutSection />
                 ) : (
                   <>
+                    {activeType !== "all" && (
+                      <div className="section-headline">
+                        <h2 className="section-title">
+                          {activeType === "movie" ? "Filmes" : activeType === "series" ? "Séries" : "Favoritos"}
+                        </h2>
+                      </div>
+                    )}
                     <CatalogGrid
                       items={items}
                       isLoading={isLoading}
