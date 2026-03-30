@@ -144,10 +144,19 @@
   position: fixed;
   inset: 0;
   z-index: 1050;
-  background: #0d0d0d;
-  border-right: 8px solid #e50914;
-  box-shadow: inset -100px 0 140px -10px rgba(229, 9, 20, 0.4);
+  /*
+    Fundo visivelmente diferente do tema escuro (#121212):
+    gradient escuro-avermelhado no centro, glow vermelho na borda esquerda.
+    border-left = borda ESQUERDA = borda que entra primeiro quando a curtina vem da direita.
+  */
+  background: linear-gradient(to right, #0a0a0a 0%, #111 40%, #0a0a0a 100%);
+  border-left: 6px solid #e50914;
+  box-shadow:
+    inset 80px 0 120px rgba(229, 9, 20, 0.28),  /* glow no interior esquerdo */
+    -4px 0 20px rgba(229, 9, 20, 0.6);           /* brilho externo na borda */
   pointer-events: none;
+  /* Estado padr\00e3o: off-screen à direita. JS sobrescreve via style inline. */
+  transform: translateX(110%);
 }
 
 @media (prefers-reduced-motion: reduce) {

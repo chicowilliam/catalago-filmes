@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { AnimatePresence, motion, useAnimation } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { AboutSection } from "@/components/catalog/AboutSection";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
 import { FilterTabs } from "@/components/catalog/FilterTabs";
@@ -73,43 +73,65 @@ export function CatalogPage() {
   const [direction, setDirection] = useState(1);
   const previousTabIndexRef = useRef(getTabIndex(activeType));
 
-  // ── Wipe curtain ──────────────────────────────────────────────────────────
-  const wipeAnimation = useAnimation();
-  const isWipingRef   = useRef(false);
+  // ── Wipe curtain (CSS transition inline, sem dependência de useAnimation) ──
+  const curtainRef  = useRef<HTMLDivElement>(null);
+  const isWipingRef = useRef(false);
 
   /**
-   * Wipe Star Wars: a cortina entra cobrindo a tela (fase 1),
-   * troca o conteúdo (invisível ao usuário) e sai revelando o novo (fase 2).
-   * Usa useAnimation para controle imperativo sem closures desatualizadas.
+   * Wipe Star Wars usando CSS transition + setTimeout.
+   *
+   * Por que não usamos useAnimation() do Framer Motion:
+   *   - No FM v12 + React 19, useAnimation foi depreciado e pode não acionar
+   *     a animação quando chamado após um await (subscriber pode ser perdido).
+   *
+   * Por que CSS transition + setTimeout garante o timing:
+   *   - `transition: none` + reflow + novo transform = posição instantânea 100%
+   *   - `transition: Xms` + novo transform = animação exatamente de Xms
+   *   - setTimeout(fn, Xms) dispara após a transição terminar — sem distorção
+   *
+   * Timeline:
+   *   0ms → 260ms  cortina entra (cobre a tela)
+   *   260ms         setActiveType (DOM troca sob a cortina, invisível ao usuário)
+   *   260ms → 560ms cortina sai  (revela o novo conteúdo)
    */
-  const runWipe = async (nextType: CatalogType, dir: number) => {
+  const runWipe = (nextType: CatalogType, dir: number) => {
+    const curtain = curtainRef.current;
+    if (!curtain) return;
+
+    const ENTER_MS = 260;
+    const EXIT_MS  = 300;
+    const startX   = dir >= 0 ? '110%' : '-110%';
+    const endX     = dir >= 0 ? '-110%' : '110%';
+
     isWipingRef.current = true;
-    const startX = dir >= 0 ? '110%' : '-110%';
-    const endX   = dir >= 0 ? '-110%' : '110%';
 
-    // Reposiciona instantaneamente fora da tela
-    wipeAnimation.set({ x: startX });
+    // PASSO 1: posição instantânea fora da tela (sem transição)
+    curtain.style.transition = 'none';
+    curtain.style.transform  = `translateX(${startX})`;
+    void curtain.offsetHeight; // força reflow — garante que o browser "viu" o passo 1
 
-    // Fase 1: cobre a tela (260ms)
-    await wipeAnimation.start({
-      x: '0%',
-      transition: { duration: 0.26, ease: [0.76, 0, 0.24, 1] },
-    });
+    // PASSO 2: desliza para cobrir a tela
+    curtain.style.transition = `transform ${ENTER_MS}ms cubic-bezier(0.76, 0, 0.24, 1)`;
+    curtain.style.transform  = 'translateX(0%)';
 
-    // Troca de conteúdo enquanto a cortina cobre tudo
-    setActiveType(nextType);
-    // Micro-pausa para o React commitar o novo DOM
-    await new Promise<void>((resolve) => setTimeout(resolve, 20));
+    // PASSO 3: após cobertura completa, troca o conteúdo
+    setTimeout(() => {
+      setActiveType(nextType); // troca invisível (curtain cobre tudo)
 
-    // Fase 2: sai revelando o novo conteúdo (300ms)
-    await wipeAnimation.start({
-      x: endX,
-      transition: { duration: 0.30, ease: [0.24, 0, 0.76, 1] },
-    });
+      // PASSO 4: inicia saída após um tick para React commitar o novo DOM
+      setTimeout(() => {
+        void curtain.offsetHeight;
+        curtain.style.transition = `transform ${EXIT_MS}ms cubic-bezier(0.24, 0, 0.76, 1)`;
+        curtain.style.transform  = `translateX(${endX})`;
 
-    // Reseta para off-screen padrão (direita)
-    wipeAnimation.set({ x: '110%' });
-    isWipingRef.current = false;
+        // PASSO 5: limpeza — reseta para off-screen padrão
+        setTimeout(() => {
+          curtain.style.transition = 'none';
+          curtain.style.transform  = 'translateX(110%)';
+          isWipingRef.current = false;
+        }, EXIT_MS + 60);
+      }, 16); // 1 frame (16ms)
+    }, ENTER_MS);
   };
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -241,16 +263,8 @@ export function CatalogPage() {
 
       <ToastHost toasts={toasts} onDismiss={removeToast} />
 
-      {/* ── Cortina de wipe Star Wars ──────────────────────────────────────
-           position:fixed garante cobertura total da viewport,
-           mesmo dentro de containers com overflow:hidden.
-           z-index 1050: acima do header e modal, abaixo do toast e login.
-      ─────────────────────────────────────────────────────────────────── */}
-      <motion.div
-        className="wipe-curtain"
-        animate={wipeAnimation}
-        initial={{ x: '110%' }}
-      />
+      {/* Cortina de wipe — plain div, CSS transition controlada pelo JS acima */}
+      <div ref={curtainRef} className="wipe-curtain" aria-hidden="true" />
     </>
   );
 }
