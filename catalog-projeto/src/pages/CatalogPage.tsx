@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { AboutSection } from "@/components/catalog/AboutSection";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
@@ -73,7 +74,7 @@ export function CatalogPage() {
   const [direction, setDirection] = useState(1);
   const previousTabIndexRef = useRef(getTabIndex(activeType));
 
-  // ── Wipe curtain (CSS transition inline, sem dependência de useAnimation) ──
+  // ── Wipe curtain (CSS transition inline, Portal renderiza direto no body) ──
   const curtainRef  = useRef<HTMLDivElement>(null);
   const isWipingRef = useRef(false);
 
@@ -96,13 +97,18 @@ export function CatalogPage() {
    */
   const runWipe = (nextType: CatalogType, dir: number) => {
     const curtain = curtainRef.current;
-    if (!curtain) return;
+    if (!curtain) {
+      console.warn('[wipe] curtainRef.current é null — Portal ainda não montado?');
+      setActiveType(nextType);
+      return;
+    }
 
     const ENTER_MS = 260;
     const EXIT_MS  = 300;
     const startX   = dir >= 0 ? '110%' : '-110%';
     const endX     = dir >= 0 ? '-110%' : '110%';
 
+    console.log(`[wipe] iniciando: ${activeType} → ${nextType} dir=${dir}`);
     isWipingRef.current = true;
 
     // PASSO 1: posição instantânea fora da tela (sem transição)
@@ -116,6 +122,7 @@ export function CatalogPage() {
 
     // PASSO 3: após cobertura completa, troca o conteúdo
     setTimeout(() => {
+      console.log('[wipe] cobertura completa — trocando conteúdo');
       setActiveType(nextType); // troca invisível (curtain cobre tudo)
 
       // PASSO 4: inicia saída após um tick para React commitar o novo DOM
@@ -129,6 +136,7 @@ export function CatalogPage() {
           curtain.style.transition = 'none';
           curtain.style.transform  = 'translateX(110%)';
           isWipingRef.current = false;
+          console.log('[wipe] concluído');
         }, EXIT_MS + 60);
       }, 16); // 1 frame (16ms)
     }, ENTER_MS);
@@ -263,8 +271,12 @@ export function CatalogPage() {
 
       <ToastHost toasts={toasts} onDismiss={removeToast} />
 
-      {/* Cortina de wipe — plain div, CSS transition controlada pelo JS acima */}
-      <div ref={curtainRef} className="wipe-curtain" aria-hidden="true" />
+      {/* Cortina renderizada via Portal direto no <body> — fora de qualquer
+          stacking context do component tree (isolation, perspective, etc.) */}
+      {createPortal(
+        <div ref={curtainRef} className="wipe-curtain" aria-hidden="true" />,
+        document.body
+      )}
     </>
   );
 }
