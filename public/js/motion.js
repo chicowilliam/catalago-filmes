@@ -359,9 +359,13 @@ export function setupMotionEnhancements() {
  *
  * @param {Element[]} hiding   - seções atualmente visíveis que devem sair
  * @param {() => void} onSwap  - callback executado entre saída e entrada
+ * @param {{ direction?: number }} options - direção horizontal: 1 para esquerda->direita, -1 inverso
  */
-export function animateTabSwitch(hiding, onSwap) {
+export function animateTabSwitch(hiding, onSwap, options = {}) {
   const validHiding = hiding.filter(Boolean);
+  const direction = options.direction === -1 ? -1 : 1;
+  const enterFromX = direction === 1 ? -64 : 64;
+  const exitToX = direction === 1 ? 36 : -36;
 
   // Sem GSAP ou com "prefere menos movimento": troca instantânea sem animação
   if (!canUseAdvancedMotion()) {
@@ -379,12 +383,12 @@ export function animateTabSwitch(hiding, onSwap) {
 
     gsapInstance.fromTo(
       entering,
-      { opacity: 0, y: 20 },
+      { opacity: 0, x: enterFromX },
       {
         opacity: 1,
-        y: 0,
-        duration: 0.44,
-        stagger: 0.055,
+        x: 0,
+        duration: 0.48,
+        stagger: 0.05,
         ease: "expo.out",
         clearProps: "transform,opacity",
         overwrite: "auto",
@@ -402,8 +406,8 @@ export function animateTabSwitch(hiding, onSwap) {
   // Anima a saída e só então faz o swap
   gsapInstance.to(validHiding, {
     opacity: 0,
-    y: -12,
-    duration: 0.22,
+    x: exitToX,
+    duration: 0.24,
     ease: "power2.in",
     overwrite: true,
     onComplete: () => {

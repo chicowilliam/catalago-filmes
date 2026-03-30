@@ -29,6 +29,7 @@ import {
   canUseAdvancedMotion,
 } from "./motion.js";
 import { openModal } from "./modal.js";
+import { getFilterTravelDirection, getVisiblePageSections } from "./page-transition.js";
 
 // ---------------------------------------------------------------------------
 // Lazy loading de imagens
@@ -552,6 +553,7 @@ export function applyFilterState(nextType) {
 
 export function applyFilterWithTransition(nextType) {
   if (nextType === state.currentType) return;
+  const previousType = state.currentType;
 
   // Limpar timers legados (caso restem de versões anteriores)
   if (state.filterTransitionTimer) {
@@ -577,16 +579,8 @@ export function applyFilterWithTransition(nextType) {
   }
 
   // Coletar seções atualmente visíveis para animar a saída
-  const allSections = [
-    heroPanel,
-    moviesSection,
-    seriesSection,
-    favoritesSection,
-    aboutSection,
-    stackSection,
-  ].filter(Boolean);
-
-  const currentlyVisible = allSections.filter((s) => !s.classList.contains("is-hidden"));
+  const currentlyVisible = getVisiblePageSections();
+  const direction = getFilterTravelDirection(previousType, nextType);
 
   state.isFilterTransitioning = true;
 
@@ -596,7 +590,7 @@ export function applyFilterWithTransition(nextType) {
     applyFilterState(nextType);       // renderCurrentView mostra as novas seções
     state.disableSectionFade = false;
     state.isFilterTransitioning = false;
-  });
+  }, { direction });
 }
 
 // ---------------------------------------------------------------------------
