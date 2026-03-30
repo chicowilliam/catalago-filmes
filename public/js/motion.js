@@ -350,126 +350,47 @@ export function setupMotionEnhancements() {
 // ---------------------------------------------------------------------------
 
 /**
- * Wipe horizontal entre abas — estilo Star Wars.
+ * Wipe de tela inteira entre abas — estilo Star Wars.
  *
- * Saída e entrada acontecem SIMULTANEAMENTE:
- *   conteúdo antigo desliza para fora enquanto o novo entra pelo lado oposto.
+ * Uma cortina fixa (#pageWipe) varre o viewport inteiro em 2 fases:
+ *   Fase 1 — cortina cobre a tela (0.2 s)  →  swap de conteúdo invisível
+ *   Fase 2 — cortina revela o novo conteúdo (0.24 s)
  *
- * Sequência:
- *   1. Captura seções ocultas antes do swap (referência de "o que vai entrar").
- *   2. Swap de DOM instantâneo (state + toggle de visibilidade).
- *   3. Posiciona novo conteúdo fora da tela e re-exibe antigo no lugar.
- *   4. GSAP Timeline: saída e entrada em paralelo (offset 0).
+ * Como a cortina é position:fixed e z-index 1050, ela cobre header,
+ * main e footer — a tela inteira — não só as seções de conteúdo.
  *
- * @param {Element[]} hiding  - seções atualmente visíveis que devem sair
- * @param {() => void} onSwap - callback que troca o estado e o DOM
- * @param {{ direction?: number }} options - 1 = esq→dir (avançar), -1 = dir→esq (voltar)
+ * @param {Element[]} hiding  - ignorado nesta implementação (swap via onSwap)
+ * @param {() => void} onSwap - callback que atualiza state + visibilidade das seções
+ * @param {{ direction?: number }} options - 1 = avança (esq→dir), -1 = volta (dir→esq)
  */
 export function animateTabSwitch(hiding, onSwap, options = {}) {
-  const validHiding = hiding.filter(Boolean);
-  const direction = options.direction === -1 ? -1 : 1;
-  const vw = Math.max(window.innerWidth, 480);
-  const fromX = direction === 1 ? vw : -vw;   // novo conteúdo começa aqui
-  const toX   = direction === 1 ? -vw : vw;   // conteúdo antigo termina aqui
-  const DURATION = 0.42;
-
   // Sem GSAP ou preferência por menos movimento: troca instantânea
   if (!canUseAdvancedMotion()) {
-    validHiding.forEach((el) => el.classList.add("is-hidden"));
     onSwap?.();
     return;
   }
 
-  // Bloqueia scroll horizontal durante o wipe para evitar barra de rolagem
-  const htmlEl = document.documentElement;
-  const lockScroll  = () => htmlEl.style.setProperty("overflow-x", "hidden");
-  const unlockScroll = () => htmlEl.style.removeProperty("overflow-x");
+  const direction = options.direction === -1 ? -1 : 1;
+  const startX = direction === 1 ? '110%' : '-110%';
+  const endX   = direction === 1 ? '-110%' : '110%';
 
-  // Caso sem conteúdo saindo: só anima a entrada
-  if (!validHiding.length) {
+  const curtain = document.getElementById('pageWipe');
+  if (!curtain) {
+    // Elemento não encontrado no DOM — troca sem animação
     onSwap?.();
-    const entering = Array.from(
-      document.querySelectorAll(".section-block:not(.is-hidden), .hero-panel:not(.is-hidden)")
-    );
-    if (entering.length) {
-      lockScroll();
-      gsapInstance.fromTo(
-        entering,
-        { x: fromX },
-        {
-          x: 0,
-          duration: DURATION,
-          ease: "expo.out",
-          stagger: 0,
-          clearProps: "transform",
-          overwrite: "auto",
-          onComplete: unlockScroll,
-        }
-      );
-    }
     return;
   }
 
-  // 1. Memoriza o que estava oculto ANTES do swap
-  const wasHidden = new Set(
-    Array.from(document.querySelectorAll(".section-block.is-hidden, .hero-panel.is-hidden"))
-  );
+  // Posiciona a cortina fora da tela no lado correto antes de começar
+  gsapInstance.set(curtain, { x: startX });
 
-  // 2. Swap de DOM: altera state + toggle de seções (tudo instantâneo)
-  onSwap?.();
-
-  // 3a. Identifica o que ficou visível e que estava oculto antes = "entrando"
-  const entering = Array.from(
-    document.querySelectorAll(".section-block:not(.is-hidden), .hero-panel:not(.is-hidden)")
-  ).filter((el) => wasHidden.has(el));
-
-  // 3b. Posiciona novo conteúdo fora da tela (sem animação ainda)
-  if (entering.length) {
-    gsapInstance.set(entering, { x: fromX });
-  }
-
-  // 3c. Re-exibe conteúdo antigo para animar a saída
-  //     (onSwap adicionou is-hidden neles; precisamos que apareçam durante o slide)
-  gsapInstance.killTweensOf(validHiding);
-  validHiding.forEach((el) => {
-    el.classList.remove("is-hidden");
-    gsapInstance.set(el, { x: 0 });
-  });
-
-  lockScroll();
-
-  // 4. Timeline com saída e entrada em paralelo (offset 0 = simultâneas)
-  const tl = gsapInstance.timeline({ onComplete: unlockScroll });
-
-  tl.to(
-    validHiding,
-    {
-      x: toX,
-      duration: DURATION,
-      ease: "power3.in",
-      overwrite: true,
-      onComplete: () => {
-        validHiding.forEach((el) => {
-          el.classList.add("is-hidden");
-          gsapInstance.set(el, { clearProps: "all" });
-        });
-      },
-    },
-    0
-  );
-
-  if (entering.length) {
-    tl.to(
-      entering,
-      {
-        x: 0,
-        duration: DURATION + 0.04,
-        ease: "expo.out",
-        stagger: 0,
-        clearProps: "transform",
-        overwrite: "auto",
-      },
-      0
-    );
-  }
+  gsapInstance.timeline()
+    // Fase 1: cortina entra e cobre a tela inteira
+    .to(curtain, { x: '0%', duration: 0.2, ease: 'power3.in' })
+    // No pico da cobertura: troca o conteúdo sem o usuário ver
+    .add(() => onSwap?.())
+    // Fase 2: cortina sai revelando o novo conteúdo
+    .to(curtain, { x: endX, duration: 0.24, ease: 'power2.out' })
+    // Reseta para posição de espera fora da tela (lado direito)
+    .set(curtain, { x: '110%' });
 }

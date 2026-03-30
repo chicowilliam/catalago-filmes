@@ -197,6 +197,39 @@
   }
 }
 
+/* -------------------------------------------------------------------------
+   Cortina de wipe — cobre a tela inteira ao trocar de aba
+   z-index 1050: acima do header (100) e do modal (1000),
+                  abaixo do toast (1200) e da tela de login (1400)
+   ------------------------------------------------------------------------- */
+.page-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  background: var(--bg-primary);
+  transform: translateX(110%);
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Linhas de acento nas laterais — aparecem na borda de entrada/saída */
+.page-wipe::before,
+.page-wipe::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--accent);
+  opacity: 0.45;
+}
+.page-wipe::before { left: 0; }
+.page-wipe::after  { right: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-wipe { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
