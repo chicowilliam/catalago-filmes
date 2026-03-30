@@ -201,26 +201,28 @@
    Cortina de wipe — cobre a tela inteira ao trocar de aba
    z-index 1050: acima do header (100) e do modal (1000),
                   abaixo do toast (1200) e da tela de login (1400)
-   Animação controlada 100% via Web Animations API em motion.js.
-   Sem @keyframes aqui — elimina o pisca causado pela troca de classes.
+
+   IMPORTANTE: sem transform nem transition aqui.
+   O JavaScript (motion.js) controla 100% das transforms inline
+   para garantir que cada passo respeita a ordem de reflow exata.
    ------------------------------------------------------------------------- */
 .page-wipe {
   position: fixed;
   inset: 0;
   z-index: 1050;
-  background: var(--bg-primary);
-  border-right: 6px solid var(--accent);
-  box-shadow: inset -80px 0 120px -10px color-mix(in srgb, var(--accent) 32%, transparent);
-  /* Estado neutro: fora da tela à direita */
-  transform: translateX(110%);
+  /* Cor dura para ser visível sobre qualquer tema */
+  background: #0d0d0d;
+  border-right: 8px solid #e50914;
+  box-shadow: inset -100px 0 140px -10px rgba(229, 9, 20, 0.4);
   pointer-events: none;
-  will-change: transform;
+  /* Estado padrão: escondida fora da tela à direita */
+  transform: translateX(110%);
+  /* Sem transition aqui — JS injeta inline a cada passo */
 }
 
 /*
-  Durante o wipe, suprime animation e transition das seções de conteúdo.
-  Sem isso, animation-fill-mode:both em .section-block parte de opacity:0
-  exatamente quando a cortina se abre, causando o pisca no novo conteúdo.
+  Durante o wipe, suprime animation/transition do conteúdo para evitar
+  o pisca causado por animation-fill-mode:both em .section-block.
 */
 body.page-wipe-active .section-block,
 body.page-wipe-active .hero-panel {
@@ -229,7 +231,7 @@ body.page-wipe-active .hero-panel {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-wipe { display: none; }
+  .page-wipe { display: none !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -352,25 +352,29 @@ export function setupMotionEnhancements() {
 /**
  * Wipe de tela inteira — estilo Star Wars.
  *
- * Usa Web Animations API: UMA única animação sem troca de classes no meio.
- * Isso elimina o "pisca" que ocorria quando a troca de wipe-in → wipe-out
- * tirava o elemento do fill:forwards por 1 frame antes da próxima animar.
+ * Abordagem: CSS transition inline + setTimeout explícito.
+ * Não usa Web Animations API, @keyframes, nem troca de classes mid-animation.
  *
- * Timeline de 560ms:
- *  0%  → 45%  cortina entra (cobre a tela)
- *  45% → 55%  cortina parada (DOM troca aqui, invisivel ao usuário)
- *  55% → 100% cortina sai  (revela o novo conteúdo)
+ * Por que essa abordagem é infalhível:
+ *  1. `void el.offsetHeight` força reflow antes de cada passo.
+ *  2. `transition: none` + reflow + novo valor = posição instantânea garantida.
+ *  3. `transition: Xms` + novo valor = transição garantida SEM distorção de easing.
+ *  4. setTimeout(onSwap, ENTER_MS) dispara exatamente quando a cobertura termina.
  *
- * @param {Element[]} _hiding  - não usado nesta implementação
- * @param {() => void} onSwap  - troca de DOM executada no pico da cobertura
+ * Timeline:
+ *  0ms          cortina é posicionada fora da tela (sem transição)
+ *  0ms→260ms    transição de entrada: cobre a tela
+ *  260ms        onSwap() — DOM troca enquanto a cortina tapa tudo
+ *  260ms→560ms  transição de saída: revela o novo conteúdo
+ *
+ * @param {Element[]} _hiding  - não usado; swap via onSwap no pico
+ * @param {() => void} onSwap  - troca de state + DOM
  * @param {{ direction?: number }} options - 1 = avança, -1 = volta
  */
 export function animateTabSwitch(_hiding, onSwap, options = {}) {
-  const TOTAL_MS   = 560;
-  const COVER_FRAC = 0.45;                            // % quando cobre tudo
-  const SWAP_AT    = Math.round(TOTAL_MS * COVER_FRAC); // 252 ms
-
-  if (prefersReducedMotion) {
+  // Avalia em tempo de execução (não em import-time) para pegar preferência atual
+  const isReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  if (isReducedMotion) {
     onSwap?.();
     return;
   }
@@ -381,47 +385,42 @@ export function animateTabSwitch(_hiding, onSwap, options = {}) {
     return;
   }
 
-  // Cancela qualquer wipe anterior ainda em andamento
+  // Cancela qualquer animação anterior na cortina
   curtain.getAnimations().forEach((a) => a.cancel());
 
+  const ENTER_MS = 260;
+  const EXIT_MS  = 300;
+
   const direction = options.direction === -1 ? -1 : 1;
-  const startX    = direction === 1 ? '110%'  : '-110%';
+  const startX    = direction === 1 ? '110%' : '-110%';
   const endX      = direction === 1 ? '-110%' : '110%';
 
   document.body.classList.add('page-wipe-active');
 
-  // Uma única animação: entrar → cobrir → sair — sem nenhuma troca de classe
-  const anim = curtain.animate(
-    [
-      { transform: `translateX(${startX})`, offset: 0             },
-      { transform: 'translateX(0%)',         offset: COVER_FRAC    },
-      { transform: 'translateX(0%)',         offset: 1 - COVER_FRAC},
-      { transform: `translateX(${endX})`,   offset: 1             },
-    ],
-    {
-      duration : TOTAL_MS,
-      easing   : 'cubic-bezier(0.76, 0, 0.24, 1)',
-      fill     : 'forwards',
-    }
-  );
+  // PASSO 1: posiciona a cortina fora da tela instantaneamente (sem transição)
+  curtain.style.transition = 'none';
+  curtain.style.transform  = `translateX(${startX})`;
+  void curtain.offsetHeight;   // força reflow — garante que o passo 1 é aplicado
 
-  // Garante que onSwap é chamado exatamente uma vez
-  let swapped = false;
-  const doSwap = () => { if (!swapped) { swapped = true; onSwap?.(); } };
+  // PASSO 2: desliza a cortina para cobrir toda a tela
+  curtain.style.transition = `transform ${ENTER_MS}ms cubic-bezier(0.76, 0, 0.24, 1)`;
+  curtain.style.transform  = 'translateX(0%)';
 
-  // Troca o conteúdo no pico da cobertura
-  const swapTimer = setTimeout(doSwap, SWAP_AT);
+  // PASSO 3: após a cobertura completa, troca o DOM e inicia a saída
+  setTimeout(() => {
+    onSwap?.(); // troca invisivel ao usuário
 
-  let done = false;
-  const cleanup = () => {
-    if (done) return;
-    done = true;
-    doSwap(); // garante swap mesmo em edge cases
-    clearTimeout(swapTimer);
-    anim.cancel(); // remove fill, volta ao translateX(110%) do CSS base
-    document.body.classList.remove('page-wipe-active');
-  };
+    // PASSO 4: desliza a cortina para fora revelando o novo conteúdo
+    void curtain.offsetHeight;  // safety reflow
+    curtain.style.transition = `transform ${EXIT_MS}ms cubic-bezier(0.24, 0, 0.76, 1)`;
+    curtain.style.transform  = `translateX(${endX})`;
 
-  anim.onfinish = cleanup;
-  setTimeout(cleanup, TOTAL_MS + 150); // fallback de seguranca
+    // PASSO 5: limpeza — reseta para off-screen padrão
+    setTimeout(() => {
+      curtain.style.transition = 'none';
+      curtain.style.transform  = 'translateX(110%)';
+      document.body.classList.remove('page-wipe-active');
+    }, EXIT_MS + 60);
+
+  }, ENTER_MS);
 }
