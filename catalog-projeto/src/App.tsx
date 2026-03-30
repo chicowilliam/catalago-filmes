@@ -60,7 +60,7 @@ function App() {
   return (
     <AppShell
       username={auth.user?.username ?? (auth.isGuest ? "Visitante" : undefined)}
-      onLogout={auth.isAuthenticated ? auth.logout : undefined}
+      onLogout={auth.isAuthenticated ? auth.logout : () => { /* guest: sem logout */ }}
     >
       <CatalogPage />
     </AppShell>

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Footer } from "@/components/layout/Footer";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 interface AppShellProps {
@@ -9,23 +10,28 @@ interface AppShellProps {
 
 export function AppShell({ children, username, onLogout }: AppShellProps) {
   return (
-    <div className="app-shell">
+    <>
       <header className="app-header">
-        <div>
-          <p className="brand-kicker">Streaming Portfolio</p>
-          <h1 className="brand-title">Catalogo X</h1>
-        </div>
+        <div className="header-inner">
+          <div>
+            <p className="brand-kicker">Streaming Portfolio</p>
+            <h1 className="brand-title">Catalogo X</h1>
+          </div>
 
-        <div className="header-actions">
-          {username ? <span className="user-chip">{username}</span> : null}
-          <ThemeToggle />
-          <button type="button" className="secondary-btn" onClick={onLogout}>
-            Sair
-          </button>
+          <div className="header-actions">
+            {username ? <span className="user-chip">{username}</span> : null}
+            <ThemeToggle />
+            <button type="button" className="secondary-btn" onClick={onLogout}>
+              Sair
+            </button>
+          </div>
         </div>
       </header>
 
-      <main className="app-main">{children}</main>
-    </div>
+      <div className="app-shell">
+        <main className="app-main">{children}</main>
+        <Footer />
+      </div>
+    </>
   );
 }

@@ -47,7 +47,8 @@ describe("MovieCard", () => {
         onOpenModal={vi.fn()}
       />
     );
-    expect(screen.getByText("Inception")).toBeInTheDocument();
+    // O título aparece em dois nós (card-info acessível + card-face-back aria-hidden)
+    expect(screen.getAllByText("Inception")[0]).toBeInTheDocument();
   });
 
   it("deve chamar onOpenModal ao clicar na imagem", () => {

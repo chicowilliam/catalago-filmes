@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { AboutSection } from "@/components/catalog/AboutSection";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
+import { FeaturedSlider } from "@/components/catalog/FeaturedSlider";
 import { FilterTabs } from "@/components/catalog/FilterTabs";
 import { MovieModal } from "@/components/catalog/MovieModal";
 import { SearchBar } from "@/components/catalog/SearchBar";
@@ -51,6 +52,7 @@ function getTabIndex(type: CatalogType) {
 export function CatalogPage() {
   const {
     items,
+    allItems,
     activeType,
     setActiveType,
     search,
@@ -185,9 +187,14 @@ export function CatalogPage() {
   return (
     <>
       <section className="catalog-page">
+        {/* ── Hero slider — visível em todas as abas exceto "Sobre" ── */}
+        {activeType !== "about" && !isLoading && allItems.length > 0 && (
+          <FeaturedSlider items={allItems} onOpenModal={open} />
+        )}
+
         <div className="catalog-toolbar">
           <FilterTabs activeType={activeType} onChange={handleTabChange} />
-          <SearchBar open={showCatalog} defaultValue={search} onSearch={submitSearch} />
+          <SearchBar open={showCatalog} defaultValue={search} onSearch={submitSearch} isLoading={isLoading} />
         </div>
 
         {showCatalog && (

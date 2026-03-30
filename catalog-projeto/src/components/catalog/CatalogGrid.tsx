@@ -2,11 +2,14 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 
 import { MovieCard } from "@/components/catalog/MovieCard";
+import { SkeletonCard } from "@/components/catalog/SkeletonCard";
 import type { CatalogItem } from "@/types/catalog";
+
+const SKELETON_COUNT = 8;
 
 const containerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.07 } },
+  visible: { transition: { staggerChildren: 0.06 } },
 };
 
 interface CatalogGridProps {
@@ -33,7 +36,14 @@ export function CatalogGrid({
   const [hoveredId, setHoveredId] = useState<number | null>(null);
 
   if (isLoading) {
-    return <p className="feedback">Carregando catálogo...</p>;
+    return (
+      <section className="catalog-grid" aria-label="Carregando catálogo" aria-busy="true">
+        {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+          // eslint-disable-next-line react/no-array-index-key
+          <SkeletonCard key={i} />
+        ))}
+      </section>
+    );
   }
 
   if (error) {
@@ -56,20 +66,21 @@ export function CatalogGrid({
       className="catalog-grid"
       aria-live="polite"
       variants={containerVariants}
-      initial={false}
+      initial="hidden"
       animate="visible"
     >
       {items.map((item) => (
         <motion.div
           key={item.id}
+          initial={{ opacity: 0, y: 18 }}
+          animate={{
+            opacity: hoveredId && hoveredId !== item.id ? 0.55 : 1,
+            y: 0,
+            scale: hoveredId === item.id ? 1.06 : 1,
+          }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           onHoverStart={() => setHoveredId(item.id)}
           onHoverEnd={() => setHoveredId(null)}
-          animate={{
-            scale: hoveredId === item.id ? 1.08 : 1,
-            y: hoveredId === item.id ? -8 : 0,
-            opacity: hoveredId && hoveredId !== item.id ? 0.55 : 1,
-          }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
           style={{ transformOrigin: "center top" }}
         >
           <MovieCard

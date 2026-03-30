@@ -6,9 +6,10 @@ interface SearchBarProps {
   open: boolean;
   defaultValue: string;
   onSearch: (value: string) => Promise<void>;
+  isLoading?: boolean;
 }
 
-export function SearchBar({ open, defaultValue, onSearch }: SearchBarProps) {
+export function SearchBar({ open, defaultValue, onSearch, isLoading }: SearchBarProps) {
   const [value, setValue] = useState(defaultValue);
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export function SearchBar({ open, defaultValue, onSearch }: SearchBarProps) {
           exit={{ scale: 0.95, opacity: 0 }}
           transition={{ duration: 0.25 }}
         >
-          <form className="search-box" onSubmit={handleSubmit}>
+          <form className={`search-box${isLoading ? " is-loading" : ""}`} onSubmit={handleSubmit}>
             <input
               type="text"
               value={value}
