@@ -144,6 +144,20 @@
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* ── Reveal ao scroll (fallback sem animation-timeline) ───── */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.reveal-visible {
+  opacity: 1;
+  transform: none;
+}
+
 @supports (animation-timeline: view()) {
   .section-block,
   .stack-folder,
@@ -171,6 +185,7 @@
   .stack-folder:active {
     transform: translate3d(0, -3px, 0) scale(1.01);
     box-shadow: 0 22px 34px rgba(0, 0, 0, 0.24);
+    border-color: var(--accent);
   }
 
   .stack-tech-item {
