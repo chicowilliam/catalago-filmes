@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { AppShell } from "@/components/layout/AppShell";
@@ -41,6 +42,17 @@ function CheckingScreen() {
 function App() {
   const auth = useAuth();
   const canAccessCatalog = auth.isAuthenticated || auth.isGuest;
+
+  // Barra de progresso de scroll
+  useEffect(() => {
+    function updateProgress() {
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = total > 0 ? window.scrollY / total : 0;
+      document.documentElement.style.setProperty("--scroll-progress", String(progress));
+    }
+    window.addEventListener("scroll", updateProgress, { passive: true });
+    return () => window.removeEventListener("scroll", updateProgress);
+  }, []);
 
   if (auth.status === "checking") {
     return <CheckingScreen />;

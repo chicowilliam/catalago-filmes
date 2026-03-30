@@ -733,7 +733,9 @@
   position: fixed;
   inset: 0;
   z-index: 999;
-  background: rgba(0, 0, 0, 0.72);
+  background: rgba(9, 13, 26, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: grid;
   place-items: center;
   padding: 20px;
@@ -1147,5 +1149,35 @@
 
   100% {
     transform: translateX(120%);
+  }
+}
+
+/* ── Mobile: active states para touch ──────────────── */
+@media (pointer: coarse) {
+  .stack-folder {
+    transition-duration: 240ms;
+  }
+
+  .stack-folder:active {
+    transform: translate3d(0, -3px, 0) scale(1.01);
+    box-shadow: 0 22px 34px rgba(0, 0, 0, 0.24);
+    border-color: var(--accent);
+  }
+
+  .stack-tech-item {
+    transition-duration: 240ms;
+  }
+
+  .stack-tech-item:active {
+    transform: translate3d(0, -4px, 0) scale(1.018);
+    box-shadow: 0 24px 34px rgba(0, 0, 0, 0.24);
+  }
+}
+
+@media (hover: none) {
+  .stack-folder:hover,
+  .stack-folder:focus-visible,
+  .stack-tech-item:hover {
+    transform: none;
   }
 }

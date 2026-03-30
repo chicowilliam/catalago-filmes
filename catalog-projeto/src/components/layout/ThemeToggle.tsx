@@ -17,10 +17,14 @@ export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
+    const html = document.documentElement;
+    html.classList.add("theme-transition");
+    html.setAttribute("data-theme", theme);
+    const timer = window.setTimeout(() => html.classList.remove("theme-transition"), 350);
     try {
       localStorage.setItem(STORAGE_KEY, theme);
     } catch {}
+    return () => window.clearTimeout(timer);
   }, [theme]);
 
   const isLight = theme === "light";

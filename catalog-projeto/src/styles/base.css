@@ -24,6 +24,7 @@
   --text: var(--text-primary);
   --text-soft: var(--text-secondary);
   --border: var(--card-border);
+  --scroll-progress: 0;
 
   color: var(--text-primary);
   background:
@@ -62,6 +63,16 @@
   box-sizing: border-box;
 }
 
+/* Transição suave ao trocar de tema — ativada temporariamente via JS */
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition:
+    background-color 300ms ease,
+    color 300ms ease,
+    border-color 300ms ease !important;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -73,6 +84,21 @@ body {
     radial-gradient(920px 460px at 0% 8%, rgba(255, 255, 255, 0.04), transparent 62%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0%, transparent 22%),
     var(--bg-primary);
+}
+
+/* ── Barra de progresso de scroll ──────────────────── */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: calc(var(--scroll-progress) * 100%);
+  height: 3px;
+  background: var(--accent-gradient);
+  z-index: 1800;
+  pointer-events: none;
+  transform-origin: left center;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 44%, transparent);
 }
 
 #root {
@@ -201,6 +227,49 @@ h3,
 
 ::-webkit-scrollbar-thumb:hover {
   background: color-mix(in srgb, var(--border) 50%, var(--text-soft));
+}
+
+/* ── Reveal ao scroll ─────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.reveal-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Aparição automática via CSS (Chrome moderno) */
+@supports (animation-timeline: view()) {
+  .section-block,
+  .stack-folder,
+  .about-fact-card {
+    animation: appear linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 40%;
+  }
+
+  .reveal,
+  .reveal.reveal-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
