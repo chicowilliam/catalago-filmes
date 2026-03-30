@@ -352,23 +352,25 @@ export function setupMotionEnhancements() {
 /**
  * Wipe de tela inteira entre abas — estilo Star Wars.
  *
- * Uma cortina fixa (#pageWipe) varre o viewport inteiro em 2 fases:
- *   Fase 1 — cortina cobre a tela (0.2 s)  →  swap de conteúdo invisível
- *   Fase 2 — cortina revela o novo conteúdo (0.24 s)
+ * Implementação 100% CSS + setTimeout, sem dependência de GSAP.
  *
- * Como a cortina é position:fixed e z-index 1050, ela cobre header,
- * main e footer — a tela inteira — não só as seções de conteúdo.
+ * Fase 1 (260ms): classe .wipe-in → cortina varre e cobre toda a tela.
+ * Pico:           onSwap() troca o conteúdo enquanto a cortina tapa tudo.
+ * Fase 2 (300ms): classe .wipe-out → cortina sai revelando o novo conteúdo.
  *
- * @param {Element[]} hiding  - ignorado nesta implementação (swap via onSwap)
- * @param {() => void} onSwap - callback que atualiza state + visibilidade das seções
- * @param {{ direction?: number }} options - 1 = avança (esq→dir), -1 = volta (dir→esq)
+ * Direção controlada por custom properties CSS injetadas antes da animação:
+ *   --wipe-start: ponto de partida da cortina (ex: 110% ou -110%)
+ *   --wipe-end:   ponto de chegada da cortina ao sair
+ *
+ * @param {Element[]} _hiding  - não usado; swap ocorre via onSwap no pico
+ * @param {() => void} onSwap  - callback que atualiza state + visibilidade
+ * @param {{ direction?: number }} options - 1 = avança (esq→dir), -1 = volta
  */
-export function animateTabSwitch(hiding, onSwap, options = {}) {
-  // Permite pegar o GSAP mesmo que config.js tenha sido avaliado antes do CDN carregar
-  const gsap = gsapInstance || window.gsap || null;
+export function animateTabSwitch(_hiding, onSwap, options = {}) {
+  const COVER_MS  = 260;
+  const REVEAL_MS = 300;
 
-  // Sem GSAP ou preferência por menos movimento: troca instantânea
-  if (!gsap || prefersReducedMotion) {
+  if (prefersReducedMotion) {
     onSwap?.();
     return;
   }
@@ -379,31 +381,32 @@ export function animateTabSwitch(hiding, onSwap, options = {}) {
     return;
   }
 
-  // Impede transições sobrepostas: se outra está em andamento, cancela a anterior
-  gsap.killTweensOf(curtain);
-
   const direction = options.direction === -1 ? -1 : 1;
-  // xPercent usa % da largura do elemento. Para position:fixed;inset:0 = 100vw.
-  const startPct = direction === 1 ? 110 : -110;  // de onde a cortina entra
-  const endPct   = direction === 1 ? -110 : 110;  // para onde a cortina sai
+  curtain.style.setProperty('--wipe-start', direction === 1 ? '110%'  : '-110%');
+  curtain.style.setProperty('--wipe-end',   direction === 1 ? '-110%' : '110%');
 
-  // Classe no body desativa animation/transition das seções durante o wipe.
-  // Sem isso, animation-fill-mode:both em .section-block parte de opacity:0
-  // bem quando a cortina se abre, causando um pisca no novo conteúdo.
+  // Cancela qualquer wipe anterior ainda em andamento
+  curtain.classList.remove('wipe-in', 'wipe-out');
+  void curtain.offsetWidth; // força reflow — garante que a animação reinicia
+
   document.body.classList.add('page-wipe-active');
+  curtain.classList.add('wipe-in');
 
-  // Posiciona a cortina fora da tela no lado correto
-  gsap.set(curtain, { xPercent: startPct });
+  // Fase 2: após a cortina cobrir tudo, troca o conteúdo e inicia a saída
+  setTimeout(() => {
+    onSwap?.();
 
-  gsap.timeline({
-    onComplete: () => document.body.classList.remove('page-wipe-active'),
-  })
-    // Fase 1 — cortina cobre a tela inteira (0.26 s)
-    .to(curtain, { xPercent: 0, duration: 0.26, ease: 'power3.in' })
-    // Pico — troca o conteúdo enquanto a cortina está sobre tudo
-    .add(() => onSwap?.())
-    // Fase 2 — cortina sai revelando o novo conteúdo (0.3 s)
-    .to(curtain, { xPercent: endPct, duration: 0.3, ease: 'power2.out' })
-    // Reseta off-screen à direita para o próximo uso
-    .set(curtain, { xPercent: 110 });
+    curtain.classList.remove('wipe-in');
+    void curtain.offsetWidth;
+    curtain.classList.add('wipe-out');
+
+    const cleanup = () => {
+      curtain.classList.remove('wipe-out');
+      document.body.classList.remove('page-wipe-active');
+    };
+
+    curtain.addEventListener('animationend', cleanup, { once: true });
+    // Fallback de segurança caso animationend não dispare
+    setTimeout(cleanup, REVEAL_MS + 80);
+  }, COVER_MS);
 }

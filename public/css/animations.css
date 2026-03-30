@@ -201,26 +201,43 @@
    Cortina de wipe — cobre a tela inteira ao trocar de aba
    z-index 1050: acima do header (100) e do modal (1000),
                   abaixo do toast (1200) e da tela de login (1400)
+   Implementação: CSS keyframes puras — sem dependência de GSAP.
+   Direção controlada por --wipe-start e --wipe-end injetados via JS.
    ------------------------------------------------------------------------- */
 .page-wipe {
   position: fixed;
   inset: 0;
   z-index: 1050;
-  /* Fundo escuro com borda de acento luminosa — claramente visível sobre qualquer tema */
   background: var(--bg-primary);
-  /* Borda de acento na frente (leading edge): 6px com glow — é a "lâmina" do wipe */
   border-right: 6px solid var(--accent);
   box-shadow: inset -60px 0 80px -20px color-mix(in srgb, var(--accent) 28%, transparent);
-  /* Começa fora da tela à direita — GSAP controla via xPercent */
+  /* Fora da tela por padrão — JS injeta --wipe-start/--wipe-end */
   transform: translateX(110%);
   pointer-events: none;
   will-change: transform;
 }
 
+@keyframes wipeEnter {
+  from { transform: translateX(var(--wipe-start, 110%)); }
+  to   { transform: translateX(0%); }
+}
+
+@keyframes wipeLeave {
+  from { transform: translateX(0%); }
+  to   { transform: translateX(var(--wipe-end, -110%)); }
+}
+
+.page-wipe.wipe-in {
+  animation: wipeEnter 260ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+
+.page-wipe.wipe-out {
+  animation: wipeLeave 300ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+
 /*
   Durante o wipe, impede que .section-block inicie sua animação sectionReveal
-  com animation-fill-mode:both (que parte de opacity:0 e causaria um pisca
-  exatamente quando a cortina se abre revelando o novo conteúdo).
+  via animation-fill-mode:both (opacity:0 → pisca quando a cortina se abre).
 */
 body.page-wipe-active .section-block,
 body.page-wipe-active .hero-panel {

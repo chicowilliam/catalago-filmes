@@ -572,13 +572,7 @@ export function applyFilterWithTransition(nextType) {
     return;
   }
 
-  // Se GSAP não estiver disponível, troca com CSS fade padrão
-  if (!canUseAdvancedMotion()) {
-    applyFilterState(nextType);
-    return;
-  }
-
-  // Coletar seções atualmente visíveis para animar a saída
+  // Coletar seções atualmente visíveis para o callback de swap
   const currentlyVisible = getVisiblePageSections();
   const direction = getFilterTravelDirection(previousType, nextType);
 
