@@ -555,3 +555,13 @@
 .toast-info {
   border-color: #3d73c9;
 }
+
+@keyframes loginShimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+
+  100% {
+    transform: translateX(120%);
+  }
+}

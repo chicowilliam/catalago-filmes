@@ -80,13 +80,13 @@ export function AboutSection() {
             final.
           </h3>
           <p className="about-copy-text">
-            Este projeto combina backend em Node.js + Express, autenticacao por sessao, integracao
-            com TMDB e um frontend em React + TypeScript remodelado para manter a mesma presenca
-            visual do portfolio original.
+            Este projeto combina uma experiencia visual inspirada em streaming com frontend em React
+            + TypeScript. No modo standalone, roda apenas com Vite e dados locais para portfolio,
+            mantendo navegacao fluida, filtros, favoritos e interacoes cinematograficas.
           </p>
           <div className="about-signal-row" aria-label="Caracteristicas do projeto">
             <span className="about-signal">UX focada em catalogo</span>
-            <span className="about-signal">TMDB via backend</span>
+            <span className="about-signal">Vite standalone</span>
             <span className="about-signal">Sessoes e favoritos</span>
           </div>
         </article>
@@ -98,7 +98,7 @@ export function AboutSection() {
           </article>
           <article className="about-fact-card">
             <span className="about-point-label">Back-end</span>
-            <p>Express com sessoes, validacao, erros padronizados e consumo protegido da TMDB.</p>
+            <p>Opcional: API Express pode ser ligada separadamente para cenarios full stack.</p>
           </article>
           <article className="about-fact-card">
             <span className="about-point-label">Experiencia</span>

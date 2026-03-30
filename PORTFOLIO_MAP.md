@@ -2,6 +2,38 @@
 
 ## 0) Historico de Sessoes
 
+### 29/03/2026 - Vite como frontend principal na raiz (modo standalone)
+
+**Objetivo:**
+- Tornar o Vite (React) o fluxo principal de execucao a partir da raiz do repositório.
+- Permitir rodar o frontend sem depender do Express durante desenvolvimento de UI.
+- Aproximar visual da tela de login ao frontend vanilla.
+
+**Ajustes aplicados:**
+- `package.json` (raiz)
+  - `dev` agora executa Vite diretamente via `npm --prefix catalog-projeto run dev`.
+  - `start`/`preview` apontam para o preview do Vite.
+  - Backend ficou opcional em `dev:api` e `start:api`.
+- `catalog-projeto/src/config/runtime.ts` *(novo)*
+  - Flag `USE_BACKEND_API` para alternar entre modo standalone local e modo API.
+- `catalog-projeto/src/services/authService.ts`
+  - Login/sessao local via `localStorage` quando `USE_BACKEND_API` nao esta ativo.
+- `catalog-projeto/src/services/catalogService.ts`
+  - Fonte local de catalogo em modo standalone.
+- `catalog-projeto/src/mocks/catalogData.ts` *(novo)*
+  - Base de filmes e series para uso local sem backend.
+- `catalog-projeto/src/styles/layout.css`
+  - Estilizacao da tela de login alinhada ao visual do vanilla (gradiente, card, botoes e spinner).
+- `catalog-projeto/src/styles/components.css`
+  - Keyframe `loginShimmer` para o loading da autenticacao.
+- `catalog-projeto/src/components/catalog/AboutSection.tsx`
+  - Texto atualizado para refletir modo standalone com backend opcional.
+
+**Resultado esperado:**
+- `npm run dev` na raiz inicia o frontend Vite imediatamente.
+- Login, animacoes e aba Sobre funcionam mesmo sem API ligada.
+- Express continua disponivel apenas quando necessario em fluxo full stack.
+
 ### 29/03/2026 - Transicao horizontal entre abas com modulo dedicado
 
 **Objetivo:**

@@ -4,12 +4,13 @@
   "description": "Catálogo de filmes com Node.js",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
-    "dev:react": "concurrently --names api,ui --prefix-colors cyan,magenta \"nodemon server.js\" \"npm --prefix catalog-projeto run dev\"",
+    "start": "npm --prefix catalog-projeto run preview",
+    "dev": "npm --prefix catalog-projeto run dev",
+    "preview": "npm --prefix catalog-projeto run preview",
+    "dev:api": "nodemon server.js",
+    "start:api": "node server.js",
     "build:frontend": "npm --prefix catalog-projeto run build",
     "build": "npm run build:frontend",
-    "serve:react": "npm run build && npm run dev",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
@@ -27,7 +28,6 @@
     "joi": "^17.9.0"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1",
     "jest": "^29.0.0",
     "jsdom": "^29.0.1",
     "nodemon": "^3.1.14",

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ApiClientError } from "@/services/apiClient";
+import { USE_BACKEND_API } from "@/config/runtime";
 import * as authService from "@/services/authService";
 import type { AuthUser } from "@/types/auth";
 
@@ -33,7 +34,11 @@ export function useAuth() {
 
       setUser(null);
       setStatus("unauthenticated");
-      setError("Nao foi possivel validar sua sessao no servidor.");
+      setError(
+        USE_BACKEND_API
+          ? "Nao foi possivel validar sua sessao no servidor."
+          : "Nao foi possivel validar sua sessao local."
+      );
     }
   }, []);
 
