@@ -371,26 +371,30 @@ export function animateTabSwitch(hiding, onSwap, options = {}) {
   }
 
   const direction = options.direction === -1 ? -1 : 1;
-  const startX = direction === 1 ? '110%' : '-110%';
-  const endX   = direction === 1 ? '-110%' : '110%';
+  // xPercent é a forma correta no GSAP 3 para % relativo à largura do elemento.
+  // Para position:fixed;inset:0 a largura = 100vw → xPercent:110 = 110vw off-screen.
+  const startPct = direction === 1 ? 110 : -110;  // lado de onde a cortina entra
+  const endPct   = direction === 1 ? -110 : 110;  // lado para onde a cortina sai
 
   const curtain = document.getElementById('pageWipe');
   if (!curtain) {
-    // Elemento não encontrado no DOM — troca sem animação
     onSwap?.();
     return;
   }
 
+  // Cancela qualquer tweening anterior na cortina
+  gsapInstance.killTweensOf(curtain);
+
   // Posiciona a cortina fora da tela no lado correto antes de começar
-  gsapInstance.set(curtain, { x: startX });
+  gsapInstance.set(curtain, { xPercent: startPct });
 
   gsapInstance.timeline()
-    // Fase 1: cortina entra e cobre a tela inteira
-    .to(curtain, { x: '0%', duration: 0.2, ease: 'power3.in' })
-    // No pico da cobertura: troca o conteúdo sem o usuário ver
+    // Fase 1 — cortina varre e cobre a tela inteira (0.22 s)
+    .to(curtain, { xPercent: 0, duration: 0.22, ease: 'power3.in' })
+    // Pico da cobertura — troca o conteúdo invisível ao usuário
     .add(() => onSwap?.())
-    // Fase 2: cortina sai revelando o novo conteúdo
-    .to(curtain, { x: endX, duration: 0.24, ease: 'power2.out' })
-    // Reseta para posição de espera fora da tela (lado direito)
-    .set(curtain, { x: '110%' });
+    // Fase 2 — cortina sai revelando o novo conteúdo (0.26 s)
+    .to(curtain, { xPercent: endPct, duration: 0.26, ease: 'power2.out' })
+    // Reseta off-screen à direita para a próxima transição
+    .set(curtain, { xPercent: 110 });
 }
