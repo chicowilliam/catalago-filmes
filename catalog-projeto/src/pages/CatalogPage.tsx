@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useAnimation } from "framer-motion";
 import { AboutSection } from "@/components/catalog/AboutSection";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
 import { FilterTabs } from "@/components/catalog/FilterTabs";
@@ -73,20 +73,61 @@ export function CatalogPage() {
   const [direction, setDirection] = useState(1);
   const previousTabIndexRef = useRef(getTabIndex(activeType));
 
+  // ── Wipe curtain ──────────────────────────────────────────────────────────
+  const wipeAnimation = useAnimation();
+  const isWipingRef   = useRef(false);
+
+  /**
+   * Wipe Star Wars: a cortina entra cobrindo a tela (fase 1),
+   * troca o conteúdo (invisível ao usuário) e sai revelando o novo (fase 2).
+   * Usa useAnimation para controle imperativo sem closures desatualizadas.
+   */
+  const runWipe = async (nextType: CatalogType, dir: number) => {
+    isWipingRef.current = true;
+    const startX = dir >= 0 ? '110%' : '-110%';
+    const endX   = dir >= 0 ? '-110%' : '110%';
+
+    // Reposiciona instantaneamente fora da tela
+    wipeAnimation.set({ x: startX });
+
+    // Fase 1: cobre a tela (260ms)
+    await wipeAnimation.start({
+      x: '0%',
+      transition: { duration: 0.26, ease: [0.76, 0, 0.24, 1] },
+    });
+
+    // Troca de conteúdo enquanto a cortina cobre tudo
+    setActiveType(nextType);
+    // Micro-pausa para o React commitar o novo DOM
+    await new Promise<void>((resolve) => setTimeout(resolve, 20));
+
+    // Fase 2: sai revelando o novo conteúdo (300ms)
+    await wipeAnimation.start({
+      x: endX,
+      transition: { duration: 0.30, ease: [0.24, 0, 0.76, 1] },
+    });
+
+    // Reseta para off-screen padrão (direita)
+    wipeAnimation.set({ x: '110%' });
+    isWipingRef.current = false;
+  };
+  // ─────────────────────────────────────────────────────────────────────────
+
   const showCatalog = activeType !== "about";
 
   function handleTabChange(nextType: CatalogType) {
-    if (nextType === activeType) return;
+    if (nextType === activeType || isWipingRef.current) return;
 
-    const nextIndex = getTabIndex(nextType);
+    const nextIndex    = getTabIndex(nextType);
     const previousIndex = previousTabIndexRef.current;
+    const dir          = nextIndex > previousIndex ? 1 : -1;
 
     if (nextIndex !== previousIndex) {
-      setDirection(nextIndex > previousIndex ? 1 : -1);
+      setDirection(dir);
       previousTabIndexRef.current = nextIndex;
     }
 
-    setActiveType(nextType);
+    runWipe(nextType, dir);
   }
 
   function handleToggleFavorite(itemId: number) {
@@ -199,6 +240,17 @@ export function CatalogPage() {
       />
 
       <ToastHost toasts={toasts} onDismiss={removeToast} />
+
+      {/* ── Cortina de wipe Star Wars ──────────────────────────────────────
+           position:fixed garante cobertura total da viewport,
+           mesmo dentro de containers com overflow:hidden.
+           z-index 1050: acima do header e modal, abaixo do toast e login.
+      ─────────────────────────────────────────────────────────────────── */}
+      <motion.div
+        className="wipe-curtain"
+        animate={wipeAnimation}
+        initial={{ x: '110%' }}
+      />
     </>
   );
 }

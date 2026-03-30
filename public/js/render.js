@@ -553,6 +553,8 @@ export function applyFilterState(nextType) {
 
 export function applyFilterWithTransition(nextType) {
   if (nextType === state.currentType) return;
+  // Impede cliques duplos durante a animação de wipe
+  if (state.isFilterTransitioning) return;
   const previousType = state.currentType;
 
   // Limpar timers legados (caso restem de versões anteriores)
