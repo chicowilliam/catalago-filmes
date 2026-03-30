@@ -364,17 +364,14 @@ export function setupMotionEnhancements() {
  * @param {{ direction?: number }} options - 1 = avança (esq→dir), -1 = volta (dir→esq)
  */
 export function animateTabSwitch(hiding, onSwap, options = {}) {
+  // Permite pegar o GSAP mesmo que config.js tenha sido avaliado antes do CDN carregar
+  const gsap = gsapInstance || window.gsap || null;
+
   // Sem GSAP ou preferência por menos movimento: troca instantânea
-  if (!canUseAdvancedMotion()) {
+  if (!gsap || prefersReducedMotion) {
     onSwap?.();
     return;
   }
-
-  const direction = options.direction === -1 ? -1 : 1;
-  // xPercent é a forma correta no GSAP 3 para % relativo à largura do elemento.
-  // Para position:fixed;inset:0 a largura = 100vw → xPercent:110 = 110vw off-screen.
-  const startPct = direction === 1 ? 110 : -110;  // lado de onde a cortina entra
-  const endPct   = direction === 1 ? -110 : 110;  // lado para onde a cortina sai
 
   const curtain = document.getElementById('pageWipe');
   if (!curtain) {
@@ -382,19 +379,31 @@ export function animateTabSwitch(hiding, onSwap, options = {}) {
     return;
   }
 
-  // Cancela qualquer tweening anterior na cortina
-  gsapInstance.killTweensOf(curtain);
+  // Impede transições sobrepostas: se outra está em andamento, cancela a anterior
+  gsap.killTweensOf(curtain);
 
-  // Posiciona a cortina fora da tela no lado correto antes de começar
-  gsapInstance.set(curtain, { xPercent: startPct });
+  const direction = options.direction === -1 ? -1 : 1;
+  // xPercent usa % da largura do elemento. Para position:fixed;inset:0 = 100vw.
+  const startPct = direction === 1 ? 110 : -110;  // de onde a cortina entra
+  const endPct   = direction === 1 ? -110 : 110;  // para onde a cortina sai
 
-  gsapInstance.timeline()
-    // Fase 1 — cortina varre e cobre a tela inteira (0.22 s)
-    .to(curtain, { xPercent: 0, duration: 0.22, ease: 'power3.in' })
-    // Pico da cobertura — troca o conteúdo invisível ao usuário
+  // Classe no body desativa animation/transition das seções durante o wipe.
+  // Sem isso, animation-fill-mode:both em .section-block parte de opacity:0
+  // bem quando a cortina se abre, causando um pisca no novo conteúdo.
+  document.body.classList.add('page-wipe-active');
+
+  // Posiciona a cortina fora da tela no lado correto
+  gsap.set(curtain, { xPercent: startPct });
+
+  gsap.timeline({
+    onComplete: () => document.body.classList.remove('page-wipe-active'),
+  })
+    // Fase 1 — cortina cobre a tela inteira (0.26 s)
+    .to(curtain, { xPercent: 0, duration: 0.26, ease: 'power3.in' })
+    // Pico — troca o conteúdo enquanto a cortina está sobre tudo
     .add(() => onSwap?.())
-    // Fase 2 — cortina sai revelando o novo conteúdo (0.26 s)
-    .to(curtain, { xPercent: endPct, duration: 0.26, ease: 'power2.out' })
-    // Reseta off-screen à direita para a próxima transição
+    // Fase 2 — cortina sai revelando o novo conteúdo (0.3 s)
+    .to(curtain, { xPercent: endPct, duration: 0.3, ease: 'power2.out' })
+    // Reseta off-screen à direita para o próximo uso
     .set(curtain, { xPercent: 110 });
 }

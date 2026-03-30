@@ -206,31 +206,27 @@
   position: fixed;
   inset: 0;
   z-index: 1050;
-  /* Leve gradiente vermelho->escuro para a cortina ser visível mesmo sobre fundo escuro */
-  background: linear-gradient(
-    105deg,
-    color-mix(in srgb, var(--accent) 18%, var(--bg-primary)) 0%,
-    var(--bg-primary) 35%
-  );
-  /* Começa fora da tela à direita — GSAP assume o controle via xPercent */
+  /* Fundo escuro com borda de acento luminosa — claramente visível sobre qualquer tema */
+  background: var(--bg-primary);
+  /* Borda de acento na frente (leading edge): 6px com glow — é a "lâmina" do wipe */
+  border-right: 6px solid var(--accent);
+  box-shadow: inset -60px 0 80px -20px color-mix(in srgb, var(--accent) 28%, transparent);
+  /* Começa fora da tela à direita — GSAP controla via xPercent */
   transform: translateX(110%);
   pointer-events: none;
   will-change: transform;
 }
 
-/* Linhas de acento nas laterais — aparecem na borda de entrada/saída */
-.page-wipe::before,
-.page-wipe::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  width: 3px;
-  height: 100%;
-  background: var(--accent);
-  opacity: 0.45;
+/*
+  Durante o wipe, impede que .section-block inicie sua animação sectionReveal
+  com animation-fill-mode:both (que parte de opacity:0 e causaria um pisca
+  exatamente quando a cortina se abre revelando o novo conteúdo).
+*/
+body.page-wipe-active .section-block,
+body.page-wipe-active .hero-panel {
+  animation: none !important;
+  transition: none !important;
 }
-.page-wipe::before { left: 0; }
-.page-wipe::after  { right: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   .page-wipe { display: none; }
