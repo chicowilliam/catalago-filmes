@@ -2,6 +2,29 @@
 
 ## 0) Historico de Sessoes
 
+### 29/03/2026 - Transicao horizontal entre abas com modulo dedicado
+
+**Objetivo:**
+- Aplicar transicao de pagina no sentido horizontal ao trocar abas (Inicio, Filmes, Series, Favoritos, Sobre).
+- Separar a logica de orquestracao para facilitar manutencao e evolucao de UX.
+
+**Ajustes aplicados:**
+- `public/js/page-transition.js` *(novo arquivo)*
+  - Centraliza a ordem visual das abas.
+  - Exporta `getFilterTravelDirection(fromType, toType)` para definir direcao da animacao.
+  - Exporta `getVisiblePageSections()` para coletar secoes visiveis antes da troca.
+- `public/js/render.js`
+  - `applyFilterWithTransition` passou a usar o modulo novo em vez de montar a lista localmente.
+  - Direcao da navegacao agora e calculada e enviada para a animacao de troca.
+- `public/js/motion.js`
+  - `animateTabSwitch` agora recebe `options.direction`.
+  - Entrada alterada para slide horizontal (`x`) com fade.
+  - Saida alterada para slide horizontal (`x`) com fade.
+
+**Resultado esperado:**
+- Troca de abas com sensacao de pagina deslizando horizontalmente.
+- Base pronta para ajustes finos futuros (distancia, velocidade e easing) sem acoplar em `render.js`.
+
 ### 29/03/2026 - Quality improvements items 1-12, README in English, 10 commits pushed
 
 **Objective:**
