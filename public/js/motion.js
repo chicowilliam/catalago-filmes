@@ -350,73 +350,126 @@ export function setupMotionEnhancements() {
 // ---------------------------------------------------------------------------
 
 /**
- * Anima a SAÍDA das seções visíveis, executa o callback que troca o DOM,
- * e em seguida anima a ENTRADA das seções que ficaram visíveis.
+ * Wipe horizontal entre abas — estilo Star Wars.
  *
- * Sequência correta:  exit ──► swap ──► enter
- * Isso evita o "piscar" que acontecia quando o grid era destruído
- * antes da animação de saída terminar.
+ * Saída e entrada acontecem SIMULTANEAMENTE:
+ *   conteúdo antigo desliza para fora enquanto o novo entra pelo lado oposto.
  *
- * @param {Element[]} hiding   - seções atualmente visíveis que devem sair
- * @param {() => void} onSwap  - callback executado entre saída e entrada
- * @param {{ direction?: number }} options - direção horizontal: 1 para esquerda->direita, -1 inverso
+ * Sequência:
+ *   1. Captura seções ocultas antes do swap (referência de "o que vai entrar").
+ *   2. Swap de DOM instantâneo (state + toggle de visibilidade).
+ *   3. Posiciona novo conteúdo fora da tela e re-exibe antigo no lugar.
+ *   4. GSAP Timeline: saída e entrada em paralelo (offset 0).
+ *
+ * @param {Element[]} hiding  - seções atualmente visíveis que devem sair
+ * @param {() => void} onSwap - callback que troca o estado e o DOM
+ * @param {{ direction?: number }} options - 1 = esq→dir (avançar), -1 = dir→esq (voltar)
  */
 export function animateTabSwitch(hiding, onSwap, options = {}) {
   const validHiding = hiding.filter(Boolean);
   const direction = options.direction === -1 ? -1 : 1;
-  const enterFromX = direction === 1 ? -64 : 64;
-  const exitToX = direction === 1 ? 36 : -36;
+  const vw = Math.max(window.innerWidth, 480);
+  const fromX = direction === 1 ? vw : -vw;   // novo conteúdo começa aqui
+  const toX   = direction === 1 ? -vw : vw;   // conteúdo antigo termina aqui
+  const DURATION = 0.42;
 
-  // Sem GSAP ou com "prefere menos movimento": troca instantânea sem animação
+  // Sem GSAP ou preferência por menos movimento: troca instantânea
   if (!canUseAdvancedMotion()) {
     validHiding.forEach((el) => el.classList.add("is-hidden"));
     onSwap?.();
     return;
   }
 
-  // Anima a entrada das seções que ficaram visíveis após o swap
-  const triggerEnter = () => {
+  // Bloqueia scroll horizontal durante o wipe para evitar barra de rolagem
+  const htmlEl = document.documentElement;
+  const lockScroll  = () => htmlEl.style.setProperty("overflow-x", "hidden");
+  const unlockScroll = () => htmlEl.style.removeProperty("overflow-x");
+
+  // Caso sem conteúdo saindo: só anima a entrada
+  if (!validHiding.length) {
+    onSwap?.();
     const entering = Array.from(
       document.querySelectorAll(".section-block:not(.is-hidden), .hero-panel:not(.is-hidden)")
     );
-    if (!entering.length) return;
-
-    gsapInstance.fromTo(
-      entering,
-      { opacity: 0, x: enterFromX },
-      {
-        opacity: 1,
-        x: 0,
-        duration: 0.48,
-        stagger: 0.05,
-        ease: "expo.out",
-        clearProps: "transform,opacity",
-        overwrite: "auto",
-      }
-    );
-  };
-
-  // Nada para esconder: pula direto para a entrada
-  if (!validHiding.length) {
-    onSwap?.();
-    triggerEnter();
+    if (entering.length) {
+      lockScroll();
+      gsapInstance.fromTo(
+        entering,
+        { x: fromX },
+        {
+          x: 0,
+          duration: DURATION,
+          ease: "expo.out",
+          stagger: 0,
+          clearProps: "transform",
+          overwrite: "auto",
+          onComplete: unlockScroll,
+        }
+      );
+    }
     return;
   }
 
-  // Anima a saída e só então faz o swap
-  gsapInstance.to(validHiding, {
-    opacity: 0,
-    x: exitToX,
-    duration: 0.24,
-    ease: "power2.in",
-    overwrite: true,
-    onComplete: () => {
-      validHiding.forEach((el) => {
-        el.classList.add("is-hidden");
-        gsapInstance.set(el, { clearProps: "all" });
-      });
-      onSwap?.();
-      triggerEnter();
-    },
+  // 1. Memoriza o que estava oculto ANTES do swap
+  const wasHidden = new Set(
+    Array.from(document.querySelectorAll(".section-block.is-hidden, .hero-panel.is-hidden"))
+  );
+
+  // 2. Swap de DOM: altera state + toggle de seções (tudo instantâneo)
+  onSwap?.();
+
+  // 3a. Identifica o que ficou visível e que estava oculto antes = "entrando"
+  const entering = Array.from(
+    document.querySelectorAll(".section-block:not(.is-hidden), .hero-panel:not(.is-hidden)")
+  ).filter((el) => wasHidden.has(el));
+
+  // 3b. Posiciona novo conteúdo fora da tela (sem animação ainda)
+  if (entering.length) {
+    gsapInstance.set(entering, { x: fromX });
+  }
+
+  // 3c. Re-exibe conteúdo antigo para animar a saída
+  //     (onSwap adicionou is-hidden neles; precisamos que apareçam durante o slide)
+  gsapInstance.killTweensOf(validHiding);
+  validHiding.forEach((el) => {
+    el.classList.remove("is-hidden");
+    gsapInstance.set(el, { x: 0 });
   });
+
+  lockScroll();
+
+  // 4. Timeline com saída e entrada em paralelo (offset 0 = simultâneas)
+  const tl = gsapInstance.timeline({ onComplete: unlockScroll });
+
+  tl.to(
+    validHiding,
+    {
+      x: toX,
+      duration: DURATION,
+      ease: "power3.in",
+      overwrite: true,
+      onComplete: () => {
+        validHiding.forEach((el) => {
+          el.classList.add("is-hidden");
+          gsapInstance.set(el, { clearProps: "all" });
+        });
+      },
+    },
+    0
+  );
+
+  if (entering.length) {
+    tl.to(
+      entering,
+      {
+        x: 0,
+        duration: DURATION + 0.04,
+        ease: "expo.out",
+        stagger: 0,
+        clearProps: "transform",
+        overwrite: "auto",
+      },
+      0
+    );
+  }
 }
