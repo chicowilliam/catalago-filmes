@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 
 import type { CatalogItem } from "@/types/catalog";
 
-// Placeholder exibido quando a imagem original do TMDB não carrega
 const PLACEHOLDER_IMAGE =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 450'%3E%3Crect width='300' height='450' fill='%231e1e2e'/%3E%3Ctext x='150' y='225' font-size='16' fill='%23666' text-anchor='middle' dominant-baseline='middle' font-family='sans-serif'%3ESem%20imagem%3C/text%3E%3C/svg%3E";
 
@@ -24,23 +23,45 @@ export function MovieCard({
 }: MovieCardProps) {
   const [imgSrc, setImgSrc] = useState(item.image);
   const typeLabel = item.type === "movie" ? "Filme" : "Série";
+  const synopsis = item.synopsis ?? "";
+  const truncatedSynopsis = synopsis.length > 117 ? synopsis.slice(0, 117) + "…" : synopsis;
 
   return (
     <motion.article
       className="movie-card"
       whileTap={{ scale: 0.97 }}
       transition={{ type: "spring", stiffness: 280, damping: 20 }}
-      style={{ transformOrigin: "center top" }}
-      aria-label={item.title}
+      style={{ "--card-pop-delay": `${Math.round(Math.random() * 140)}ms` } as React.CSSProperties}
+      aria-label={`Abrir detalhes de ${item.title}`}
     >
-      {/* ── Área do poster com face-swap ── */}
-      <div className="movie-media">
-        <span className="badge" aria-hidden="true">
-          {typeLabel}
-        </span>
+      {/* ── Frente: poster + info (desaparece no hover) ── */}
+      <div className="card-face-front">
+        <div className="movie-media">
+          <span className="badge" aria-hidden="true">
+            {typeLabel}
+          </span>
 
-        {/* Frente: o poster some no hover */}
-        <div className="card-face-front">
+          {/* Botão favorito flutuante no canto do poster */}
+          <button
+            type="button"
+            className={`favorite-btn ${isFavorite ? "favorited" : "not-favorited"}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onFavoriteToggle(item);
+            }}
+            aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+            aria-pressed={isFavorite}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="heart-icon"
+              aria-hidden="true"
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          </button>
+
           <img
             className="movie-image"
             src={imgSrc}
@@ -50,58 +71,37 @@ export function MovieCard({
           />
         </div>
 
-        {/* Verso: sinopse aparece no hover — apenas desktop */}
-        <div className="card-face-back" aria-hidden="true">
-          <span className="card-back-type">{typeLabel}</span>
-          <h3 className="card-back-title">{item.title}</h3>
-          {item.synopsis && (
-            <p className="card-back-synopsis">{item.synopsis}</p>
+        {/* Info abaixo do poster */}
+        <div className="card-info">
+          <h3 className="movie-title">{item.title}</h3>
+          <p className="movie-meta">{typeLabel}</p>
+
+          {rating > 0 && (
+            <div className="star-row" aria-label={`Avaliação: ${rating} de 5 estrelas`}>
+              {"★".repeat(rating)}
+              {"☆".repeat(5 - rating)}
+            </div>
           )}
+
           <button
             type="button"
-            className="card-back-cta"
+            className="movie-image-btn"
             onClick={() => onOpenModal(item)}
-            tabIndex={-1}
+            aria-label={`Ver detalhes de ${item.title}`}
           >
             ▶ Ver detalhes
           </button>
         </div>
       </div>
 
-      {/* ── Informações abaixo do poster (sempre visíveis) ── */}
-      <div className="card-info">
-        <div className="card-info-top">
-          <h3 className="movie-title">{item.title}</h3>
-          <button
-            type="button"
-            className={`fav-btn${isFavorite ? " is-fav" : ""}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onFavoriteToggle(item);
-            }}
-            aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-            aria-pressed={isFavorite}
-          >
-            {isFavorite ? "♥" : "♡"}
-          </button>
-        </div>
-
-        {rating > 0 && (
-          <div className="star-row" aria-label={`Avaliação: ${rating} de 5 estrelas`}>
-            {"★".repeat(rating)}{"☆".repeat(5 - rating)}
-          </div>
+      {/* ── Verso: cobre o card inteiro no hover ── */}
+      <div className="card-face-back" aria-hidden="true">
+        <span className="card-back-type">{typeLabel}</span>
+        <h3 className="card-back-title">{item.title}</h3>
+        {truncatedSynopsis && (
+          <p className="card-back-synopsis">{truncatedSynopsis}</p>
         )}
-
-        {/* Botão abrir modal acessível via teclado (complementa o card-face-back) */}
-        <button
-          type="button"
-          className="movie-image-btn"
-          onClick={() => onOpenModal(item)}
-          aria-label={`Ver detalhes de ${item.title}`}
-          style={{ fontSize: "0.78rem", color: "var(--text-soft)", marginTop: 2 }}
-        >
-          ▶ Ver detalhes
-        </button>
+        <span className="card-back-cta">Ver detalhes →</span>
       </div>
     </motion.article>
   );
