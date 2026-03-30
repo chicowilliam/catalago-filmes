@@ -4,6 +4,7 @@ const express = require("express");
 const session = require("express-session");
 const helmet = require("helmet");
 const path = require("path");
+const fs = require("fs");
 const rateLimit = require("express-rate-limit");
 
 const authRoutes = require("./backend/routes/auth.routes");
@@ -128,17 +129,41 @@ app.get("/api/health", (req, res) => {
 });
 
 /* =========================
-    FRONTEND (legado public/)
-========================= */
-app.use(express.static(path.join(__dirname, "public")));
+    FRONTEND
+    Prioridade: React build (catalog-projeto/dist) > vanilla (public/)
 
-// Rotas de API não encontradas
+    - Em produção (Vercel/deploy): sempre usa o build do React
+    - Em desenvolvimento local: usa React build SE já foi rodado
+      `npm run build`, caso contrário cai no vanilla (public/).
+    - Para dev com React: rodar `npm run dev:react` (2 servidores)
+      ou `npm run build && npm run dev` (Express serve o build).
+========================= */
+const reactBuildPath = path.join(__dirname, "catalog-projeto", "dist");
+const hasReactBuild = fs.existsSync(path.join(reactBuildPath, "index.html"));
+
+if (hasReactBuild) {
+   // Serve os assets do React (JS, CSS, imagens)
+   app.use(express.static(reactBuildPath));
+} else {
+   // Fallback para o frontend vanilla em dev (sem build)
+   app.use(express.static(path.join(__dirname, "public")));
+}
+
+// Rotas de API não encontradas — DEVE vir antes do SPA fallback
 app.use("/api/*", (req, res) => {
    res.status(404).json({
       status: "error",
       message: "Rota não encontrada"
    });
 });
+
+// SPA fallback: qualquer rota não-API retorna o index.html do React
+// (necessário para navegação client-side com React Router no futuro)
+if (hasReactBuild) {
+   app.get("*", (req, res) => {
+      res.sendFile(path.join(reactBuildPath, "index.html"));
+   });
+}
 
 /* =========================
    TRATAMENTO DE ERROS (DEVE SER POR ÚLTIMO!)
@@ -153,9 +178,16 @@ module.exports = app;
 if (require.main === module) {
    const PORT = process.env.PORT || 3000;
    const server = app.listen(PORT, () => {
-      console.log(`🚀 Server rodando em http://localhost:${PORT}`);
+      console.log(`\x1b[32m🚀 Servidor: http://localhost:${PORT}\x1b[0m`);
       console.log(`🔐 Modo: ${process.env.NODE_ENV}`);
-      console.log("🖥️ Frontend ativo: public/");
+      if (hasReactBuild) {
+         console.log("\x1b[35m⚛️  Frontend: React (catalog-projeto/dist)\x1b[0m");
+         console.log("    Para dev com hot-reload: npm run dev:react");
+      } else {
+         console.log("\x1b[33m🌐 Frontend: vanilla JS (public/)\x1b[0m");
+         console.log("    Para ativar o React: npm run build");
+         console.log("    Para dev React c/ hot-reload: npm run dev:react");
+      }
    });
 
    server.on("error", (err) => {
