@@ -350,25 +350,25 @@ export function setupMotionEnhancements() {
 // ---------------------------------------------------------------------------
 
 /**
- * Wipe de tela inteira entre abas — estilo Star Wars.
+ * Wipe de tela inteira — estilo Star Wars.
  *
- * Implementação 100% CSS + setTimeout, sem dependência de GSAP.
+ * Usa Web Animations API: UMA única animação sem troca de classes no meio.
+ * Isso elimina o "pisca" que ocorria quando a troca de wipe-in → wipe-out
+ * tirava o elemento do fill:forwards por 1 frame antes da próxima animar.
  *
- * Fase 1 (260ms): classe .wipe-in → cortina varre e cobre toda a tela.
- * Pico:           onSwap() troca o conteúdo enquanto a cortina tapa tudo.
- * Fase 2 (300ms): classe .wipe-out → cortina sai revelando o novo conteúdo.
+ * Timeline de 560ms:
+ *  0%  → 45%  cortina entra (cobre a tela)
+ *  45% → 55%  cortina parada (DOM troca aqui, invisivel ao usuário)
+ *  55% → 100% cortina sai  (revela o novo conteúdo)
  *
- * Direção controlada por custom properties CSS injetadas antes da animação:
- *   --wipe-start: ponto de partida da cortina (ex: 110% ou -110%)
- *   --wipe-end:   ponto de chegada da cortina ao sair
- *
- * @param {Element[]} _hiding  - não usado; swap ocorre via onSwap no pico
- * @param {() => void} onSwap  - callback que atualiza state + visibilidade
- * @param {{ direction?: number }} options - 1 = avança (esq→dir), -1 = volta
+ * @param {Element[]} _hiding  - não usado nesta implementação
+ * @param {() => void} onSwap  - troca de DOM executada no pico da cobertura
+ * @param {{ direction?: number }} options - 1 = avança, -1 = volta
  */
 export function animateTabSwitch(_hiding, onSwap, options = {}) {
-  const COVER_MS  = 260;
-  const REVEAL_MS = 300;
+  const TOTAL_MS   = 560;
+  const COVER_FRAC = 0.45;                            // % quando cobre tudo
+  const SWAP_AT    = Math.round(TOTAL_MS * COVER_FRAC); // 252 ms
 
   if (prefersReducedMotion) {
     onSwap?.();
@@ -381,32 +381,47 @@ export function animateTabSwitch(_hiding, onSwap, options = {}) {
     return;
   }
 
-  const direction = options.direction === -1 ? -1 : 1;
-  curtain.style.setProperty('--wipe-start', direction === 1 ? '110%'  : '-110%');
-  curtain.style.setProperty('--wipe-end',   direction === 1 ? '-110%' : '110%');
-
   // Cancela qualquer wipe anterior ainda em andamento
-  curtain.classList.remove('wipe-in', 'wipe-out');
-  void curtain.offsetWidth; // força reflow — garante que a animação reinicia
+  curtain.getAnimations().forEach((a) => a.cancel());
+
+  const direction = options.direction === -1 ? -1 : 1;
+  const startX    = direction === 1 ? '110%'  : '-110%';
+  const endX      = direction === 1 ? '-110%' : '110%';
 
   document.body.classList.add('page-wipe-active');
-  curtain.classList.add('wipe-in');
 
-  // Fase 2: após a cortina cobrir tudo, troca o conteúdo e inicia a saída
-  setTimeout(() => {
-    onSwap?.();
+  // Uma única animação: entrar → cobrir → sair — sem nenhuma troca de classe
+  const anim = curtain.animate(
+    [
+      { transform: `translateX(${startX})`, offset: 0             },
+      { transform: 'translateX(0%)',         offset: COVER_FRAC    },
+      { transform: 'translateX(0%)',         offset: 1 - COVER_FRAC},
+      { transform: `translateX(${endX})`,   offset: 1             },
+    ],
+    {
+      duration : TOTAL_MS,
+      easing   : 'cubic-bezier(0.76, 0, 0.24, 1)',
+      fill     : 'forwards',
+    }
+  );
 
-    curtain.classList.remove('wipe-in');
-    void curtain.offsetWidth;
-    curtain.classList.add('wipe-out');
+  // Garante que onSwap é chamado exatamente uma vez
+  let swapped = false;
+  const doSwap = () => { if (!swapped) { swapped = true; onSwap?.(); } };
 
-    const cleanup = () => {
-      curtain.classList.remove('wipe-out');
-      document.body.classList.remove('page-wipe-active');
-    };
+  // Troca o conteúdo no pico da cobertura
+  const swapTimer = setTimeout(doSwap, SWAP_AT);
 
-    curtain.addEventListener('animationend', cleanup, { once: true });
-    // Fallback de segurança caso animationend não dispare
-    setTimeout(cleanup, REVEAL_MS + 80);
-  }, COVER_MS);
+  let done = false;
+  const cleanup = () => {
+    if (done) return;
+    done = true;
+    doSwap(); // garante swap mesmo em edge cases
+    clearTimeout(swapTimer);
+    anim.cancel(); // remove fill, volta ao translateX(110%) do CSS base
+    document.body.classList.remove('page-wipe-active');
+  };
+
+  anim.onfinish = cleanup;
+  setTimeout(cleanup, TOTAL_MS + 150); // fallback de seguranca
 }
