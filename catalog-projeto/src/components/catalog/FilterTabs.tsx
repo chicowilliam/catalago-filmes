@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
 import type { CatalogType } from "@/types/catalog";
 
-const FILTERS: Array<{ value: CatalogType; label: string }> = [
-  { value: "all", label: "Início" },
-  { value: "movie", label: "Filmes" },
-  { value: "series", label: "Séries" },
-  { value: "favorites", label: "Favoritos" },
-  { value: "about", label: "Sobre" },
+const FILTERS: Array<{ value: CatalogType; label: string; icon: string }> = [
+  { value: "all",       label: "Início",     icon: "🏠" },
+  { value: "movie",     label: "Filmes",     icon: "🎬" },
+  { value: "series",    label: "Séries",     icon: "📺" },
+  { value: "favorites", label: "Favoritos",  icon: "❤️" },
+  { value: "about",     label: "Sobre",      icon: "👤" },
 ];
 
 interface FilterTabsProps {
@@ -16,7 +16,7 @@ interface FilterTabsProps {
 
 export function FilterTabs({ activeType, onChange }: FilterTabsProps) {
   return (
-    <div className="filter-tabs" role="tablist" aria-label="Filtros do catalogo">
+    <div className="filter-tabs" role="tablist" aria-label="Filtros do catálogo">
       {FILTERS.map((filter) => {
         const isActive = activeType === filter.value;
         return (
@@ -28,6 +28,7 @@ export function FilterTabs({ activeType, onChange }: FilterTabsProps) {
             className={`filter-btn${isActive ? " is-active" : ""}`}
             onClick={() => onChange(filter.value)}
           >
+            <span className="filter-btn-icon" aria-hidden="true">{filter.icon}</span>
             {filter.label}
             {isActive && (
               <motion.div
