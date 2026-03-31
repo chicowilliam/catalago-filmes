@@ -20,10 +20,10 @@ export function ToastHost({ toasts, onDismiss }: ToastHostProps) {
             key={toast.id}
             type="button"
             className={`toast-item toast-${toast.kind}`}
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, y: 32, scale: 0.92 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ type: "spring", stiffness: 280, damping: 22 }}
             onClick={() => onDismiss(toast.id)}
             aria-label="Fechar notificação"
           >
