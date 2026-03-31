@@ -133,22 +133,14 @@ export function FeaturedSlider({ items, onOpenModal }: FeaturedSliderProps) {
 
         {/* Controles — só exibidos quando há mais de 1 slide */}
         {slides.length > 1 && (
-          <>
+          <div className="slider-controls">
             <button
               type="button"
-              className="slider-control slider-control-prev"
+              className="slider-btn"
               onClick={prev}
               aria-label="Slide anterior"
             >
               ‹
-            </button>
-            <button
-              type="button"
-              className="slider-control slider-control-next"
-              onClick={next}
-              aria-label="Próximo slide"
-            >
-              ›
             </button>
 
             <div className="slider-dots" role="tablist" aria-label="Slides do destaque">
@@ -164,7 +156,16 @@ export function FeaturedSlider({ items, onOpenModal }: FeaturedSliderProps) {
                 />
               ))}
             </div>
-          </>
+
+            <button
+              type="button"
+              className="slider-btn"
+              onClick={next}
+              aria-label="Próximo slide"
+            >
+              ›
+            </button>
+          </div>
         )}
       </div>
     </div>
