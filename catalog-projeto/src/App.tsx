@@ -54,6 +54,37 @@ function App() {
     return () => window.removeEventListener("scroll", updateProgress);
   }, []);
 
+  // Scroll reveal — fallback para browsers sem animation-timeline: view()
+  useEffect(() => {
+    if (!canAccessCatalog) return;
+    if (CSS.supports("animation-timeline", "view()")) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("reveal-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    // Pequeno delay para o DOM estar pronto após a transição de entrada
+    const timer = window.setTimeout(() => {
+      document.querySelectorAll(".section-block, .stack-folder, .about-fact-card").forEach((el) => {
+        el.classList.add("reveal");
+        observer.observe(el);
+      });
+    }, 600);
+
+    return () => {
+      window.clearTimeout(timer);
+      observer.disconnect();
+    };
+  }, [canAccessCatalog]);
+
   if (auth.status === "checking") {
     return <CheckingScreen />;
   }
