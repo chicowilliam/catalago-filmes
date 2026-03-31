@@ -9,8 +9,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 1px solid var(--border);
-  background: color-mix(in srgb, var(--bg-primary) 82%, transparent);
+  background: color-mix(in srgb, var(--bg-primary) 72%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
@@ -245,6 +244,18 @@
   overflow: visible;
 }
 
+/* Dimming: apaga os outros cards enquanto um está em hover */
+.catalog-grid:hover .movie-card {
+  opacity: 0.88;
+  transform: translate3d(0, 0, 0) scale(0.984);
+}
+
+.catalog-grid:hover .movie-card:hover,
+.catalog-grid:hover .movie-card:focus-visible {
+  opacity: 1;
+  transform: translate3d(0, -5px, 0) scale(1.04);
+}
+
 @media (max-width: 720px) {
   .app-shell {
     padding: 14px;
@@ -271,18 +282,14 @@
 .wipe-curtain {
   position: fixed;
   inset: 0;
-  z-index: 9999;         /* acima de absolutamente tudo */
-  /*
-    Vermelho escuro profundo — visivelmente diferente de QUALQUER tema
-    (nem confunde com o fundo escuro #121212 nem com o claro #f4f1ea)
-  */
-  background: linear-gradient(to right, #1a0000 0%, #300000 50%, #1a0000 100%);
-  border-left: 8px solid #e50914;
+  /* z-index acima do header (100) e modal (999), abaixo do toast (1300) e login (1400) */
+  z-index: 1050;
+  background: linear-gradient(to right, #0a0a0a 0%, #111 40%, #0a0a0a 100%);
+  border-left: 6px solid #e50914;
   box-shadow:
-    inset 120px 0 200px rgba(229, 9, 20, 0.45),
-    -8px 0 40px rgba(229, 9, 20, 0.8);
+    inset 80px 0 120px rgba(229, 9, 20, 0.28),
+    -4px 0 20px rgba(229, 9, 20, 0.6);
   pointer-events: none;
-  /* Estado padr\00e3o: off-screen à direita. JS sobrescreve via style inline. */
   transform: translateX(110%);
 }
 
