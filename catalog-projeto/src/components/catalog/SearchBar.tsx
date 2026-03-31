@@ -34,13 +34,23 @@ export function SearchBar({ open, defaultValue, onSearch, isLoading }: SearchBar
         >
           <form className={`search-box${isLoading ? " is-loading" : ""}`} onSubmit={handleSubmit}>
             <input
-              type="text"
+              type="search"
               value={value}
               onChange={(event) => setValue(event.target.value)}
               placeholder="Buscar..."
               className="search-input"
-              aria-label="Buscar no catalogo"
+              aria-label="Buscar no catálogo"
             />
+            {value.length > 0 && (
+              <button
+                type="button"
+                className="search-clear-btn"
+                onClick={() => { setValue(""); void onSearch(""); }}
+                aria-label="Limpar busca"
+              >
+                ×
+              </button>
+            )}
           </form>
         </motion.div>
       )}
