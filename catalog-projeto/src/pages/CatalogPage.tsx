@@ -212,7 +212,7 @@ export function CatalogPage() {
                 ) : (
                   <>
                     {activeType !== "all" && (
-                      <div className="section-headline">
+                      <div className="section-headline section-block">
                         <h2 className="section-title">
                           {activeType === "movie" ? "Filmes" : activeType === "series" ? "Séries" : "Favoritos"}
                         </h2>

@@ -62,7 +62,7 @@ export function AboutSection() {
 
   return (
     <section className="about-section">
-      <div className="section-headline about-headline">
+      <div className="section-headline about-headline section-block">
         <div>
           <h2 className="section-title">Sobre o projeto</h2>
           <span className="section-subtitle">
@@ -107,7 +107,7 @@ export function AboutSection() {
         </div>
       </div>
 
-      <div className="section-headline stack-headline">
+      <div className="section-headline stack-headline section-block">
         <div>
           <h3 className="section-title">Tecnologias utilizadas</h3>
           <span className="section-subtitle">
