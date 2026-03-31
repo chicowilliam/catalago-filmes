@@ -228,18 +228,24 @@ h3,
   background: color-mix(in srgb, var(--border) 50%, var(--text-soft));
 }
 
+/* ── Section block ───────────────────────────────── */
+.section-block {
+  margin-bottom: 32px;
+  animation: sectionReveal 550ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 /* ── Reveal ao scroll ─────────────────────────────── */
 .reveal {
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(20px) scale(0.988);
   transition:
-    opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.62s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 0.70s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
 }
 
 .reveal.reveal-visible {
   opacity: 1;
-  transform: none;
+  transform: translateY(0) scale(1);
 }
 
 /* Aparição automática via CSS (Chrome moderno) */
