@@ -130,23 +130,23 @@ app.get("/api/health", (req, res) => {
 
 /* =========================
     FRONTEND
-    Prioridade: React build (catalog-projeto/dist) > vanilla (public/)
+    React build (catalog-projeto/dist) é o único frontend.
 
-    - Em produção (Vercel/deploy): sempre usa o build do React
-    - Em desenvolvimento local: usa React build SE já foi rodado
-      `npm run build`, caso contrário cai no vanilla (public/).
-    - Para dev com React: rodar `npm run dev:react` (2 servidores)
-      ou `npm run build && npm run dev` (Express serve o build).
+    - Em produção (Vercel/deploy): build gerado automaticamente no deploy.
+    - Em desenvolvimento local: rode `npm run build` uma vez antes de
+      usar `npm run start:api`. Para hot-reload, use `npm run dev`.
 ========================= */
 const reactBuildPath = path.join(__dirname, "catalog-projeto", "dist");
 const hasReactBuild = fs.existsSync(path.join(reactBuildPath, "index.html"));
 
 if (hasReactBuild) {
-   // Serve os assets do React (JS, CSS, imagens)
+   // Serve os assets estáticos do React (JS, CSS, imagens)
    app.use(express.static(reactBuildPath));
 } else {
-   // Fallback para o frontend vanilla em dev (sem build)
-   app.use(express.static(path.join(__dirname, "public")));
+   // Sem build: avisa no console e retorna 503 em qualquer rota não-API
+   console.warn("\x1b[33m⚠️  Build do React não encontrado.\x1b[0m");
+   console.warn("   Rode: npm run build");
+   console.warn("   Ou para dev com hot-reload: npm run dev");
 }
 
 // Rotas de API não encontradas — DEVE vir antes do SPA fallback
@@ -158,10 +158,19 @@ app.use("/api/*", (req, res) => {
 });
 
 // SPA fallback: qualquer rota não-API retorna o index.html do React
-// (necessário para navegação client-side com React Router no futuro)
 if (hasReactBuild) {
    app.get("*", (req, res) => {
       res.sendFile(path.join(reactBuildPath, "index.html"));
+   });
+} else {
+   app.get("*", (req, res) => {
+      res.status(503).send(
+         "<!doctype html><html lang='pt-BR'><head><meta charset='utf-8'>" +
+         "<title>Build não encontrado</title></head><body style='font-family:sans-serif;padding:40px'>" +
+         "<h2>⚠️ Frontend não compilado</h2>" +
+         "<p>Rode <code>npm run build</code> e reinicie o servidor.</p>" +
+         "</body></html>"
+      );
    });
 }
 
@@ -182,11 +191,9 @@ if (require.main === module) {
       console.log(`🔐 Modo: ${process.env.NODE_ENV}`);
       if (hasReactBuild) {
          console.log("\x1b[35m⚛️  Frontend: React (catalog-projeto/dist)\x1b[0m");
-         console.log("    Para dev com hot-reload: npm run dev:react");
+         console.log("    Para dev com hot-reload: npm run dev");
       } else {
-         console.log("\x1b[33m🌐 Frontend: vanilla JS (public/)\x1b[0m");
-         console.log("    Para ativar o React: npm run build");
-         console.log("    Para dev React c/ hot-reload: npm run dev:react");
+         console.log("\x1b[33m⚠️  Frontend: build não encontrado — rode npm run build\x1b[0m");
       }
    });
 
