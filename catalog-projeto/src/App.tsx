@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { AppShell } from "@/components/layout/AppShell";
 import { useAuth } from "@/hooks/useAuth";
@@ -58,24 +58,42 @@ function App() {
     return <CheckingScreen />;
   }
 
-  if (!canAccessCatalog) {
-    return (
-      <LoginForm
-        isSubmitting={auth.isSubmitting}
-        error={auth.error}
-        onSubmit={auth.login}
-        onGuestAccess={auth.enterAsGuest}
-      />
-    );
-  }
-
   return (
-    <AppShell
-      username={auth.user?.username ?? (auth.isGuest ? "Visitante" : undefined)}
-      onLogout={auth.isAuthenticated ? auth.logout : () => { /* guest: sem logout */ }}
-    >
-      <CatalogPage />
-    </AppShell>
+    <AnimatePresence mode="wait" initial={false}>
+      {!canAccessCatalog ? (
+        <motion.div
+          key="login"
+          exit={{
+            opacity: 0,
+            y: -10,
+            filter: "blur(5px)",
+            scale: 0.97,
+          }}
+          transition={{ duration: 0.28, ease: "easeIn" }}
+        >
+          <LoginForm
+            isSubmitting={auth.isSubmitting}
+            error={auth.error}
+            onSubmit={auth.login}
+            onGuestAccess={auth.enterAsGuest}
+          />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="catalog"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <AppShell
+            username={auth.user?.username ?? (auth.isGuest ? "Visitante" : undefined)}
+            onLogout={auth.isAuthenticated ? auth.logout : () => { /* guest: sem logout */ }}
+          >
+            <CatalogPage />
+          </AppShell>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
