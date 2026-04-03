@@ -1,0 +1,5 @@
+react : OK
+react-dom : OK
+framer-motion : OK
+vite : OK
+tailwindcss : OK
