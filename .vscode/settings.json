@@ -33,5 +33,7 @@
         },
         "npx shadcn@latest": true
     },
-    "postman.settings.dotenv-detection-notification-visibility": false
+    "postman.settings.dotenv-detection-notification-visibility": false,
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 300
 }

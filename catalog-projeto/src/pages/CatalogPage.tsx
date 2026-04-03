@@ -17,26 +17,29 @@ import type { CatalogType } from "@/types/catalog";
 
 const pageSlideVariants: Variants = {
   enter: (direction: number) => ({
-    x: direction >= 0 ? "100%" : "-100%",
-    rotateY: direction >= 0 ? -9 : 9,
-    opacity: 0.78,
-    filter: "blur(4px)",
+    x: direction >= 0 ? "72%" : "-72%",
+    rotateY: direction >= 0 ? -4 : 4,
+    scale: 0.992,
+    opacity: 0.86,
+    filter: "blur(2px)",
     zIndex: 1,
     transformOrigin: direction >= 0 ? "100% 50%" : "0% 50%",
   }),
   center: {
     x: 0,
     rotateY: 0,
+    scale: 1,
     opacity: 1,
     filter: "blur(0px)",
     zIndex: 2,
     transformOrigin: "50% 50%",
   },
   exit: (direction: number) => ({
-    x: direction >= 0 ? "-100%" : "100%",
-    rotateY: direction >= 0 ? 9 : -9,
-    opacity: 0.78,
-    filter: "blur(4px)",
+    x: direction >= 0 ? "-72%" : "72%",
+    rotateY: direction >= 0 ? 4 : -4,
+    scale: 0.992,
+    opacity: 0.86,
+    filter: "blur(2px)",
     zIndex: 1,
     transformOrigin: direction >= 0 ? "0% 50%" : "100% 50%",
   }),
@@ -78,7 +81,7 @@ export function CatalogPage() {
   const isWipingRef = useRef(false);
 
   /**
-   * Wipe Star Wars usando CSS transition + setTimeout.
+   * Wipe lateral com visual glass/futurista usando CSS transition + setTimeout.
    *
    * Por que não usamos useAnimation() do Framer Motion:
    *   - No FM v12 + React 19, useAnimation foi depreciado e pode não acionar
@@ -89,10 +92,10 @@ export function CatalogPage() {
    *   - `transition: Xms` + novo transform = animação exatamente de Xms
    *   - setTimeout(fn, Xms) dispara após a transição terminar — sem distorção
    *
-   * Timeline:
-   *   0ms → 260ms  cortina entra (cobre a tela)
-   *   260ms         setActiveType (DOM troca sob a cortina, invisível ao usuário)
-   *   260ms → 560ms cortina sai  (revela o novo conteúdo)
+  * Timeline:
+  *   0ms → 220ms  cortina entra (cobre a tela)
+  *   220ms         setActiveType (DOM troca sob a cortina, invisível ao usuário)
+  *   220ms → 470ms cortina sai  (revela o novo conteúdo)
    */
   const runWipe = (nextType: CatalogType, dir: number) => {
     const curtain = curtainRef.current;
@@ -102,8 +105,8 @@ export function CatalogPage() {
       return;
     }
 
-    const ENTER_MS = 260;
-    const EXIT_MS  = 300;
+    const ENTER_MS = 220;
+    const EXIT_MS  = 250;
     const startX   = dir >= 0 ? '110%' : '-110%';
     const endX     = dir >= 0 ? '-110%' : '110%';
 
@@ -116,7 +119,7 @@ export function CatalogPage() {
     void curtain.offsetHeight; // força reflow — garante que o browser "viu" o passo 1
 
     // PASSO 2: desliza para cobrir a tela
-    curtain.style.transition = `transform ${ENTER_MS}ms cubic-bezier(0.76, 0, 0.24, 1)`;
+    curtain.style.transition = `transform ${ENTER_MS}ms cubic-bezier(0.32, 0.72, 0, 1)`;
     curtain.style.transform  = 'translateX(0%)';
 
     // PASSO 3: após cobertura completa, troca o conteúdo
@@ -127,7 +130,7 @@ export function CatalogPage() {
       // PASSO 4: inicia saída após um tick para React commitar o novo DOM
       setTimeout(() => {
         void curtain.offsetHeight;
-        curtain.style.transition = `transform ${EXIT_MS}ms cubic-bezier(0.24, 0, 0.76, 1)`;
+        curtain.style.transition = `transform ${EXIT_MS}ms cubic-bezier(0.2, 0.8, 0.2, 1)`;
         curtain.style.transform  = `translateX(${endX})`;
 
         // PASSO 5: limpeza — reseta para off-screen padrão
@@ -184,7 +187,7 @@ export function CatalogPage() {
   return (
     <>
       <section className="catalog-page">
-        {/* ── Hero slider — visível em todas as abas exceto "Sobre" ── */}
+        {/* ── Destaque compacto — visível em todas as abas exceto "Sobre" ── */}
         {activeType !== "about" && !isLoading && allItems.length > 0 && (
           <FeaturedSlider items={allItems} onOpenModal={open} />
         )}
@@ -205,7 +208,13 @@ export function CatalogPage() {
                 initial="enter"
                 animate="center"
                 exit="exit"
-                transition={{ duration: 0.58, ease: "easeInOut" }}
+                transition={{
+                  x: { type: "spring", stiffness: 420, damping: 38, mass: 0.72 },
+                  rotateY: { duration: 0.34, ease: [0.2, 0.8, 0.2, 1] },
+                  scale: { duration: 0.34, ease: [0.2, 0.8, 0.2, 1] },
+                  opacity: { duration: 0.28, ease: "easeOut" },
+                  filter: { duration: 0.34, ease: [0.2, 0.8, 0.2, 1] },
+                }}
               >
                 {activeType === "about" ? (
                   <AboutSection />

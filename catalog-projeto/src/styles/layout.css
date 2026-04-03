@@ -218,7 +218,8 @@
   overflow: hidden;
   isolation: isolate;
   display: block;
-  perspective: 1400px;
+  perspective: 1600px;
+  border-radius: 16px;
 }
 
 .tab-transition-stage {
@@ -226,13 +227,14 @@
   width: 100%;
   display: grid;
   transform-style: preserve-3d;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.014), rgba(255, 255, 255, 0));
 }
 
 .tab-transition-panel {
   grid-area: 1 / 1;
   position: relative;
   width: 100%;
-  will-change: transform, opacity;
+  will-change: transform, opacity, filter;
   backface-visibility: hidden;
 }
 
@@ -274,7 +276,7 @@
 }
 
 /* -----------------------------------------------------------------------
-   Cortina de wipe — Star Wars
+  Cortina de wipe — Glass lateral
    position:fixed cobre 100% da viewport independente do
    overflow:hidden do .tab-transition-viewport.
    z-index 1050: acima do header/modal, abaixo do toast e tela de login.
@@ -284,11 +286,16 @@
   inset: 0;
   /* z-index acima do header (100) e modal (999), abaixo do toast (1300) e login (1400) */
   z-index: 1050;
-  background: linear-gradient(to right, #0a0a0a 0%, #111 40%, #0a0a0a 100%);
-  border-left: 6px solid #e50914;
+  background:
+    linear-gradient(to right, rgba(8, 12, 20, 0.96) 0%, rgba(15, 20, 30, 0.95) 42%, rgba(8, 12, 20, 0.96) 100%),
+    radial-gradient(120% 90% at 10% 50%, rgba(255, 255, 255, 0.09), transparent 56%);
+  border-left: 1px solid rgba(255, 255, 255, 0.34);
   box-shadow:
-    inset 80px 0 120px rgba(229, 9, 20, 0.28),
-    -4px 0 20px rgba(229, 9, 20, 0.6);
+    inset 90px 0 120px rgba(255, 255, 255, 0.08),
+    -6px 0 24px rgba(110, 145, 185, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   pointer-events: none;
   transform: translateX(110%);
 }
