@@ -1,0 +1,7 @@
+express:FAIL
+helmet:OK
+bcryptjs:OK
+joi:FAIL
+dotenv:OK
+jest:OK
+supertest:FAIL
