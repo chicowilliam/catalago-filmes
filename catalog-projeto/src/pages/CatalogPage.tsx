@@ -17,11 +17,11 @@ import type { CatalogType } from "@/types/catalog";
 
 const pageSlideVariants: Variants = {
   enter: (direction: number) => ({
-    x: direction >= 0 ? "72%" : "-72%",
-    rotateY: direction >= 0 ? -4 : 4,
-    scale: 0.992,
-    opacity: 0.86,
-    filter: "blur(2px)",
+    x: direction >= 0 ? "56%" : "-56%",
+    rotateY: 0,
+    scale: 1,
+    opacity: 1,
+    filter: "blur(0px)",
     zIndex: 1,
     transformOrigin: direction >= 0 ? "100% 50%" : "0% 50%",
   }),
@@ -35,11 +35,11 @@ const pageSlideVariants: Variants = {
     transformOrigin: "50% 50%",
   },
   exit: (direction: number) => ({
-    x: direction >= 0 ? "-72%" : "72%",
-    rotateY: direction >= 0 ? 4 : -4,
-    scale: 0.992,
-    opacity: 0.86,
-    filter: "blur(2px)",
+    x: direction >= 0 ? "-56%" : "56%",
+    rotateY: 0,
+    scale: 1,
+    opacity: 1,
+    filter: "blur(0px)",
     zIndex: 1,
     transformOrigin: direction >= 0 ? "0% 50%" : "100% 50%",
   }),
@@ -105,8 +105,8 @@ export function CatalogPage() {
       return;
     }
 
-    const ENTER_MS = 220;
-    const EXIT_MS  = 250;
+    const ENTER_MS = 150;
+    const EXIT_MS  = 172;
     const startX   = dir >= 0 ? '110%' : '-110%';
     const endX     = dir >= 0 ? '-110%' : '110%';
 
@@ -119,7 +119,7 @@ export function CatalogPage() {
     void curtain.offsetHeight; // força reflow — garante que o browser "viu" o passo 1
 
     // PASSO 2: desliza para cobrir a tela
-    curtain.style.transition = `transform ${ENTER_MS}ms cubic-bezier(0.32, 0.72, 0, 1)`;
+    curtain.style.transition = `transform ${ENTER_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`;
     curtain.style.transform  = 'translateX(0%)';
 
     // PASSO 3: após cobertura completa, troca o conteúdo
@@ -130,7 +130,7 @@ export function CatalogPage() {
       // PASSO 4: inicia saída após um tick para React commitar o novo DOM
       setTimeout(() => {
         void curtain.offsetHeight;
-        curtain.style.transition = `transform ${EXIT_MS}ms cubic-bezier(0.2, 0.8, 0.2, 1)`;
+        curtain.style.transition = `transform ${EXIT_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`;
         curtain.style.transform  = `translateX(${endX})`;
 
         // PASSO 5: limpeza — reseta para off-screen padrão
@@ -187,8 +187,8 @@ export function CatalogPage() {
   return (
     <>
       <section className="catalog-page">
-        {/* ── Destaque compacto — visível em todas as abas exceto "Sobre" ── */}
-        {activeType !== "about" && !isLoading && allItems.length > 0 && (
+        {/* ── Destaque compacto — visível apenas na aba Início ── */}
+        {activeType === "all" && !isLoading && allItems.length > 0 && (
           <FeaturedSlider items={allItems} onOpenModal={open} />
         )}
 
@@ -209,11 +209,11 @@ export function CatalogPage() {
                 animate="center"
                 exit="exit"
                 transition={{
-                  x: { type: "spring", stiffness: 420, damping: 38, mass: 0.72 },
-                  rotateY: { duration: 0.34, ease: [0.2, 0.8, 0.2, 1] },
-                  scale: { duration: 0.34, ease: [0.2, 0.8, 0.2, 1] },
-                  opacity: { duration: 0.28, ease: "easeOut" },
-                  filter: { duration: 0.34, ease: [0.2, 0.8, 0.2, 1] },
+                  x: { type: "spring", stiffness: 460, damping: 46, mass: 0.68 },
+                  rotateY: { duration: 0.23, ease: [0.4, 0, 0.2, 1] },
+                  scale: { duration: 0.23, ease: [0.4, 0, 0.2, 1] },
+                  opacity: { duration: 0.18, ease: "linear" },
+                  filter: { duration: 0.23, ease: [0.4, 0, 0.2, 1] },
                 }}
               >
                 {activeType === "about" ? (

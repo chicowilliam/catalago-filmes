@@ -18,6 +18,12 @@
   --accent-hover: #f6121d;
   --accent-soft: rgba(229, 9, 20, 0.16);
   --accent-gradient: linear-gradient(135deg, #e50914 0%, #b20710 100%);
+  --transition-strip: linear-gradient(90deg, rgba(6, 8, 12, 0.88), rgba(10, 12, 16, 0.8));
+  --transition-strip-shadow: 0 0 12px rgba(0, 0, 0, 0.28);
+  --wipe-bg-1: rgba(8, 10, 14, 0.9);
+  --wipe-bg-2: rgba(12, 15, 20, 0.86);
+  --wipe-edge: rgba(255, 255, 255, 0.14);
+  --wipe-glow: rgba(255, 255, 255, 0.07);
   --bg: var(--bg-primary);
   --panel: var(--bg-secondary);
   --panel-2: var(--bg-tertiary);
@@ -51,6 +57,12 @@
   --accent-hover: #c90b14;
   --accent-soft: rgba(229, 9, 20, 0.12);
   --accent-gradient: linear-gradient(135deg, #e50914 0%, #a10812 100%);
+  --transition-strip: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(252, 252, 252, 0.84));
+  --transition-strip-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+  --wipe-bg-1: rgba(255, 255, 255, 0.88);
+  --wipe-bg-2: rgba(248, 248, 248, 0.8);
+  --wipe-edge: rgba(20, 24, 32, 0.14);
+  --wipe-glow: rgba(20, 24, 32, 0.08);
   --bg: var(--bg-primary);
   --panel: var(--bg-secondary);
   --panel-2: var(--bg-tertiary);
@@ -93,12 +105,12 @@ body::before {
   top: 0;
   left: 0;
   width: calc(var(--scroll-progress) * 100%);
-  height: 3px;
-  background: var(--accent-gradient);
+  height: 2px;
+  background: var(--transition-strip);
   z-index: 1800;
   pointer-events: none;
   transform-origin: left center;
-  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 44%, transparent);
+  box-shadow: var(--transition-strip-shadow);
 }
 
 #root {
