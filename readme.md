@@ -37,37 +37,41 @@
 ## 🚀 Tech Stack
 
 ### Backend
-| Technology | Purpose |
-|---|---|
-| **Node.js 20+** | JavaScript runtime |
-| **Express.js** | Web framework |
-| **express-session** | Session management |
-| **Helmet** | HTTP security headers |
-| **Joi** | Input validation |
-| **bcryptjs** | Password hashing |
-| **TMDB API** | Movie and series data source |
+
+| Technology          | Purpose                      |
+| ------------------- | ---------------------------- |
+| **Node.js 20+**     | JavaScript runtime           |
+| **Express.js**      | Web framework                |
+| **express-session** | Session management           |
+| **Helmet**          | HTTP security headers        |
+| **Joi**             | Input validation             |
+| **bcryptjs**        | Password hashing             |
+| **TMDB API**        | Movie and series data source |
 
 ### Frontend — Classic (`public/`)
-| Technology | Purpose |
-|---|---|
-| **HTML5 + CSS3** | Structure and styles |
+
+| Technology             | Purpose                   |
+| ---------------------- | ------------------------- |
+| **HTML5 + CSS3**       | Structure and styles      |
 | **Vanilla JavaScript** | ES modules, no frameworks |
 
 ### Frontend — Modern (`catalog-projeto/`)
-| Technology | Purpose |
-|---|---|
-| **React 19** | UI library |
-| **TypeScript** | Static typing |
-| **Vite 8** | Build tool and dev server |
-| **Tailwind CSS 4** | Utility-first styling |
-| **Framer Motion** | Animations |
-| **shadcn/ui** | Accessible UI components |
+
+| Technology         | Purpose                   |
+| ------------------ | ------------------------- |
+| **React 19**       | UI library                |
+| **TypeScript**     | Static typing             |
+| **Vite 8**         | Build tool and dev server |
+| **Tailwind CSS 4** | Utility-first styling     |
+| **Framer Motion**  | Animations                |
+| **shadcn/ui**      | Accessible UI components  |
 
 ### Testing
-| Technology | Purpose |
-|---|---|
-| **Jest + Supertest** | Backend integration and unit tests |
-| **Vitest + Testing Library** | React component tests |
+
+| Technology                   | Purpose                            |
+| ---------------------------- | ---------------------------------- |
+| **Jest + Supertest**         | Backend integration and unit tests |
+| **Vitest + Testing Library** | React component tests              |
 
 ## 💻 Getting Started
 
@@ -80,32 +84,36 @@
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/chicowilliam/catalago-filmes.git
    cd catalago-filmes
    ```
 
-2. **Install backend dependencies**
+2. **Install project dependencies**
+
    ```bash
    npm install
    ```
 
+   This command installs both the root dependencies and the React frontend dependencies in `catalog-projeto/`.
+
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    # Edit .env and add your TMDB credentials
    ```
 
 4. **Start the development server**
+
    ```bash
    npm run dev
    ```
 
-5. **(Optional) Start the React frontend**
+5. **(Optional) Run frontend commands directly**
    ```bash
-   cd catalog-projeto
-   npm install
-   npm run dev
+   npm --prefix catalog-projeto run dev
    ```
 
 ## ⚙️ Environment Variables
@@ -133,26 +141,26 @@ SESSION_SECRET=a_long_random_secret_string
 
 ### Authentication
 
-| Method | Route | Description |
-|--------|-------|-------------|
-| `POST` | `/api/auth/login` | Log in with username and password |
-| `POST` | `/api/auth/logout` | Terminate the current session |
-| `GET`  | `/api/auth/me` | Check active session |
+| Method | Route              | Description                       |
+| ------ | ------------------ | --------------------------------- |
+| `POST` | `/api/auth/login`  | Log in with username and password |
+| `POST` | `/api/auth/logout` | Terminate the current session     |
+| `GET`  | `/api/auth/me`     | Check active session              |
 
 ### Catalog
 
-| Method | Route | Description |
-|--------|-------|-------------|
+| Method | Route          | Description                      |
+| ------ | -------------- | -------------------------------- |
 | `GET`  | `/api/catalog` | List movies and series from TMDB |
 
 #### Query Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `type` | `movie` \| `series` \| `all` | `all` | Filter by content type |
-| `search` | string | `""` | Full-text search by title |
-| `page` | number | `1` | Page number |
-| `pageSize` | number | `20` | Items per page (max 100) |
+| Parameter  | Type                         | Default | Description               |
+| ---------- | ---------------------------- | ------- | ------------------------- |
+| `type`     | `movie` \| `series` \| `all` | `all`   | Filter by content type    |
+| `search`   | string                       | `""`    | Full-text search by title |
+| `page`     | number                       | `1`     | Page number               |
+| `pageSize` | number                       | `20`    | Items per page (max 100)  |
 
 #### Sample Response
 
@@ -183,9 +191,8 @@ npm run test:coverage
 ### React Frontend (Vitest)
 
 ```bash
-cd catalog-projeto
-node node_modules/vitest/vitest.mjs run
-node node_modules/vitest/vitest.mjs run --coverage
+npm run test:frontend
+npm run test:frontend:coverage
 ```
 
 ## 📁 Project Structure
@@ -229,8 +236,7 @@ Built as a portfolio project to demonstrate:
 
 ---
 
-*Inspired by streaming services like Netflix*
-
+_Inspired by streaming services like Netflix_
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-green.svg)](https://nodejs.org)
@@ -266,6 +272,7 @@ Built as a portfolio project to demonstrate:
 ## 🚀 Tecnologias
 
 ### Back-end
+
 - **Node.js 20+** — Runtime JavaScript
 - **Express.js** — Framework web
 - **express-session** — Gerenciamento de sessão
@@ -275,10 +282,12 @@ Built as a portfolio project to demonstrate:
 - **TMDB API** — Fonte dos dados de filmes e séries
 
 ### Front-end Clássico (`public/`)
+
 - **HTML5** + **CSS3** — Estrutura e estilo
 - **JavaScript Vanilla** — Módulos ES sem frameworks
 
 ### Front-end Moderno (`catalog-projeto/`)
+
 - **React 19** — Biblioteca de UI
 - **TypeScript** — Tipagem estática
 - **Vite 8** — Build tool e servidor de desenvolvimento
@@ -287,6 +296,7 @@ Built as a portfolio project to demonstrate:
 - **shadcn/ui** — Componentes acessíveis
 
 ### Testes
+
 - **Jest + Supertest** — 37+ testes de back-end (rotas, serviços, middlewares)
 - **Vitest + Testing Library** — Testes de componentes React
 
@@ -301,32 +311,36 @@ Built as a portfolio project to demonstrate:
 ### Passos
 
 1. **Clone o repositório**
+
    ```bash
    git clone https://github.com/chicowilliam/catalago-filmes.git
    cd catalago-filmes
    ```
 
-2. **Instale as dependências do back-end**
+2. **Instale as dependências do projeto**
+
    ```bash
    npm install
    ```
 
+   Esse comando instala as dependências da raiz e também do front-end React em `catalog-projeto/`.
+
 3. **Configure as variáveis de ambiente**
+
    ```bash
    cp .env.example .env
    # Edite .env e adicione sua chave TMDB
    ```
 
 4. **Inicie o servidor**
+
    ```bash
    npm run dev
    ```
 
-5. **(Opcional) Front-end moderno React**
+5. **(Opcional) Execute comandos diretos do front-end React**
    ```bash
-   cd catalog-projeto
-   npm install
-   npm run dev
+   npm --prefix catalog-projeto run dev
    ```
 
 ## ⚙️ Variáveis de Ambiente
@@ -354,26 +368,26 @@ SESSION_SECRET=uma_chave_secreta_longa
 
 ### Autenticação
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| `POST` | `/api/auth/login` | Login com usuário e senha |
-| `POST` | `/api/auth/logout` | Encerra a sessão atual |
-| `GET`  | `/api/auth/me` | Verifica sessão ativa |
+| Método | Rota               | Descrição                 |
+| ------ | ------------------ | ------------------------- |
+| `POST` | `/api/auth/login`  | Login com usuário e senha |
+| `POST` | `/api/auth/logout` | Encerra a sessão atual    |
+| `GET`  | `/api/auth/me`     | Verifica sessão ativa     |
 
 ### Catálogo
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
+| Método | Rota           | Descrição                      |
+| ------ | -------------- | ------------------------------ |
 | `GET`  | `/api/catalog` | Lista filmes e séries via TMDB |
 
 #### Parâmetros do catálogo
 
-| Parâmetro | Tipo | Padrão | Descrição |
-|-----------|------|--------|-----------|
-| `type` | `movie` \| `series` \| `all` | `all` | Filtrar por tipo |
-| `search` | string | `""` | Buscar por título |
-| `page` | número | `1` | Número da página |
-| `pageSize` | número | `20` | Itens por página (máx. 100) |
+| Parâmetro  | Tipo                         | Padrão | Descrição                   |
+| ---------- | ---------------------------- | ------ | --------------------------- |
+| `type`     | `movie` \| `series` \| `all` | `all`  | Filtrar por tipo            |
+| `search`   | string                       | `""`   | Buscar por título           |
+| `page`     | número                       | `1`    | Número da página            |
+| `pageSize` | número                       | `20`   | Itens por página (máx. 100) |
 
 #### Exemplo de resposta
 
@@ -404,9 +418,8 @@ npm run test:coverage
 ### Front-end React (Vitest)
 
 ```bash
-cd catalog-projeto
-node node_modules/vitest/vitest.mjs run
-node node_modules/vitest/vitest.mjs run --coverage
+npm run test:frontend
+npm run test:frontend:coverage
 ```
 
 ## 📁 Estrutura do Projeto
@@ -449,4 +462,5 @@ Desenvolvido como projeto de portfólio para demonstrar:
 - Cobertura de testes automatizados (Jest + Vitest)
 
 ---
-*Inspirado em serviços de streaming como Netflix*
+
+_Inspirado em serviços de streaming como Netflix_
