@@ -4,16 +4,19 @@
   "description": "Catálogo de filmes com Node.js",
   "main": "server.js",
   "scripts": {
+    "postinstall": "npm --prefix catalog-projeto install",
     "start": "npm --prefix catalog-projeto run preview",
     "dev": "npm --prefix catalog-projeto run dev",
     "preview": "npm --prefix catalog-projeto run preview",
-    "dev:api": "nodemon server.js",
+    "dev:api": "node ./node_modules/nodemon/bin/nodemon.js server.js",
     "start:api": "node server.js",
     "build:frontend": "npm --prefix catalog-projeto run build",
     "build": "npm run build:frontend",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test": "node ./node_modules/jest/bin/jest.js",
+    "test:frontend": "npm --prefix catalog-projeto run test:run",
+    "test:frontend:coverage": "npm --prefix catalog-projeto run test:coverage",
+    "test:watch": "node ./node_modules/jest/bin/jest.js --watch",
+    "test:coverage": "node ./node_modules/jest/bin/jest.js --coverage"
   },
   "keywords": [],
   "author": "",
