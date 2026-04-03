@@ -1,0 +1,15 @@
+server.js: OK
+package.json: OK
+jest.config.js: OK
+vercel.json: OK
+.env.example: OK
+.gitignore: OK
+backend/services/tmdb.service.js: OK
+backend/controllers/catalog.controller.js: OK
+backend/routes/catalog.routes.js: OK
+public/index.html: OK
+public/js/script.js: OK
+public/css/style.css: OK
+catalog-projeto/src/App.tsx: OK
+catalog-projeto/vite.config.ts: OK
+catalog-projeto/src/components/catalog/MovieCard.tsx: OK
