@@ -5,22 +5,24 @@
 ### 29/03/2026 - Vite como frontend principal na raiz (modo standalone)
 
 **Objetivo:**
+
 - Tornar o Vite (React) o fluxo principal de execucao a partir da raiz do repositório.
 - Permitir rodar o frontend sem depender do Express durante desenvolvimento de UI.
 - Aproximar visual da tela de login ao frontend vanilla.
 
 **Ajustes aplicados:**
+
 - `package.json` (raiz)
   - `dev` agora executa Vite diretamente via `npm --prefix catalog-projeto run dev`.
   - `start`/`preview` apontam para o preview do Vite.
   - Backend ficou opcional em `dev:api` e `start:api`.
-- `catalog-projeto/src/config/runtime.ts` *(novo)*
+- `catalog-projeto/src/config/runtime.ts` _(novo)_
   - Flag `USE_BACKEND_API` para alternar entre modo standalone local e modo API.
 - `catalog-projeto/src/services/authService.ts`
   - Login/sessao local via `localStorage` quando `USE_BACKEND_API` nao esta ativo.
 - `catalog-projeto/src/services/catalogService.ts`
   - Fonte local de catalogo em modo standalone.
-- `catalog-projeto/src/mocks/catalogData.ts` *(novo)*
+- `catalog-projeto/src/mocks/catalogData.ts` _(novo)_
   - Base de filmes e series para uso local sem backend.
 - `catalog-projeto/src/styles/layout.css`
   - Estilizacao da tela de login alinhada ao visual do vanilla (gradiente, card, botoes e spinner).
@@ -30,6 +32,7 @@
   - Texto atualizado para refletir modo standalone com backend opcional.
 
 **Resultado esperado:**
+
 - `npm run dev` na raiz inicia o frontend Vite imediatamente.
 - Login, animacoes e aba Sobre funcionam mesmo sem API ligada.
 - Express continua disponivel apenas quando necessario em fluxo full stack.
@@ -37,11 +40,13 @@
 ### 29/03/2026 - Transicao horizontal entre abas com modulo dedicado
 
 **Objetivo:**
+
 - Aplicar transicao de pagina no sentido horizontal ao trocar abas (Inicio, Filmes, Series, Favoritos, Sobre).
 - Separar a logica de orquestracao para facilitar manutencao e evolucao de UX.
 
 **Ajustes aplicados:**
-- `public/js/page-transition.js` *(novo arquivo)*
+
+- `public/js/page-transition.js` _(novo arquivo)_
   - Centraliza a ordem visual das abas.
   - Exporta `getFilterTravelDirection(fromType, toType)` para definir direcao da animacao.
   - Exporta `getVisiblePageSections()` para coletar secoes visiveis antes da troca.
@@ -54,6 +59,7 @@
   - Saida alterada para slide horizontal (`x`) com fade.
 
 **Resultado esperado:**
+
 - Troca de abas com sensacao de pagina deslizando horizontalmente.
 - Base pronta para ajustes finos futuros (distancia, velocidade e easing) sem acoplar em `render.js`.
 
@@ -154,7 +160,7 @@ Apply remaining medium-priority fixes: centralize logging, remove dead write rou
   - Added Open Graph (`og:title`, `og:description`, `og:image`, `og:url`, `og:locale`) and Twitter Card meta tags — link previews now appear on LinkedIn, WhatsApp, etc.
   - `<title>` updated to `"CatalogoX — Portfólio Full Stack | Vinicius William"`.
 
-- `public/favicon.svg` *(new file)*
+- `public/favicon.svg` _(new file)_
   - SVG favicon with "CX" initials on red background (#e50914) — replaces missing `favicon.ico` reference.
 
 - `backend/__tests__/catalog.routes.test.js`
@@ -166,7 +172,7 @@ Apply remaining medium-priority fixes: centralize logging, remove dead write rou
   - Added `GET /api/auth/me` test with active session.
   - Replaced simple logout test with agent-based flow: login → confirm `/me` 200 → logout → confirm `/me` 401.
 
-- `backend/__tests__/tmdb.service.test.js` *(new file)*
+- `backend/__tests__/tmdb.service.test.js` _(new file)_
   - 10 unit tests with `https` module mocked via `jest.spyOn`.
   - Covers: item mapping, type filter, search endpoint, in-memory cache, HTTP error 500, trailer attachment (Trailer/Teaser/fallback/already-filled), non-tmdb-id items.
 
@@ -180,11 +186,12 @@ Apply remaining medium-priority fixes: centralize logging, remove dead write rou
 Apply a complete set of security fixes, UX improvements and backend quality enhancements across all three layers of the project (vanilla frontend, React frontend, backend).
 
 **Security fixes applied:**
+
 - `public/js/modal.js`
   - YouTube `trailerId` is now validated against `/^[a-zA-Z0-9_-]+$/` before being inserted into the `iframe.src` — prevents XSS injection.
 - `public/js/utils.js`
   - All `localStorage` calls (read/write) wrapped in `try/catch` to avoid crashes in browsers with storage disabled or in restricted private mode.
-- `catalog-projeto/src/components/ErrorBoundary.tsx` *(new file)*
+- `catalog-projeto/src/components/ErrorBoundary.tsx` _(new file)_
   - React `ErrorBoundary` class component created.
 - `catalog-projeto/src/main.tsx`
   - `<App />` wrapped with `<ErrorBoundary>` so unhandled React errors show a fallback screen instead of a blank page.
@@ -196,6 +203,7 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - `ADMIN_USERNAME`, `ADMIN_PASSWORD` and `TMDB_BEARER_TOKEN` validated at startup — server refuses to boot if any is missing.
 
 **Vanilla frontend UX improvements:**
+
 - `public/css/base.css` + `public/js/settings.js`
   - Dark mode theme switch now has a smooth 300ms transition instead of an instant flash.
   - CSS class `html.theme-transition` temporarily applies background/color/border transitions only during the switch.
@@ -210,7 +218,8 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Replaced single `fetch()` call with `fetchCatalogWithRetry()` which retries up to 3 times with exponential backoff (800ms → 1.6s → 3.2s) before showing the error button to the user.
 
 **Backend quality improvements:**
-- `backend/utils/logger.js` *(new file)*
+
+- `backend/utils/logger.js` _(new file)_
   - Centralized logger: human-readable in development, structured JSON in production (`NODE_ENV=production`). Replaces all `console.log/warn/error` in tmdb.service.js.
 - `backend/services/tmdb.service.js`
   - Three `Map()` instances replaced by `CacheStore` class with `get()`, `getStale()` and `set()` — `getStale()` returns expired data as fallback when TMDB is unreachable.
@@ -224,6 +233,7 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Added `catalogLimiter` (20 req/min per IP) applied specifically to `POST /api/catalog` — protects the TMDB API key from exhaustion while keeping the global 100 req/min limit for other routes.
 
 **Expected results:**
+
 - No XSS vectors via YouTube trailer IDs.
 - App no longer crashes when localStorage is unavailable.
 - React shows a user-friendly fallback on unhandled component errors.
@@ -240,11 +250,14 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
 ---
 
 ### 26/03/2026 - Transicao entre abas no frontend vanilla (GSAP, sem piscar)
+
 **Objetivo:**
+
 - Corrigir o "piscar" ao trocar de aba no frontend legado (`public/`).
 - Garantir que o DOM so e trocado DEPOIS que a animacao de saida termina.
 
 **Ajustes aplicados:**
+
 - `public/js/motion.js`
   - Adicionada funcao `animateTabSwitch(hiding, onSwap)`: anima saida GSAP, executa callback de troca, anima entrada.
   - Exportada junto com `canUseAdvancedMotion` para uso em `render.js`.
@@ -262,15 +275,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
     - `@keyframes tabContentEnter`
 
 **Resultado esperado:**
+
 - Troca entre abas (Inicio, Filmes, Series, Favoritos, Sobre) sem piscar no frontend vanilla.
 - Animacao de saida termina antes da nova aba aparecer, garantindo continuidade visual.
 
 ### 26/03/2026 - Hover coordenado nos cards React (Framer Motion)
+
 **Objetivo:**
+
 - Aplicar hover moderno nos cards com zoom suave e elevacao.
 - Reduzir opacidade dos cards vizinhos enquanto um card estiver ativo.
 
 **Ajustes aplicados:**
+
 - `catalog-projeto/src/components/catalog/CatalogGrid.tsx`
   - Adicionado estado `hoveredId` no topo do componente para controlar foco visual do card ativo.
   - Cada item do `.map` agora e envolvido por `motion.div` com:
@@ -282,19 +299,24 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Conteudo interno do card foi preservado integralmente.
 
 **Resultado esperado:**
+
 - Card em hover flutua com leve zoom.
 - Cards ao redor ficam discretamente transparentes.
 - Interacao mais limpa e cinematografica no grid, sem alterar API/dados.
 
 ### 27/03/2026 - Refatoracao da transicao de abas no frontend legado (public/)
+
 **Objetivo:**
+
 - Corrigir o "piscar" ao trocar abas (Inicio, Filmes, Series, Favoritos, Sobre) no frontend vanilla.
 - Substituir o sistema de classes CSS (tab-exit-active/tab-enter-active) por animacoes GSAP sequenciadas.
 
 **Diagnostico:**
+
 - O DOM era destruido e recriado no meio da animacao CSS de saida, causando flash visual.
 
 **Ajustes aplicados:**
+
 - `public/js/motion.js`
   - Nova funcao `animateTabSwitch(hiding, onSwap)`:
     - Anima a saida das secoes visiveis via GSAP.
@@ -310,16 +332,20 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Removidos blocos CSS obsoletos: `is-filter-transitioning`, `tab-exit-active`, `tab-enter-active` e `@keyframes tabContentEnter`.
 
 **Resultado esperado:**
+
 - Troca entre abas no site vanilla sem piscar.
 - Saida animada (GSAP) -> DOM atualizado -> entrada animada.
 - Compatibilidade com `prefers-reduced-motion`.
 
 ### 26/03/2026 - Transicao horizontal estilo "virar pagina" no React (abas)
+
 **Objetivo:**
+
 - Tornar a troca entre `Início`, `Filmes`, `Séries`, `Favoritos` e `Sobre` mais fluida e profissional.
 - Simular efeito de pagina horizontal com direcao baseada na navegacao (forward/back), sem reload.
 
 **Ajustes aplicados:**
+
 - `catalog-projeto/src/pages/CatalogPage.tsx`
   - Variants de transicao refinadas para estados `enter`, `center` e `exit` com:
     - deslizamento horizontal (x)
@@ -334,21 +360,26 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Painel com `backface-visibility` e `will-change` para estabilidade e suavidade.
 
 **Resultado esperado:**
+
 - Navegacao entre abas com comportamento de "carousel de paginas" horizontal, mais natural e sem piscar.
 - Ao avancar: aba atual sai para esquerda e nova entra da direita.
 - Ao voltar: direcao invertida.
 
 ### 25/03/2026 - Push Transition horizontal entre abas no React
+
 **Objetivo:**
+
 - Implementar transicao de navegacao estilo app mobile (efeito push) ao trocar abas/secoes do portfolio.
 
 **Diagnostico de erro da API no frontend:**
+
 - `catalog-projeto/src/hooks/useCatalog.ts`
   - Tratamento de erro passou a exibir causa real da falha da API no React.
   - Em `TMDB_NOT_CONFIGURED`, a interface agora orienta diretamente a configurar `TMDB_API_KEY` ou `TMDB_BEARER_TOKEN`.
   - Em erros 5xx, a mensagem mostra status e detalhe retornado pela API para facilitar debug.
 
 **Correcao de conflito na transicao entre abas:**
+
 - `catalog-projeto/src/components/catalog/CatalogGrid.tsx`
   - Removido `AnimatePresence` interno e a troca de `key` por lista para nao concorrer com a transicao principal da navbar.
 - `catalog-projeto/src/pages/CatalogPage.tsx`
@@ -358,6 +389,7 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Viewport da transicao recebeu isolamento e `will-change` para melhorar estabilidade visual.
 
 **Melhoria estrutural da troca de telas:**
+
 - `catalog-projeto/src/pages/CatalogPage.tsx`
   - A troca entre abas passou a ocorrer dentro de um "palco" unico de transicao, com entrada e saida simultaneas (`mode="sync"`).
 - `catalog-projeto/src/styles/layout.css`
@@ -365,6 +397,7 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Isso reduz o efeito de piscar e evita que o conteudo apareca separado em vez de deslizar.
 
 **Substituicao da barra de pesquisa por AnimatePresence:**
+
 - `catalog-projeto/src/components/catalog/SearchBar.tsx`
   - Busca refeita com `AnimatePresence` e `motion.div` no mesmo padrao solicitado:
     - `initial: { scale: 0.95, opacity: 0 }`
@@ -378,6 +411,7 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Classes antigas da busca foram substituidas por estilos da nova estrutura (`search-animated-wrapper`, `search-box`, `search-input`).
 
 **Refino direcional na navbar:**
+
 - `catalog-projeto/src/pages/CatalogPage.tsx`
   - A direcao do slide agora segue a ordem das abas da navbar (`Início` → `Filmes` → `Séries` → `Favoritos` → `Sobre`).
   - Ao avancar de aba, o painel entra da direita e sai para a esquerda.
@@ -385,6 +419,7 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Implementado com `custom` nas variants para manter tipagem e legibilidade.
 
 **Ajustes aplicados:**
+
 - `catalog-projeto/src/pages/CatalogPage.tsx`
   - Substituida animacao anterior por `AnimatePresence` com variantes horizontais:
     - `enter: { x: "100%" }`
@@ -398,15 +433,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Painel animado ajustado para `width: 100%`.
 
 **Resultado esperado:**
+
 - Troca entre `Início`, `Filmes`, `Séries`, `Favoritos` e `Sobre` com deslizamento da direita para a esquerda.
 - Apenas um painel visivel por vez, sem artefatos de layout durante a animacao.
 
 ### 25/03/2026 - Hover do card consolidado no React (wrapper correto + grid com respiro)
+
 **Objetivo:**
+
 - Fazer a animacao aparecer no card inteiro do React, exatamente na area externa destacada pelo usuario.
 - Evitar misturar a correcao entre React e `public/` sem necessidade tecnica.
 
 **Refino adicional:**
+
 - `catalog-projeto/src/components/catalog/CatalogGrid.tsx`
   - Grid animado com `layout` para reduzir sensacao de quebra entre cards lado a lado.
 - `catalog-projeto/src/components/catalog/MovieCard.tsx`
@@ -414,6 +453,7 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Adicionado reforco de sombra no hover para efeito mais proximo de streaming premium.
 
 **Refino visual premium:**
+
 - `catalog-projeto/src/components/catalog/MovieCard.tsx`
   - Hover passou para `scale: 1.085` e `y: -12`, com sombra mais profunda.
 - `catalog-projeto/src/styles/components.css`
@@ -421,10 +461,12 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Conteudo interno recebe realce sutil para aproximar o efeito de interfaces estilo streaming premium.
 
 **Causa raiz identificada:**
+
 - O hover estava aplicado no `motion.article` correto, mas com escala agressiva demais (`1.2`) para um grid compacto.
 - O grid tinha pouco respiro para a expansao visual, deixando a animacao parecer cortada ou abafada pelos cards vizinhos.
 
 **Ajustes aplicados:**
+
 - `catalog-projeto/src/components/catalog/MovieCard.tsx`
   - Hover recalibrado para o card inteiro com `whileHover` mais estavel (`scale: 1.06`, `y: -8`, `zIndex: 12`).
   - `whileTap` suavizado para clique/toque realista (`scale: 0.98`).
@@ -437,16 +479,20 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - `focus-within` recebeu prioridade de empilhamento para manter consistencia ao navegar por teclado.
 
 **Decisao tecnica sobre `public/`:**
+
 - Nao foi movido TypeScript para `public/`.
 - Motivo: `public/` hoje e frontend estatico legado; colocar TS ali exigiria pipeline de build proprio ou duplicacao de logica.
 - Para esta correcao, o caminho mais limpo e confiavel e manter a animacao no React (`catalog-projeto`), que ja tem Vite + Framer Motion.
 
 ### 25/03/2026 - Remocao de conflito de hover nos cards (Motion-only)
+
 **Objetivo:**
+
 - Corrigir conflito entre animacoes CSS e Framer Motion no hover dos cards.
 - Manter exclusivamente a animacao de gesture solicitada no card.
 
 **Ajustes aplicados:**
+
 - `catalog-projeto/src/components/catalog/MovieCard.tsx`
   - Card passou a usar apenas:
     - `whileHover={{ scale: 1.2 }}`
@@ -455,13 +501,17 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Removidas regras de hover/focus que também transformavam o card (`transform`, zoom da imagem, fundo do info e glow em hover), evitando sobreposição com Motion.
 
 **Resultado esperado:**
+
 - A interacao dos cards agora segue somente a animacao enviada pelo usuario, sem conflito de efeitos concorrentes.
 
 ### 25/03/2026 - Gestures nos cards React (hover/tap estilo motion)
+
 **Objetivo:**
+
 - Aplicar animacao de gesto inspirada no exemplo de `whileHover` e `whileTap` para deixar os cards mais vivos.
 
 **Ajustes aplicados:**
+
 - `catalog-projeto/src/components/catalog/MovieCard.tsx`
   - Hover ajustado para escala mais perceptivel com elevacao (`whileHover: scale 1.08 + y -10`).
   - Toque/click com compressao visual (`whileTap: scale 0.94`).
@@ -471,15 +521,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Estado hover/focus do card inteiro reforcado com elevacao e prioridade visual (`z-index: 12`).
 
 **Resultado esperado:**
+
 - Interacao de hover/click mais evidente em toda a superficie do card.
 - Sensacao de gesto moderna sem quebrar o layout do grid.
 
 ### 25/03/2026 - Cards maiores no grid React + hover no card inteiro
+
 **Objetivo:**
+
 - Aumentar presença visual dos cards no grid de filmes/séries.
 - Aplicar animação de hover no card completo (não apenas na área da imagem).
 
 **Ajustes aplicados:**
+
 - `catalog-projeto/src/styles/layout.css`
   - Grid principal ampliado para cards maiores (`minmax(250px, 1fr)`) com maior espaçamento.
   - Em mobile (`max-width: 720px`), ajuste responsivo para manter boa densidade (`minmax(210px, 1fr)`).
@@ -492,38 +546,48 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Ajustado `whileHover`/`whileTap` do Framer Motion para sincronizar com o novo comportamento do card completo.
 
 **Resultado esperado:**
+
 - Cards maiores e mais legíveis no catálogo.
 - Hover percebido em toda a superfície do card, com sensação mais premium e fluida.
 
 ### 25/03/2026 - Correcao de fonte TMDB apos modo API-only
+
 **Objetivo:**
+
 - Restaurar carregamento do catalogo e destaque apos remocao do fallback local.
 
 **Causa raiz identificada:**
+
 - Ambiente estava com `CATALOG_SOURCE=local`, enquanto o catalogo local havia sido removido.
 
 **Ajustes aplicados:**
+
 - `backend/config/catalog.config.js`
   - `isTmdbEnabled()` passou a habilitar TMDB sempre que existir `TMDB_BEARER_TOKEN` ou `TMDB_API_KEY` (modo API-only), sem depender de `CATALOG_SOURCE`.
 - `backend/services/catalog.service.js`
   - Mensagem de erro de configuracao atualizada para orientar apenas variaveis TMDB.
 
 **Validacao:**
+
 - Execucao direta do service retornou com sucesso:
   - `source=tmdb`
   - `count=20`
   - logs indicando retorno de itens validos com imagem.
 
 **Resultado esperado:**
+
 - Catalogo volta a carregar exclusivamente da TMDB.
 - Hero slider volta a exibir destaque atualizado com base nos itens da API.
 
 ### 25/03/2026 - Catalogo somente API externa (remocao total do acervo local)
+
 **Objetivo:**
+
 - Remover completamente filmes/series locais antigos.
 - Forcar o backend a operar apenas com fonte externa (TMDB), sem fallback local.
 
 **Ajustes aplicados:**
+
 - `backend/services/catalog.service.js`
   - Fluxo de listagem agora exige TMDB configurada (`CATALOG_SOURCE=tmdb` + chave/token).
   - Removido fallback `local` e `local-fallback`.
@@ -536,15 +600,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Comentario tecnico atualizado para refletir integracao direta com servico externo.
 
 **Resultado esperado:**
+
 - Nenhum item antigo local e mais utilizado pelo projeto.
 - Catalogo exibido exclusivamente via API externa (TMDB).
 
 ### 25/03/2026 - Transicao de abas no React com pose x/y/rotate (inspirada em motion)
+
 **Objetivo:**
+
 - Substituir a transicao anterior de troca de abas por uma animacao mais fluida e menos agressiva para os cards.
 - Aplicar conceito de estado animado por `x`, `y` e `rotate` conforme exemplo de motion.
 
 **Ajustes aplicados:**
+
 - `catalog-projeto/src/pages/CatalogPage.tsx`
   - Adicionado mapa de poses por aba (`all`, `movie`, `series`, `favorites`, `about`) com valores sutis de `x`, `y` e `rotate`.
   - Troca de conteudo mantida com `AnimatePresence mode="wait"`.
@@ -555,15 +623,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Transicao padronizada com `spring` para resposta mais organica.
 
 **Resultado esperado:**
+
 - Navegacao entre `Início`, `Filmes`, `Séries`, `Favoritos` e `Sobre` com sensacao de continuidade.
 - Menos conflito visual com hover e animacoes internas dos cards.
 
 ### 25/03/2026 - Responsividade mobile (768px) + menu hamburguer
+
 **Objetivo:**
+
 - Melhorar a usabilidade em celular com breakpoint ate `768px`.
 - Aplicar fonte maior no branding, espacamento consistente e menu hamburguer para navegacao.
 
 **Ajustes aplicados:**
+
 - `public/index.html`
   - Header ganhou estrutura `header-brand-row` com botao `#mobileMenuToggle` (hamburguer) e painel controlado por `aria-controls`.
 - `public/css/layout.css`
@@ -578,16 +650,20 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Fechamento automatico ao trocar aba de filtro, clicar fora, redimensionar para desktop e pressionar `ESC`.
 
 **Resultado esperado:**
+
 - Header mais legivel no celular.
 - Navegacao limpa e funcional com menu hamburguer em telas pequenas.
 - Melhor espacamento geral na versao mobile sem afetar o desktop.
 
 ### 25/03/2026 - Preparacao para deploy no Vercel + acesso visitante com animacao
+
 **Objetivo:**
+
 - Publicar o portfolio na Vercel para compartilhamento com recrutadores.
 - Permitir exploracao do catalogo sem credenciais, com botao dedicado de visitante na tela de acesso.
 
 **Ajustes aplicados:**
+
 - `server.js`
   - Backend passou a exportar `app` e a iniciar `listen` apenas em execucao local (`require.main === module`), evitando conflito em ambiente serverless.
 - `api/index.js`
@@ -606,15 +682,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Estilo visual do botao visitante com variacao secundaria, mantendo comportamento e animacao do estado `loading`.
 
 **Resultado esperado:**
+
 - Projeto pronto para deploy na Vercel mantendo API e frontend no mesmo dominio.
 - Recrutador pode entrar sem credenciais via botao de visitante, com a mesma experiencia de animacao do login original.
 
 ### 24/03/2026 - Hero Slider em modo premium (harmonizacao de imagens)
+
 **Objetivo:**
+
 - Harmonizar visual do destaque sem recorte agressivo e sem distorcao perceptivel.
 - Manter o hero preenchido com aparencia cinematografica.
 
 **Ajustes aplicados:**
+
 - `public/js/render.js`
   - Adicionada camada dedicada da imagem principal no slide (`featured-poster-layer`) para exibir poster central sem corte.
 - `public/css/layout.css`
@@ -624,44 +704,56 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
     - Overlay refinado para legibilidade do titulo, sinopse e CTA.
 
 **Resultado esperado:**
+
 - Hero visualmente mais elegante e coerente com streaming.
 - Sem esticar imagem e sem recorte principal do poster.
 - Melhor equilibrio entre impacto visual e legibilidade de conteudo.
 
 ### 24/03/2026 - Refino 2 do Hero Slider (preenchimento total + aumento adicional de 15%)
+
 **Objetivo:**
+
 - Fazer as imagens ocuparem toda a area do hero sem recorte.
 - Aumentar novamente o destaque para maior impacto visual.
 
 **Ajustes aplicados:**
+
 - `public/css/layout.css`
   - Camada da imagem do slide alterada para preenchimento total do banner (`background-size: 100% 100%` na imagem principal).
   - Altura do hero aumentada em mais 15% sobre a versao anterior em desktop, tablet e mobile.
 
 **Resultado esperado:**
+
 - Hero totalmente preenchido por imagem em todos os slides.
 - Area de destaque maior e mais dominante na home.
 
 ### 24/03/2026 - Ajuste classico do Hero Slider (sem corte de imagem + banner 20% maior)
+
 **Objetivo:**
+
 - Deixar o destaque principal mais classico e coerente com a proposta de catalogo streaming.
 - Evitar corte visual dos posters no banner e ampliar o hero para maior presenca.
 
 **Ajustes aplicados:**
+
 - `public/css/layout.css`
   - Banner do hero (`.featured-card`) aumentado em aproximadamente 20% em desktop, tablet e mobile.
   - Slides do destaque (`.featured-slide`) alterados para `background-size: contain` na camada da imagem, evitando recorte do poster.
 
 **Resultado esperado:**
+
 - Imagem completa no destaque, preservando enquadramento original do poster.
 - Hero slider mais impactante visualmente sem perder legibilidade dos textos e CTA.
 
 ### 24/03/2026 - Migracao Fase 5 (switch de entrega para React + fallback seguro)
+
 **Objetivo:**
+
 - Finalizar a transicao de entrega do frontend no backend Express, priorizando o build React em producao.
 - Manter fallback para frontend legado para evitar indisponibilidade quando `catalog-projeto/dist` nao existir.
 
 **Ajustes aplicados:**
+
 - `server.js`
   - Adicionado detector de build React (`catalog-projeto/dist/index.html`).
   - Quando build existe: servidor entrega arquivos de `catalog-projeto/dist` e aplica fallback SPA para rotas nao-API.
@@ -672,15 +764,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Script `build` para centralizar o build da fase de frontend.
 
 **Validacao esperada:**
+
 - API continua respondendo em `/api/*` sem alteracao de contrato.
 - Rotas de interface passam a usar React build quando disponivel.
 - Ambiente local continua funcional sem build (fallback legado ativo).
 
 ### 24/03/2026 - Migracao Fase 4 (robustez de UX, feedback e atualizacao automatica)
+
 **Objetivo:**
+
 - Melhorar a experiencia final de uso com feedback imediato, mais acessibilidade e sincronizacao automatica do catalogo.
 
 **Ajustes aplicados:**
+
 - `catalog-projeto/src/hooks/useCatalog.ts`
   - Incluida autoatualizacao silenciosa do catalogo a cada 5 minutos.
   - Incluido estado `lastUpdated` para exibir o horario da ultima sincronizacao.
@@ -699,19 +795,24 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Novos estilos para notificacoes (`toast-host`, `toast-item`, variantes de cor por tipo).
 
 **Validacao:**
+
 - Checagem de TypeScript sem erros no frontend (`No errors found`).
 - Build executado em terminal isolado sem mensagens de erro visiveis.
 
 **Resultado esperado:**
+
 - Interacoes com feedback imediato e experiencia mais profissional.
 - Catalogo mais confiavel em sessoes longas por conta da sincronizacao periodica.
 
 ### 24/03/2026 - Migracao Fase 3 (cleanup tecnico, consolidacao de estilos e validacao)
+
 **Objetivo:**
+
 - Remover boilerplate remanescente do template e consolidar a arquitetura de estilos do app React.
 - Garantir que a base migrada siga limpa para manutencao e evolucao da Fase 4.
 
 **Ajustes aplicados:**
+
 - `catalog-projeto/src/App.tsx`
   - Removidos imports diretos de CSS para evitar acoplamento visual na camada de pagina.
 - `catalog-projeto/src/index.css`
@@ -720,18 +821,23 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Removido por nao estar sendo utilizado apos a migracao para o novo sistema de estilos.
 
 **Validacao:**
+
 - Checagem de TypeScript no frontend executada sem erros (`No errors found`).
 
 **Resultado esperado:**
+
 - Estrutura visual mais previsivel, com menor risco de regressao por estilos duplicados.
 - Projeto pronto para fase seguinte (otimizacoes, testes adicionais e eventual remocao de legado final no `public/` quando houver paridade completa confirmada).
 
 ### 24/03/2026 - Migracao Fase 2 para React + TypeScript (favoritos, ratings, modal, sobre, animacoes)
+
 **Objetivo:**
+
 - Adicionar as funcionalidades interativas que faltavam para atingir paridade com o frontend legado.
 - Integrar Framer Motion para animacoes fluidas sem CSS puro.
 
 **Ajustes aplicados:**
+
 - `catalog-projeto/src/hooks/`
   - `useRatings` — avaliacao de 1-5 estrelas por item, persistida no localStorage.
   - `useModal` — controle de qual item tem o modal aberto.
@@ -747,11 +853,14 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
 - `catalog-projeto/index.html` — adicionado CDN do devicons, lang pt-BR e titulo do projeto.
 
 ### 24/03/2026 - Migracao Fase 1 para React + TypeScript (estrutura + integracao inicial)
+
 **Objetivo:**
+
 - Iniciar migracao controlada do frontend legado para React + TypeScript sem quebrar backend atual.
 - Entregar base funcional com login e listagem de catalogo orientados a estado (sem manipulacao direta de DOM).
 
 **Ajustes aplicados:**
+
 - `catalog-projeto/src/types/`
   - Novos tipos para `auth` e `catalog`.
 - `catalog-projeto/src/services/`
@@ -772,39 +881,49 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Adicionado proxy de desenvolvimento para `/api -> http://localhost:3000`.
 
 **Decisoes tecnicas da fase:**
+
 - Backend e contratos de API preservados.
 - Sem `querySelector`/DOM imperativo no novo frontend React.
 - Reaproveito visual com CSS proprio da fase 1 para acelerar validacao da arquitetura.
 
 **Resultado esperado:**
+
 - App React inicial capaz de autenticar em `/api/auth/*` e carregar catalogo de `/api/catalog`.
 - Base pronta para Fase 2 (paridade de funcionalidades: modal, favoritos, rating, sobre e animacoes com Framer Motion).
 
 ### 24/03/2026 - Instalacao do Framer Motion no React + TypeScript
+
 **Objetivo:**
+
 - Adicionar a biblioteca `framer-motion` no subprojeto React com Vite e TypeScript.
 
 **Ajustes aplicados:**
+
 - `catalog-projeto/package.json`
   - Dependencia `framer-motion` adicionada em `dependencies`.
 - `catalog-projeto/package-lock.json`
   - Lockfile atualizado com resolucao da nova dependencia.
 
 **Resultado esperado:**
+
 - Projeto React pronto para importar componentes animados via `framer-motion`.
 
 ### 24/03/2026 - Setup do shadcn/ui no Subprojeto React (Vite + TypeScript)
+
 **Objetivo:**
+
 - Resolver falha ao executar `npx shadcn@latest init` no subprojeto React.
 - Configurar requisitos de Tailwind e alias de import exigidos pela CLI.
 
 **Causa raiz identificada:**
+
 - Comando inicialmente executado fora do contexto correto do app React (`catalog-projeto`).
 - Dentro do subprojeto, a CLI falhava por dois motivos:
   - Tailwind nao configurado (`Validating Tailwind CSS` falhando).
   - Alias `@/*` ausente no `tsconfig.json` (`Validating import alias` falhando).
 
 **Ajustes aplicados:**
+
 - `catalog-projeto/vite.config.ts`
   - Adicionado plugin `@tailwindcss/vite`.
   - Adicionado alias `@` apontando para `./src`.
@@ -824,15 +943,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Utilitario `cn()` gerado automaticamente para composicao de classes.
 
 **Resultado esperado:**
+
 - `npx shadcn@latest init` executa com sucesso no subprojeto React.
 - Projeto pronto para adicionar componentes com `npx shadcn@latest add ...`.
 
 ### 23/03/2026 - Correcao do Underline Dinamico das Tabs (sem track fixa)
+
 **Objetivo:**
+
 - Remover qualquer barra fixa no fundo da navegacao por tabs.
 - Garantir apenas um underline dinamico que desliza com continuidade entre as abas.
 
 **Ajustes aplicados:**
+
 - `public/css/layout.css`
   - Removido comportamento visual que podia sugerir track fixa no container (`background` e `border-bottom` zerados no grupo).
   - Scrollbar horizontal da navegação ocultada em todos os breakpoints para evitar leitura visual de linha fixa.
@@ -846,6 +969,7 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Recalculo em `resize`, `scroll` e apos carregamento de fontes para manter alinhamento responsivo.
 
 **Refino adicional (mesma sessao):**
+
 - `public/index.html`
   - Indicador migrado para elemento real no DOM (`.filter-indicator`) dentro da `filter-group`.
 - `public/css/layout.css`
@@ -854,18 +978,21 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Atualizacao do indicador passou a atuar diretamente no elemento unico (sem recriar no clique), mantendo movimento continuo entre abas.
 
 **Ajuste fino de timing (mesma sessao):**
+
 - `public/js/portfolio-sections.js`
   - Duracao dinamica da transicao aumentada para faixa entre `350ms` e `430ms`.
 - `public/css/layout.css`
   - Duracao base do indicador ajustada para `380ms` com o mesmo easing `cubic-bezier(0.4, 0, 0.2, 1)`.
 
 **Ajuste fino de timing 2 (mesma sessao):**
+
 - `public/js/portfolio-sections.js`
   - Duracao dinamica aumentada novamente para faixa entre `460ms` e `580ms`, mantendo fluidez e continuidade visual.
 - `public/css/layout.css`
   - Duracao base visual do underline ajustada para `500ms`.
 
 **Correcoes de estabilidade da transicao (mesma sessao):**
+
 - `public/js/portfolio-sections.js`
   - Removida sincronizacao do indicador no evento `scroll` da nav para evitar snap/teleporte no meio da animacao.
   - Posicionamento do underline passou a usar `offsetLeft` direto, sem compensacao por `scrollLeft`.
@@ -878,12 +1005,14 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - `::view-transition-old/new(root)` ajustado para `520ms`, reduzindo descompasso perceptivo entre animacoes.
 
 **Refino de microinteracao (mesma sessao):**
+
 - `public/js/portfolio-sections.js`
   - Underline passou a animar por keyframes atraves das tabs intermediarias ao pular entre itens distantes (ex.: Início -> Sobre).
   - Ao final da animacao, o indicador permanece somente na tab selecionada.
   - Cancelamento de animacoes anteriores tratado para evitar estado quebrado em cliques rapidos.
 
 **Transicao premium entre conteudos das tabs (mesma sessao):**
+
 - `public/js/render.js`
   - `applyFilterWithTransition()` reestruturado para fluxo em duas fases (`exit` -> `enter`) com controle por `runId`, evitando glitches em cliques rapidos.
   - Sincronizacao via `requestAnimationFrame` para garantir entrada suave apos troca de estado.
@@ -895,27 +1024,33 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Entrada com easing cinematografico para sensacao mais fluida estilo streaming.
 
 **Resultado esperado:**
+
 - Nenhuma linha estatica abaixo de toda a nav.
 - Apenas um underline que se move suavemente entre Início, Filmes, Séries, Favoritos e Sobre.
 - Movimento continuo, sem sumir/reaparecer, com alinhamento correto em desktop e mobile.
 
 ### 22/03/2026 - Revisao Tecnica Completa (Back + Front + DX)
+
 **Objetivo:**
+
 - Revisar o projeto de ponta a ponta (arquitetura, UX, dados, seguranca e performance).
 - Consolidar riscos tecnicos e sugerir plano pratico de evolucao.
 
 **Diagnostico resumido:**
+
 - Testes automatizados: 26/26 passando (Jest + Supertest).
 - Backend: estrutura em camadas esta boa (routes/controller/service/repository), com fallback local/TMDB funcional.
 - Frontend: arquitetura modular clara, com melhorias recentes de lazy loading, delegation e transicoes.
 
 **Riscos e pontos de atencao (prioridade):**
+
 - Critico: catalogo local referencia 15 imagens em `assets/images/...`, mas `public/assets/images` esta vazio. Hoje funciona apenas quando ha enriquecimento via TMDB; sem token/chave, cards podem quebrar visualmente.
 - Medio: middleware global exige `Content-Type: application/json` para `DELETE`, o que pode bloquear clientes REST validos que nao enviam body nesse metodo.
 - Medio: validacao de contexto no login fixa a porta `3000`, impedindo execucao em outra porta local mesmo quando o backend esta correto.
 - Baixo: logs de erro esperados de teste (401/400) aparecem com `console.error`, gerando ruido em CI e leitura de diagnostico.
 
 **Sugestoes praticas (roadmap curto):**
+
 - Dados/imagens:
   - Migrar entradas locais de `backend/data/catalog.json` para URLs HTTPS validas (padrao `w500`) ou reintroduzir assets reais em `public/assets/images`.
   - Criar teste de integridade para garantir que cada item tenha `image` acessivel (http/https) ou fallback valido.
@@ -929,16 +1064,20 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Reduzir ruido de logs em ambiente de teste (`NODE_ENV=test`) mantendo erro estruturado em producao.
 
 **Resultado esperado apos backlog:**
+
 - Portfolio mais resiliente sem dependencia forte da TMDB para renderizar capa.
 - Menos falso-positivo de erro em integracoes/CI.
 - Melhor experiencia para rodar projeto em ambientes locais diferentes (outra porta/proxy).
 
 ### 22/03/2026 - Ajuste de Catalogo e Otimizacoes de Performance
+
 **Objetivo:**
+
 - Corrigir imagens quebradas do catalogo antigo sem depender de arquivos locais ausentes.
 - Remover 3 filmes da expansao recente e reduzir a sensacao de peso no frontend.
 
 **Ajustes aplicados:**
+
 - `backend/services/tmdb.service.js`
   - Adicionada busca/cache de poster por titulo para enriquecer itens locais com imagem da TMDB quando o caminho local nao existe mais.
 - `backend/services/catalog.service.js`
@@ -957,15 +1096,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Adicionado controle unico para binding das interacoes dos grids.
 
 **Resultado esperado:**
+
 - Titulos antigos do portfolio voltam a ter poster mesmo sem arquivos locais em `public/assets/images`.
 - Menos downloads pesados de imagem e menos custo de render/listeners no frontend.
 
 ### 21/03/2026 - Correcao de Loading e Transicao do Login
+
 **Objetivo:**
+
 - Investigar por que o loading do login e a transicao entre tela de acesso e catalogo pareciam estaticos.
 - Remover interferencias globais e tornar o fluxo de autenticacao visualmente perceptivel.
 
 **Ajustes aplicados:**
+
 - `public/js/auth.js`
   - O loading minimo agora vale tanto para sucesso quanto para erro, evitando sumico instantaneo do estado `loading`.
   - A transicao de saida do login passa a disparar antes do reveal do app, com um frame de separacao para garantir animacao perceptivel.
@@ -977,15 +1120,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - O bloqueio global de `prefers-reduced-motion` deixa de matar spinner e transicoes essenciais do fluxo de login/loading.
 
 **Resultado esperado:**
+
 - O shimmer do botao de login volta a se mover de forma visivel.
 - A troca entre login e catalogo fica perceptivel mesmo em ambientes com reducao de movimento ativa no sistema.
 
 ### 21/03/2026 - Correcao de Limite do Catalogo e Destaque
+
 **Objetivo:**
+
 - Garantir que novos itens adicionados ao catalogo local aparecam na interface sem serem cortados por limite interno.
 - Corrigir o card de destaque para respeitar a proporcao real do poster em todos os breakpoints.
 
 **Ajustes aplicados:**
+
 - `backend/services/catalog.service.js`
   - Removido o corte por `limitAndBalance()` para o catalogo local.
   - O JSON local agora retorna todos os itens filtrados, evitando sumico de entradas novas na home.
@@ -994,15 +1141,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Mantido o poster alinhado a direita, sem voltar para o comportamento antigo que causava corte visual.
 
 **Resultado esperado:**
+
 - Todos os itens presentes em `backend/data/catalog.json` passam a ficar disponiveis na listagem local.
 - O destaque deixa de voltar para um enquadramento incorreto em tablet e mobile.
 
 ### 21/03/2026 - Expansao do Catalogo e Hover de Cards em 0.8s
+
 **Objetivo:**
+
 - Completar mais a vitrine inicial com 4 filmes e 4 series adicionais.
 - Deixar o hover dos cards mais suave e cinematografico com transicoes em `0.8s`.
 
 **Ajustes aplicados:**
+
 - `backend/data/catalog.json`
   - Adicionados 8 novos titulos ao catalogo local: 4 filmes e 4 series.
   - Novas entradas usam URLs validas de poster para manter compatibilidade com o schema de validacao do backend.
@@ -1011,15 +1162,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Mantido o hover com destaque visual, mas com easing mais suave para reduzir sensacao de corte brusco.
 
 **Resultado esperado:**
+
 - Catalogo inicial mais encorpado e equilibrado entre filmes e series.
 - Hover dos cards com resposta mais lenta, suave e premium.
 
 ### 21/03/2026 - Remocao Total do Modo Performance
+
 **Objetivo:**
+
 - Eliminar conflitos que estavam desativando animacoes e transicoes do frontend.
 - Remover completamente o modo performance da interface e da logica da aplicacao.
 
 **Ajustes aplicados:**
+
 - `public/index.html`
   - Botao `#performanceToggle` removido do header.
 - `public/js/settings.js`
@@ -1037,15 +1192,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Removidas regras visuais e overrides que zeravam `animation` e `transition` quando `data-performance="on"` estava ativo.
 
 **Resultado esperado:**
+
 - Nenhuma parte do app desliga mais as animacoes por modo performance.
 - Hover dos cards, reveal das secoes e transicoes voltam a funcionar sem conflito com estado legado.
 
 ### 21/03/2026 - Hover com Scale nos Cards de Filmes
+
 **Objetivo:**
+
 - Aplicar hover mais explícito nos cards do catálogo com `scale`.
 - Padronizar transições mais suaves de `0.5s` dentro dos cards dos filmes.
 
 **Ajustes aplicados:**
+
 - `public/css/components.css`
   - `.movie-card:hover` alterado para destaque por escala.
   - Transições de `transform`, `opacity`, `box-shadow` e `border-color` ajustadas para `0.5s`.
@@ -1053,15 +1212,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Regras de hover do grid mantidas alinhadas com o novo comportamento dos cards.
 
 **Resultado esperado:**
+
 - Cards de filmes com hover mais visível e suave ao passar o mouse.
 - Sensação de animação mais contínua dentro da área dos cards.
 
 ### 21/03/2026 - Refino de Hover para Sensação 60 FPS
+
 **Objetivo:**
+
 - Reduzir agressividade nas interações de mouse.
 - Deixar hover e parallax com movimento contínuo, suave e estável.
 
 **Ajustes aplicados:**
+
 - `public/css/components.css`
   - Hover de cards com deslocamento/escala menores.
   - Easing sem overshoot para entrada/saída mais natural.
@@ -1075,16 +1238,20 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Parallax do hero com amplitude menor e amortecimento (lerp), evitando resposta brusca ao mouse.
 
 **Resultado esperado:**
+
 - Interações de hover com aparência mais "fluida" e menos agressiva.
 - Melhor estabilidade visual durante movimentação rápida do mouse.
 
 ### 21/03/2026 - Ajuste de Fluidez dos Cards e Bootstrap de Toggles
+
 **Objetivo:**
+
 - Eliminar sensação de animação estática/brusca nos cards.
 - Reforçar legibilidade do hero em diferentes tamanhos de tela.
 - Garantir inicialização confiável dos controles de tema/performance.
 
 **Ajustes aplicados:**
+
 - `public/css/components.css`
   - Hover de cards recalibrado para reduzir "pulo" visual.
   - Base de transição dos cards refinada com easing mais suave em `transform` e `opacity`.
@@ -1097,21 +1264,26 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Reduz risco de botões (`theme/performance`) sem listener em cenários de carregamento irregular.
 
 **Verificação de interferência back/front:**
+
 - `server.js` validado: backend apenas expõe estáticos via `express.static(public)` e rotas `/api/*`.
 - Execução local indicou porta em uso (`EADDRINUSE`), sugerindo instância já ativa, não bloqueio de animações no front.
 
 **Resultado esperado:**
+
 - Cards com interação mais fluida e menos brusca.
 - Hero mais legível em desktop e mobile.
 - Toggles de tema/performance mais confiáveis no carregamento da página.
 
 ### 21/03/2026 - Correcao Tecnica de Animacoes, Hero e Toggles
+
 **Objetivo:**
+
 - Reduzir saltos visuais nos cards e melhorar fluidez de hover.
 - Corrigir robustez visual do hero com fallback de imagem.
 - Garantir consistencia dos toggles de tema/performance com persistencia.
 
 **Ajustes aplicados:**
+
 - `public/css/components.css`
   - Transicoes de card centralizadas no estado base com foco em `transform` e `opacity`.
   - Hover dos cards suavizado para reduzir comportamento brusco.
@@ -1128,16 +1300,20 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Listener de `prefers-color-scheme` agora respeita preferencia explicita do usuario salva no `localStorage`.
 
 **Resultado esperado:**
+
 - Interacoes mais fluidas e sem "saltos" nos cards.
 - Hero mais previsivel e legivel em diferentes tamanhos de tela.
 - Toggles de tema/performance consistentes entre recarregamentos.
 
 ### 21/03/2026 - Correcao de Animações e Loadings no Frontend
+
 **Objetivo:**
+
 - Resolver percepcao de animacoes quase nulas e loadings estaticos.
 - Evitar estado de modo performance "travado" sem controle visual.
 
 **Ajustes aplicados:**
+
 - `public/index.html`
   - Reintroduzidos os controles de interface no header:
     - botao `#performanceToggle` (liga/desliga modo performance),
@@ -1150,15 +1326,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Fallback defensivo: se nao existir `#performanceToggle` e o estado estiver em performance, o app desativa o modo automaticamente para nao suprimir animacoes sem opcao de retorno.
 
 **Resultado esperado:**
+
 - Animacoes visuais e estados de loading voltam a ficar perceptiveis no fluxo normal.
 - Usuario pode controlar claramente quando reduzir animacoes via botao de performance.
 
 ### 21/03/2026 - Modularizacao do CSS por Responsabilidade
+
 **Objetivo:**
+
 - Reduzir acoplamento do arquivo unico `public/css/style.css`.
 - Organizar estilos por contexto (base, layout, components, pages, animations).
 
 **Ajustes aplicados:**
+
 - `public/css/style.css`
   - Convertido em agregador com `@import` para os modulos.
 - `public/css/base.css`
@@ -1173,16 +1353,20 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Keyframes, regras de transicao, acessibilidade (`prefers-reduced-motion`) e modo performance.
 
 **Resultado esperado:**
+
 - Manutencao mais simples e previsivel do front-end.
 - Melhor legibilidade e evolucao incremental sem regressao visual.
 
 ### 21/03/2026 - UX Premium da Aba Sobre e Tecnologias
+
 **Objetivo:**
+
 - Deixar a aba `Sobre` totalmente focada, ocultando o hero de destaque durante essa navegação.
 - Reposicionar a seção de tecnologias com visual premium, clean e centralizado (inspirado em pastas iOS).
 - Elevar a presença dos ícones com aparência de apps e animações leves por `transform` + `opacity`.
 
 **Ajustes aplicados:**
+
 - `public/js/script.js`
   - Novo controle de visibilidade com fade suave para seções (`toggleSection` com transição por classe).
   - Hero (`.hero-panel`) agora é ocultado ao entrar em `Sobre` e reexibido ao sair.
@@ -1207,15 +1391,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Loading do botão de login atualizado de bolinhas para shimmer moderno, mantendo performance com `transform` e `opacity`.
 
 **Resultado esperado:**
+
 - Aba Sobre com foco limpo, sem distrações do hero e do catálogo.
 - Tecnologias mais legíveis e destacadas, com hierarquia visual premium.
 - Interações suaves e performáticas, mantendo compatibilidade desktop/mobile.
 
 ### 21/03/2026 - Upgrade Premium do Hero Section
+
 **Objetivo:**
+
 - Deixar o hero mais cinematografico e premium sem alterar a integracao com o backend.
 
 **Ajustes aplicados:**
+
 - `public/css/style.css`
   - Overlay em gradiente mais sofisticado para contraste e profundidade visual.
   - Nova animacao suave de background (`heroBackgroundDrift`) para sensacao cinematografica.
@@ -1226,22 +1414,27 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Compatibilidade com modo performance: animacoes do hero desligam quando ativo.
 
 **Resultado esperado:**
+
 - Hero visualmente mais premium e com maior sensacao de produto final.
 - Melhor leitura de titulo/descricao sobre imagem de fundo.
 - Microinteracoes mais suaves e consistentes.
 
 ### 21/03/2026 - Refatoracao Cinematografica da Home (Layout Minimalista)
+
 **Objetivo:**
+
 - Sair da estrutura estilo dashboard na home e adotar uma landing page com foco visual.
 - Priorizar hero cinematografico com imagem de destaque, texto e CTA.
 - Manter conexao front/back intacta (login, listagem e trailers).
 
 **Revisao de integracao front/back antes das mudancas:**
+
 - Front segue consumindo `POST /api/auth/login` e `GET /api/catalog`.
 - Backend continua retornando `status`, `source`, `data`, `count` e `trailerId` sem alteracao de contrato.
 - Suite de testes backend executada com sucesso (`4 suites`, `26 testes`, todos `pass`).
 
 **Ajustes aplicados:**
+
 - `public/index.html`
   - Removidos elementos de dashboard da home (chips de metricas e blocos auxiliares do hero antigo).
   - Navbar simplificada, mantendo apenas elementos essenciais de navegacao + busca.
@@ -1259,19 +1452,23 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Event listener de tema protegido com guarda para evitar erro quando o botao nao estiver no layout.
 
 **Resultado esperado:**
+
 - Home mais premium e cinematografica, com foco em conteudo e impacto visual.
 - Navegacao mais limpa e objetiva.
 - Tecnologias concentradas na aba Sobre, reduzindo ruido na pagina inicial.
 - Integracao com backend preservada e validada por testes.
 
 ### 21/03/2026 - Refino UI/UX: Aba Sobre, Stack Minimalista e Loading Fluido
+
 **Objetivo:**
+
 - Adicionar aba `Sobre` na navbar para exibir visão geral do projeto e tecnologias.
 - Reduzir peso visual da seção de stack, mantendo o conceito de pasta interativa.
 - Melhorar sensação de fluidez com loading de bolinhas realmente animado e microinterações mais polidas.
 - Evoluir a seção Sobre para um bloco mais editorial e modularizar a UI relacionada a navegação/stack.
 
 **Ajustes aplicados:**
+
 - `public/index.html`
   - Nova aba `Sobre` ao lado de `Favoritos`.
   - Nova seção `#aboutSection` com visão geral do projeto, experiência e stack.
@@ -1294,18 +1491,22 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Seção About refinada com headline forte, sinais curtos e cards de destaque mais sofisticados.
 
 **Resultado esperado:**
+
 - Navegação mais clara com uma área dedicada para contexto do projeto.
 - Seção de tecnologias com aparência mais premium, limpa e alinhada a interfaces Apple/streaming.
 - Loading perceptível e suave no login.
 - Código de UI mais organizado, com menor acoplamento dentro do `script.js` principal.
 
 ### 21/03/2026 - Ajuste de Mídia: Devicon + Trailers TMDB
+
 **Objetivo:**
+
 - Trocar ícones das tecnologias para Devicon.
 - Corrigir ausência de vídeos em itens vindos da TMDB.
 - Revisar cadeia API front/back para fotos e trailers.
 
 **Ajustes aplicados:**
+
 - `public/index.html`
   - Adicionado CDN do Devicon no `<head>`.
 - `public/js/script.js`
@@ -1323,6 +1524,7 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - CSP atualizada para permitir Devicon via `cdn.jsdelivr.net` (`styleSrc`/`fontSrc`).
 
 **Validação técnica:**
+
 - Execução direta do service retornou:
   - `SOURCE tmdb`
   - `COUNT 20`
@@ -1331,16 +1533,20 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
 - Conclusão: API TMDB está funcional para fotos e agora também para parte dos vídeos.
 
 **Observação importante:**
+
 - `public/assets/images/` está vazio no projeto atual.
 - Se a TMDB cair e entrar em `local-fallback`, os itens locais podem ficar sem capa por falta de arquivos físicos nessa pasta.
 
 ### 21/03/2026 - Componente UI: Pastas iOS para Stack Full Stack
+
 **Objetivo:**
+
 - Criar componente visual reutilizável para exibir categorias Front-end e Back-end.
 - Aplicar interação estilo pasta clicável (inspirado em iOS) com modal animado.
 - Manter visual moderno mobile-first sem quebrar identidade do portfólio.
 
 **Ajustes aplicados:**
+
 - `public/index.html`
   - Nova seção `#stackSection` após o hero com container `#stackFolders`.
   - Headline dedicada para a stack com dica de interação.
@@ -1356,16 +1562,20 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Grid de tecnologias com ícones por categoria e animação em cascade.
 
 **Resultado esperado:**
+
 - Usuário vê duas pastas clicáveis com aparência mobile moderna.
 - Clique abre overlay suave com tecnologias em grid.
 - Código mantém padrão vanilla JS com funções reutilizáveis.
 
 ### 21/03/2026 - Debug & Diagnóstico: Imagens TMDB Não Aparecem
+
 **Objetivo:**
+
 - Identificar e resolver problema de imagens não sendo exibidas.
 - Fornecer ferramentas de debug para diagnosticar chave TMDB inválida.
 
 **Ajustes aplicados:**
+
 - `backend/services/tmdb.service.js`
   - Adicionados logs de debug ao mapear itens (aviso se `poster_path` está vazio).
   - Log crítico à função `fetch()` com contagem de itens com/sem imagem.
@@ -1380,15 +1590,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - `DIAGNÓSTICO_IMAGENS.md`: Guia prático com checklist, problemas comuns e soluções.
 
 **Resultado esperado:**
+
 - Usuario pode rapidamente identificar se problema é: chave inválida, TMDB offline, ou falta de `poster_path`.
 - Logs claros no console do servidor facilitam debug sem rastrear código.
 - Frontend alerta sobre estado de falha com sugestão de ação.
 
 ### 20/03/2026 - UX streaming refinada sem perder identidade visual
+
 **Objetivo:**
+
 - Implementar os 3 pacotes de melhoria UX (feedback, navegacao e refinamento visual) preservando paleta, tipografia e linguagem existente do portfolio.
 
 **Ajustes aplicados:**
+
 - `public/index.html`
   - Adicionado indicador textual de busca no header (`#searchMeta`) com `aria-live="polite"`.
 - `public/css/style.css`
@@ -1407,15 +1621,19 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Atalho `/` para focar rapidamente a busca.
 
 **Resultado esperado:**
+
 - Experiencia mais proxima de plataforma de streaming profissional sem descaracterizar o visual atual.
 - Fluxo de busca mais claro para o usuario (estado, resultado e recuperacao de erro).
 - Navegacao mais fluida para desktop e acessibilidade por teclado.
 
 ### 20/03/2026 - Pacote completo de hardening (seguranca + robustez de estado)
+
 **Objetivo:**
+
 - Aplicar todas as correcoes recomendadas na revisao: seguranca critica, estabilidade de frontend e confiabilidade de persistencia local.
 
 **Ajustes aplicados:**
+
 - `server.js`
   - Adicionada validacao obrigatoria de `SESSION_SECRET` no boot (fail-fast).
   - Sessao endurecida com `name`, `unset: "destroy"`, `maxAge` explicito e `trust proxy` em producao.
@@ -1441,6 +1659,7 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Fonte do catalogo em teste fixada para `local` (evita variacao por TMDB).
 
 **Resultado esperado:**
+
 - Eliminacao de credencial padrao insegura em runtime.
 - Menor superficie de XSS no frontend.
 - Busca de catalogo sem sobrescrita por respostas antigas.
@@ -1448,10 +1667,13 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
 - Suite de testes mais deterministica entre ambientes.
 
 ### 19/03/2026 - Endurecimento de seguranca, DX e estabilizacao de testes
+
 **Objetivo:**
+
 - Aplicar melhorias de seguranca no backend, melhorar experiencia de desenvolvimento e corrigir inconsistencias na suite de testes.
 
 **Ajustes aplicados:**
+
 - `server.js`
   - Ativado `helmet()` para headers de seguranca HTTP.
   - Configuracao de cookie de sessao reforcada com `httpOnly`, `sameSite: "lax"` e `secure` condicionado a `NODE_ENV=production`.
@@ -1469,27 +1691,35 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Cenário de validacao de `POST /api/catalog` ajustado para autenticar antes de validar payload invalido.
 
 **Resultado esperado:**
+
 - API mais protegida por padrao sem quebrar contratos existentes.
 - Fluxo de desenvolvimento mais rapido com reload automatico.
 - Suite Jest/Supertest estavel e alinhada ao comportamento real do backend (`26/26` testes passando).
 
 ### 19/03/2026 - Correcao definitiva da animacao das bolinhas no login
+
 **Objetivo:**
+
 - Resolver o bug em que o loader de bolinhas do botao de login aparecia sem animacao.
 
 **Ajustes aplicados:**
+
 - `public/css/style.css`
   - Removidas animacoes do estado base de `.login-spinner` (elemento oculto com `display: none`).
   - Animacoes movidas para o estado `.login-btn.loading .login-spinner` e pseudo-elementos.
 
 **Resultado esperado:**
+
 - As bolinhas iniciam a animacao corretamente sempre que o estado de loading do botao e ativado.
 
 ### 19/03/2026 - Pacote de animacoes otimizadas no frontend
+
 **Objetivo:**
+
 - Aumentar percepcao de fluidez e sofisticacao visual com animacoes leves e performaticas, mantendo boa experiencia em mobile.
 
 **Ajustes aplicados:**
+
 - `public/js/script.js`
   - Adicionado sistema de reveal on scroll com `IntersectionObserver` para hero, secoes, cards e footer.
   - Adicionada barra de progresso de leitura da pagina (scroll progress) atualizada com `requestAnimationFrame`.
@@ -1503,14 +1733,18 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Ajustes especificos para mobile e reforco de acessibilidade em `prefers-reduced-motion`.
 
 **Resultado esperado:**
+
 - Interface com sensacao mais premium, transicoes naturais e sem travamentos perceptiveis.
 - Comportamento adaptado para usuarios que preferem menos movimento.
 
 ### 19/03/2026 - Transicao de filtros e Modo Performance
+
 **Objetivo:**
+
 - Atender pedido de transicao mais premium entre filtros e oferecer controle manual para reduzir efeitos em dispositivos mais fracos.
 
 **Ajustes aplicados:**
+
 - `public/index.html`
   - Adicionado botao `Performance: On/Off` no header.
 - `public/js/script.js`
@@ -1524,14 +1758,18 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Regras CSS condicionais para `:root[data-performance="on"]` com menos animacao e menor custo de render.
 
 **Resultado esperado:**
+
 - Troca de filtro com percepcao de continuidade visual.
 - Usuario pode priorizar FPS e estabilidade via botao de performance sem perder recursos do sistema.
 
 ### 19/03/2026 - Loader circular e nova paleta Netflix-like
+
 **Objetivo:**
+
 - Substituir a barra de carregamento por um loader mais discreto e alinhar a identidade visual para uma direcao mais proxima de plataformas de streaming como Netflix.
 
 **Ajustes aplicados:**
+
 - `public/css/style.css`
   - Loader principal (`.spinner`) trocado de barra horizontal para spinner circular minimalista em tons de cinza.
   - Paleta base revisada para preto/carvao/vermelho com contraste mais cinematografico.
@@ -1539,28 +1777,36 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Backgrounds, hero, cards e tela de login receberam refinamento visual para combinar com a nova paleta.
 
 **Resultado esperado:**
+
 - Carregamento inicial com visual mais limpo e menos chamativo.
 - Interface com leitura mais proxima de um produto streaming premium e menos "colorida demais".
 
 ### 19/03/2026 - Loader de login com exibicao minima de 1000ms
+
 **Objetivo:**
+
 - Deixar o loader de bolinhas do login mais perceptivel, com tempo suficiente para aparecer visualmente antes da transicao para a vitrine.
 
 **Ajustes aplicados:**
+
 - `public/js/script.js`
   - `LOGIN_MIN_LOADING_MS` alterado de `120` para `1000`.
 - `public/css/style.css`
   - Animacao das bolinhas do login ajustada para ciclo de `1s`, com atraso lateral recalibrado para acompanhar o novo ritmo.
 
 **Resultado esperado:**
+
 - Feedback visual de carregamento mais claro no login.
 - Entrada na aplicacao continua suave, mas agora com loader perceptivel em vez de quase instantaneo.
 
 ### 18/03/2026 - Integracao segura com API externa (TMDB)
+
 **Contexto:**
+
 - Usuario quer substituir imagens/catalogo local por API de filmes, mas sem expor API key para recrutadores.
 
 **Ajuste aplicado:**
+
 - `backend/routes/catalog.routes.js`
   - `GET /api/catalog` agora suporta fonte externa opcional via TMDB quando `CATALOG_SOURCE=tmdb`.
   - Integracao feita no backend (server-side), mantendo API key fora do frontend.
@@ -1569,37 +1815,46 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Resposta do endpoint inclui `source` (`tmdb` ou `local`) para facilitar diagnostico.
 
 **Seguranca da chave:**
+
 - Chave permanece apenas em variavel de ambiente (`TMDB_BEARER_TOKEN` ou `TMDB_API_KEY`).
 - Nao enviar chave para `public/js/script.js`.
 - Nao versionar `.env` no GitHub.
 
 **Como ativar TMDB:**
+
 - Definir no ambiente:
   - `CATALOG_SOURCE=tmdb`
   - `TMDB_BEARER_TOKEN=...` (preferencial) ou `TMDB_API_KEY=...`
 
 **Resultado esperado:**
+
 - Frontend continua consumindo `/api/catalog` sem alteracoes.
 - Recrutadores conseguem rodar o projeto sem acesso direto ao segredo no browser.
 
 ### 19/03/2026 - Configuracao de chave TMDB e auditoria de GitHub
+
 **Acoes aplicadas:**
+
 - `.env` (local e ignorado pelo Git):
   - `CATALOG_SOURCE=tmdb`
   - `TMDB_API_KEY` preenchida para uso no backend.
 
 **Diagnostico de Git no terminal:**
+
 - `user.name`: `viwilliamxz` (ajustado depois para `chicowilliam`)
 - `user.email`: `viniciuswilliam91@gmail.com`
 - `origin`: `https://github.com/chicowilliam/catalago-filmes.git`
 - Branch `master` estava `ahead 8` (commits locais existentes, faltando push).
 
 **Publicacao e autoria:**
+
 - Push para `origin/master` concluido com sucesso.
 - `git config user.name` atualizado para `chicowilliam` no repositorio local.
 
 ### 19/03/2026 - Visibilidade da fonte TMDB no frontend
+
 **Ajustes aplicados:**
+
 - `backend/routes/catalog.routes.js`
   - Quando `CATALOG_SOURCE=tmdb`, tentativas de leitura na TMDB agora possuem fallback automatico para base local.
   - Em caso de fallback, a API responde com `source: local-fallback` e `warning` para diagnostico.
@@ -1608,10 +1863,13 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Toast informativo quando houver fallback local por indisponibilidade da TMDB.
 
 **Motivo:**
+
 - Evitar tela sem filmes quando a API externa falhar (chave invalida, limite de requicoes ou erro de rede).
 
 ### 19/03/2026 - Catalogo automatico com TMDB
+
 **Ajustes aplicados:**
+
 - `backend/routes/catalog.routes.js`
   - Carregamento automatico de multiplas paginas da TMDB para `trending/movie` e `trending/tv`.
   - Quantidade de paginas configuravel por ambiente com `TMDB_AUTO_PAGES` (padrao 3, maximo 5).
@@ -1621,20 +1879,26 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Reuso da busca ativa no refresh para manter contexto do usuario.
 
 **Resultado esperado:**
+
 - Mais filmes e series aparecem automaticamente sem cadastro manual no JSON local.
 - Catalogo se atualiza sozinho durante uso da aplicacao.
 
 ### 19/03/2026 - Estabilidade de consulta TMDB
+
 **Ajuste aplicado:**
+
 - `backend/routes/catalog.routes.js`
   - Adicionado timeout nas chamadas HTTP para TMDB (`TMDB_TIMEOUT_MS`, padrao 8000ms, maximo 15000ms).
   - Em timeout/rede lenta, a rota retorna fallback local em vez de deixar a resposta pendente.
 
 **Motivo:**
+
 - Evitar travamento do carregamento quando a TMDB estiver lenta ou indisponivel.
 
 ### 19/03/2026 - Otimizacao de catalogo e transicao de login
+
 **Ajustes aplicados:**
+
 - `backend/routes/catalog.routes.js`
   - Catalogo passou a retornar cerca de 20 itens por padrao (`CATALOG_LIMIT`, padrao 20, maximo 40).
   - Em listagem geral, o limite prioriza equilibrio entre filmes e series para nao concentrar tudo em um unico tipo.
@@ -1648,10 +1912,13 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Saida da tela de login passou a usar fade curto antes de revelar a lista.
 
 **Motivo:**
+
 - Reduzir excesso de cards na tela, melhorar percepcao de fluidez e deixar a experiencia mais polida no acesso inicial.
 
 ### 18/03/2026 - Sessao de hoje
+
 **Bugs corrigidos:**
+
 - HTML malformado na `<nav>` (tags sem `>`, `<button` sem `<`) travava o `script.js` inteiro,
   impedindo o evento de submit do login de ser registrado. Corrigido em `public/index.html`.
 - Senha no `.env` estava diferente da senha usada no login (`minha_senha_super_segura_123` → `admin123`).
@@ -1660,26 +1927,32 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   para que contribuicoes apareçam no grafico do GitHub.
 
 **Melhorias aplicadas:**
+
 - Nav de filtros (`Todos/Filmes/Series/Favoritos`) repaginada com HTML semantico:
   `role="tablist"`, `role="tab"`, `aria-selected` e `tabindex` corretos para acessibilidade.
 - Plano de CSS e JS profissional entregue para o usuario aplicar manualmente
   (visual dashboard, sublinhado ativo, scroll horizontal no mobile, navegacao por teclado).
 
 **Arquivos de contexto criados:**
+
 - `.github/copilot-instructions.md` — regras permanentes de stack, padrao de codigo e idioma para o assistente.
 - `PORTFOLIO_MAP.md` (este arquivo) — mapa tecnico vivo do projeto.
 
 **Commits da sessao:**
+
 - `428c3a2` fix: resolve critical login bug caused by malformed HTML in nav
 - `1f37c73` fix: corrige HTML malformado na nav que travava o script.js e bloqueava o login
 - `514874e` docs: adiciona instrucoes do copilot para o portfolio
 - `b0d5773` docs: atualiza portfolio map com mudancas recentes
 
 ### 18/03/2026 - Redesign visual estilo streaming
+
 **Objetivo:**
+
 - Modernizar o visual do frontend com UI limpa, layout mais profissional e organizacao de catalogo por categorias.
 
 **Mudancas aplicadas:**
+
 - `public/index.html`
   - Nova secao hero com destaque principal, estatisticas de catalogo e CTA de trailer.
   - Estrutura separada em blocos para `Filmes`, `Series` e `Favoritos`.
@@ -1697,38 +1970,49 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Preservadas funcionalidades existentes: login, tema, modal, rating e favoritos.
 
 **Validacao tecnica:**
+
 - Sem erros nos arquivos alterados (`index.html`, `style.css`, `script.js`) na verificacao do editor.
 
 ### 18/03/2026 - Diagnostico de boot/backend
+
 **Causa principal identificada:**
+
 - Erro `EADDRINUSE` ao iniciar com `node server.js` (porta `3000` ja estava ocupada por outra instancia).
 
 **Acoes aplicadas:**
+
 - `server.js`
   - Adicionado endpoint `GET /api/health` para checagem rapida de disponibilidade da API.
   - Adicionado tratamento de erro no `app.listen` para `EADDRINUSE` com mensagem amigavel de diagnostico.
 
 **Varredura geral:**
+
 - Rotas backend principais e middlewares sem erros de sintaxe.
 - Suite de testes executada: ha falhas de contrato em testes de rotas (nao bloqueia boot do servidor, mas requer alinhamento entre formato de erro esperado e app de teste).
 
 ### 18/03/2026 - Diagnostico de tela sem conteudo apos login
+
 **Resultado da investigacao:**
+
 - Backend respondeu normalmente nos testes manuais de `health`, `login` e `catalog`.
 - Causa mais provavel para "site sem conteudo" no browser: frontend aberto fora da URL esperada (`http://localhost:3000`), como `file://` ou outra porta local.
 
 **Ajuste aplicado:**
+
 - `public/js/script.js`
   - Adicionada validacao de contexto em runtime.
   - Exibicao de mensagem clara no login quando o frontend nao esta sendo acessado por `http://localhost:3000`.
   - Mensagem de erro de conexao mais objetiva para orientar subida do backend.
 
 ### 18/03/2026 - Correcao de loader infinito
+
 **Contexto:**
+
 - Usuario reportou tela presa em carregamento.
 - `node_modules` presente; nao ha necessidade de rodar `npm install` novamente em toda execucao.
 
 **Ajustes aplicados:**
+
 - `public/index.html`
   - Loader passou a iniciar oculto por padrao (`class="hide"`) para nao bloquear a UI em caso de falha de script/rede.
 - `public/js/script.js`
@@ -1737,22 +2021,29 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - Toast de erro para feedback ao usuario quando o catalogo nao carregar.
 
 ### 18/03/2026 - Alinhamento de commits/autoria
+
 **Contexto:**
+
 - Usuario reportou duvida se os commits estavam sendo gerados corretamente.
 
 **Acoes aplicadas:**
+
 - Configurado email local do Git no repositorio para `viniciuswilliam91@gmail.com`.
 - Validado que o historico local esta ativo e recebendo commits.
 
 **Observacao de publicacao:**
+
 - Commits locais so aparecem no GitHub apos `git push` para a branch remota.
 
 ### 19/03/2026 - Encerramento de sessao e proximas intencoes
+
 **Contexto:**
+
 - Sessao encerrada para reinicio do computador.
 - Todos os commits da sessao foram realizados e enviados para `origin/master`.
 
 **Ultimo estado confirmado:**
+
 - Servidor local (`http://localhost:3000`) encerrado com sucesso.
 - Repositorio limpo: sem arquivos pendentes de commit.
 - Ultimos commits (mais recentes primeiro):
@@ -1762,20 +2053,25 @@ Apply a complete set of security fixes, UX improvements and backend quality enha
   - `fix(server): improve startup diagnostics and add health endpoint`
 
 **Proxima sessao planejada:**
+
 - Elaborar um plano de estudos e melhorias para o portfolio.
 - Temas a considerar: modularizacao do `script.js`, testes de regressao, persistencia com banco de dados, acessibilidade avancada, CI/CD basico.
 
 ---
 
 ### 18/03/2026 - Ajuste de copy na hero
+
 **Mudanca aplicada:**
+
 - `public/index.html`
   - Texto de descricao da hero atualizado para destacar que o projeto e inspirado em streaming e usa front-end + back-end.
 
 ## 1) Visao Geral
+
 Projeto full stack com autenticacao de sessao para area administrativa, catalogo em JSON e frontend focado em experiencia semelhante a plataformas de streaming.
 
 ## 2) Arquitetura Atual
+
 - Backend (Node.js/Express)
   - Entrada da aplicacao: `server.js`
   - Rotas de autenticacao: `backend/routes/auth.routes.js`
@@ -1789,6 +2085,7 @@ Projeto full stack com autenticacao de sessao para area administrativa, catalogo
   - Logica de interface e integracao com API: `public/js/script.js`
 
 ## 3) Fluxos Principais
+
 - Login
   - Usuario envia credenciais para `POST /api/auth/login`.
   - Sessao e criada em caso de sucesso.
@@ -1802,18 +2099,21 @@ Projeto full stack com autenticacao de sessao para area administrativa, catalogo
   - Alternancia de tema claro/escuro.
 
 ## 4) Pontos Fortes Ja Implementados
+
 - Estrutura de backend separada por responsabilidades.
 - Validacao de entrada e padrao de erro consistente.
 - Suite de testes com Jest e Supertest.
 - Frontend com boas funcionalidades de usabilidade (filtros, favoritos, feedback visual).
 
 ## 5) Riscos e Limitacoes Atuais
+
 - Persistencia em JSON local (nao ideal para concorrencia e escala).
 - Sessao depende de segredo em ambiente; sem isso, ambiente fica fragil.
 - Script frontend concentra muitas responsabilidades em um unico arquivo.
 - Possivel crescimento de complexidade sem modularizacao no frontend.
 
 ## 6) Backlog Prioritario (Recomendado)
+
 1. Refinar microinteracoes (hover/focus/active) com padrao visual unico por componente.
 2. Modularizar `public/js/script.js` por dominio (auth, catalog, ui, storage).
 3. Adicionar testes de regressao para rotas de catalogo e validacoes de erro.
@@ -1823,6 +2123,7 @@ Projeto full stack com autenticacao de sessao para area administrativa, catalogo
 7. ✅ Redesign visual principal (hero, secoes por categoria e nova grade) aplicado em 18/03/2026.
 
 ## 7) Como Rodar e Validar
+
 - Instalar: `npm install`
 - Executar app: `npm run dev`
 - Abrir: `http://localhost:3000`
@@ -1830,6 +2131,7 @@ Projeto full stack com autenticacao de sessao para area administrativa, catalogo
 - Cobertura: `npm run test:coverage`
 
 ## 8) Referencia Rapida de Arquivos Criticos
+
 - `server.js`
 - `backend/routes/auth.routes.js`
 - `backend/routes/catalog.routes.js`
@@ -1842,12 +2144,15 @@ Projeto full stack com autenticacao de sessao para area administrativa, catalogo
 - `public/js/script.js`
 
 ### 21/03/2026 - Hardening de Segurança: CSP, Rate Limit Global, Timing Attacks
+
 **Objetivo:**
+
 - Incrementar proteção contra ataques comuns: XSS, CSRF, brute force, timing attacks
 - Documentar boas práticas de segurança para deploy em produção
 - Manter compatibilidade com stack existing (sem alterar estrutura)
 
 **Ajustes aplicados:**
+
 - `backend/services/auth.service.js`
   - Adicionado `constantTimeCompare()` para comparação de credenciais segura.
   - Previne timing attacks que poderiam revelar se username existe.
@@ -1871,6 +2176,7 @@ Projeto full stack com autenticacao de sessao para area administrativa, catalogo
 **Resultado esperado:**
 
 **Arquivos Novos/Modificados:**
+
 - `server.js`: Helm aprimorado, rate limit global, content-type validation
 - `backend/services/auth.service.js`: Constant-time comparison
 - `public/js/script.js`: Sanitização de URL
