@@ -1,172 +1,156 @@
-import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-
 interface Technology {
-  name: string;
+  label: string;
   iconClass: string;
 }
 
-interface StackCategory {
+interface TechnologyGroup {
   id: string;
   title: string;
-  description: string;
-  summary: string;
-  technologies: Technology[];
+  items: Technology[];
 }
 
-const stackCategories: StackCategory[] = [
+interface SocialLink {
+  id: string;
+  label: string;
+  href: string;
+  badgeSrc: string;
+}
+
+const technologyGroups: TechnologyGroup[] = [
   {
     id: "frontend",
     title: "Front-end",
-    description: "Experiência visual, responsividade e interações do usuário.",
-    summary: "React, TypeScript, Vite e CSS sem dependências pesadas.",
-    technologies: [
-      { name: "HTML", iconClass: "devicon-html5-plain colored" },
-      { name: "CSS", iconClass: "devicon-css3-plain colored" },
-      { name: "JavaScript", iconClass: "devicon-javascript-plain colored" },
-      { name: "React", iconClass: "devicon-react-original colored" },
-      { name: "TypeScript", iconClass: "devicon-typescript-plain colored" },
+    items: [
+      { label: "HTML", iconClass: "devicon-html5-plain colored" },
+      { label: "CSS", iconClass: "devicon-css3-plain colored" },
+      { label: "JavaScript", iconClass: "devicon-javascript-plain colored" },
+      { label: "TypeScript", iconClass: "devicon-typescript-plain colored" },
     ],
   },
   {
     id: "backend",
     title: "Back-end",
-    description: "Regras de negócio, API REST e integração de dados externos.",
-    summary: "Node.js, Express e consumo de APIs com arquitetura enxuta.",
-    technologies: [
-      { name: "Node.js", iconClass: "devicon-nodejs-plain colored" },
-      { name: "Express", iconClass: "devicon-express-original" },
-      { name: "APIs", iconClass: "devicon-fastapi-plain colored" },
+    items: [
+      { label: "Node.js", iconClass: "devicon-nodejs-plain colored" },
+      { label: "Express", iconClass: "devicon-express-original" },
+      { label: "FastAPI", iconClass: "devicon-fastapi-plain colored" },
     ],
   },
   {
     id: "tools",
-    title: "Ferramentas",
-    description: "Ambiente de desenvolvimento, testes e controle de versão.",
-    summary: "Git, Jest, Vite e VS Code no dia a dia.",
-    technologies: [
-      { name: "Git", iconClass: "devicon-git-plain colored" },
-      { name: "Vite", iconClass: "devicon-vitejs-plain colored" },
-      { name: "Jest", iconClass: "devicon-jest-plain colored" },
+    title: "Frameworks / Ferramentas",
+    items: [
+      { label: "React", iconClass: "devicon-react-original colored" },
+      { label: "Vite", iconClass: "devicon-vitejs-plain colored" },
+      { label: "Jest", iconClass: "devicon-jest-plain colored" },
+      { label: "Git", iconClass: "devicon-git-plain colored" },
     ],
   },
 ];
 
+const socialLinks: SocialLink[] = [
+  {
+    id: "linkedin",
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/vin%C3%ADcius-william-/",
+    badgeSrc: "https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white",
+  },
+  {
+    id: "instagram",
+    label: "Instagram",
+    href: "https://www.instagram.com/williamvx__/",
+    badgeSrc: "https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white",
+  },
+  {
+    id: "discord",
+    label: "Discord",
+    href: "https://discord.gg/Kz9ZEfnh",
+    badgeSrc: "https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white",
+  },
+];
+
 export function AboutSection() {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const selected = stackCategories.find((c) => c.id === selectedId) ?? null;
-
-  function toggle(id: string) {
-    setSelectedId((prev) => (prev === id ? null : id));
-  }
-
   return (
     <section className="about-section">
       <div className="section-headline about-headline section-block">
         <div>
-          <h2 className="section-title">Sobre o projeto</h2>
+          <h2 className="section-title">Sobre mim</h2>
           <span className="section-subtitle">
-            Catalogo full stack inspirado em streaming, com foco em UX, integracao com API e
-            arquitetura limpa.
+            Apresentação profissional e visão geral do projeto.
           </span>
         </div>
       </div>
 
-      <div className="about-layout">
-        <article className="about-copy-block">
-          <span className="about-kicker">Portfolio case</span>
-          <h3 className="about-spotlight">
-            Interface com linguagem de streaming, arquitetura leve e foco em sensacao de produto
-            final.
-          </h3>
-          <p className="about-copy-text">
-            Este projeto combina uma experiencia visual inspirada em streaming com frontend em React
-            + TypeScript. No modo standalone, roda apenas com Vite e dados locais para portfolio,
-            mantendo navegacao fluida, filtros, favoritos e interacoes cinematograficas.
-          </p>
-          <div className="about-signal-row" aria-label="Caracteristicas do projeto">
-            <span className="about-signal">UX focada em catalogo</span>
-            <span className="about-signal">Vite standalone</span>
-            <span className="about-signal">Sessoes e favoritos</span>
-          </div>
-        </article>
+      <article className="about-summary-card section-block">
+        <p className="about-summary-text">
+          Olá, sou Vinicius William e este projeto marca um passo importante na minha trajetória
+          como desenvolvedor. Nele, busquei aplicar na prática fundamentos modernos de engenharia de
+          software, combinando organização de código, componentização, responsividade e preocupações
+          com segurança para construir uma experiência mais próxima de um produto real.
+        </p>
+        <p className="about-summary-text">
+          A aplicação foi desenvolvida com React e TypeScript no front-end, com uma proposta visual
+          inspirada em plataformas de streaming. Ela pode funcionar de forma standalone com Vite e
+          dados locais, o que a torna adequada para apresentação em portfólio, mas também está
+          preparada para integração com API em cenários mais completos.
+        </p>
+        <p className="about-summary-text">
+          O foco da interface foi transmitir consistência visual, fluidez de navegação e sensação de
+          produto finalizado, com organização por categorias, interações dinâmicas e decisões de UI
+          pensadas para simular padrões encontrados em aplicações reais do mercado.
+        </p>
+      </article>
 
-        <div className="about-facts" aria-label="Destaques do projeto">
-          <article className="about-fact-card">
-            <span className="about-point-label">Front-end</span>
-            <p>React, TypeScript, Vite, animacoes com Motion e interface inspirada em streaming.</p>
-          </article>
-          <article className="about-fact-card">
-            <span className="about-point-label">Back-end</span>
-            <p>Opcional: API Express pode ser ligada separadamente para cenarios full stack.</p>
-          </article>
-          <article className="about-fact-card">
-            <span className="about-point-label">Experiencia</span>
-            <p>Busca, favoritos, trailers, modal, destaque dinamico e layout pensado para portfolio.</p>
-          </article>
-        </div>
-      </div>
-
-      <div className="section-headline stack-headline section-block">
+      <div className="section-headline about-section-headline section-block">
         <div>
-          <h3 className="section-title">Tecnologias utilizadas</h3>
-          <span className="section-subtitle">
-            Disponiveis na aba Sobre para manter a home limpa e cinematografica.
-          </span>
+          <h3 className="section-title">Tecnologias</h3>
         </div>
-        <span className="stack-tip">Toque para abrir cada pasta</span>
       </div>
 
-      <div className="stack-grid">
-        {stackCategories.map((cat) => (
-          <button
-            key={cat.id}
-            type="button"
-            className={`stack-folder${selectedId === cat.id ? " is-open" : ""}`}
-            onClick={() => toggle(cat.id)}
-            aria-expanded={selectedId === cat.id}
-            aria-label={`${selectedId === cat.id ? "Fechar" : "Abrir"} categoria ${cat.title}`}
-          >
-            <strong className="stack-folder-title">{cat.title}</strong>
-            <span className="stack-folder-meta">{cat.summary}</span>
-            <span className="stack-folder-open" aria-hidden="true">
-              {selectedId === cat.id ? "▲ Fechar" : "▼ Abrir"}
-            </span>
-          </button>
+      <div className="tech-groups section-block" aria-label="Tecnologias organizadas por categoria">
+        {technologyGroups.map((group) => (
+          <div key={group.id} className="tech-group-row">
+            <h4 className="tech-group-title">{group.title}</h4>
+            <div className="tech-badge-row" role="list" aria-label={group.title}>
+              {group.items.map((tech, index) => (
+                <span
+                  key={`${group.id}-${tech.iconClass}-${index}`}
+                  className="tech-badge"
+                  role="listitem"
+                  aria-label={tech.label}
+                  title={tech.label}
+                >
+                  <i className={tech.iconClass} aria-hidden="true" />
+                </span>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 
-      <AnimatePresence mode="wait">
-        {selected && (
-          <motion.div
-            key={selected.id}
-            className="stack-detail"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25, ease: "easeInOut" }}
+      <div className="section-headline social-headline section-block">
+        <div>
+          <h3 className="section-title">Redes sociais</h3>
+          <span className="section-subtitle">
+            Contatos e perfis para networking profissional.
+          </span>
+        </div>
+      </div>
+
+      <div className="social-badges section-block" aria-label="Links para redes sociais">
+        {socialLinks.map((social) => (
+          <a
+            key={social.id}
+            className="social-badge-link"
+            href={social.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Abrir ${social.label} em nova aba`}
           >
-            <h3 className="stack-detail-title">{selected.title}</h3>
-            <p className="stack-detail-description">{selected.description}</p>
-            <div className="stack-tech-grid">
-              {selected.technologies.map((tech, i) => (
-                <motion.article
-                  key={tech.name}
-                  className="stack-tech-item"
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.07, duration: 0.2 }}
-                >
-                  <span className="stack-tech-icon">
-                    <i className={tech.iconClass} aria-hidden="true" />
-                  </span>
-                  <span className="stack-tech-name">{tech.name}</span>
-                </motion.article>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <img src={social.badgeSrc} alt={`Badge ${social.label}`} loading="lazy" />
+          </a>
+        ))}
+      </div>
     </section>
   );
 }
