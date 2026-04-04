@@ -73,7 +73,7 @@ function App() {
 
     // Pequeno delay para o DOM estar pronto após a transição de entrada
     const timer = window.setTimeout(() => {
-      document.querySelectorAll(".section-block, .stack-folder, .about-fact-card").forEach((el) => {
+      document.querySelectorAll(".section-block, .about-summary-card, .tech-group-row, .social-badges").forEach((el) => {
         el.classList.add("reveal");
         observer.observe(el);
       });
@@ -94,13 +94,12 @@ function App() {
       {!canAccessCatalog ? (
         <motion.div
           key="login"
+          initial={false}
+          style={{ willChange: "opacity" }}
           exit={{
             opacity: 0,
-            y: -10,
-            filter: "blur(5px)",
-            scale: 0.97,
           }}
-          transition={{ duration: 0.28, ease: "easeIn" }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
         >
           <LoginForm
             isSubmitting={auth.isSubmitting}
@@ -112,9 +111,10 @@ function App() {
       ) : (
         <motion.div
           key="catalog"
+          style={{ willChange: "transform, opacity" }}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.56, ease: [0.22, 1, 0.36, 1] }}
         >
           <AppShell
             username={auth.user?.username ?? (auth.isGuest ? "Visitante" : undefined)}
