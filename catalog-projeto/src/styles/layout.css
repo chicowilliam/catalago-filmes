@@ -65,7 +65,10 @@
   padding: 20px;
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  contain: paint;
   transition: opacity 0.32s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.32s;
 }
 
@@ -79,9 +82,11 @@
   flex-direction: column;
   gap: 14px;
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translate3d(0, 0, 0) scale(1);
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.36);
-  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease, filter 0.32s ease;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transition: transform 0.48s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.38s ease;
 }
 
 .login-title {
@@ -222,6 +227,11 @@
   border-radius: 16px;
 }
 
+.tab-transition-viewport-about {
+  overflow: visible;
+  border-radius: 0;
+}
+
 .tab-transition-stage {
   position: relative;
   width: 100%;
@@ -230,12 +240,20 @@
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.014), rgba(255, 255, 255, 0));
 }
 
+.tab-transition-stage-about {
+  background: transparent;
+}
+
 .tab-transition-panel {
   grid-area: 1 / 1;
   position: relative;
   width: 100%;
   will-change: transform, opacity, filter;
   backface-visibility: hidden;
+}
+
+.tab-transition-panel-about {
+  background: transparent;
 }
 
 .catalog-grid {
