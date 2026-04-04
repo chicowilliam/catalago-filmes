@@ -197,12 +197,15 @@ export function CatalogPage() {
           <SearchBar open={showCatalog} defaultValue={search} onSearch={submitSearch} isLoading={isLoading} />
         </div>
 
-        <div className="tab-transition-viewport" aria-live="polite">
-          <div className="tab-transition-stage">
+        <div
+          className={`tab-transition-viewport${activeType === "about" ? " tab-transition-viewport-about" : ""}`}
+          aria-live="polite"
+        >
+          <div className={`tab-transition-stage${activeType === "about" ? " tab-transition-stage-about" : ""}`}>
             <AnimatePresence initial={false} mode="sync" custom={direction}>
               <motion.div
                 key={activeType}
-                className="tab-transition-panel"
+                className={`tab-transition-panel${activeType === "about" ? " tab-transition-panel-about" : ""}`}
                 custom={direction}
                 variants={pageSlideVariants}
                 initial="enter"
