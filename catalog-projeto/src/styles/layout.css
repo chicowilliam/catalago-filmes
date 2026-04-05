@@ -1,3 +1,75 @@
+.main-container {
+  position: relative;
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  perspective: 1px;
+  transform-style: preserve-3d;
+}
+
+.parallax-container {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translateZ(-1px) scale(2.15);
+  transform-origin: center top;
+  background:
+    radial-gradient(50% 36% at 16% 18%, rgba(229, 9, 20, 0.18), transparent 72%),
+    radial-gradient(44% 30% at 84% 12%, rgba(255, 255, 255, 0.07), transparent 78%),
+    linear-gradient(180deg, rgba(7, 10, 18, 0.96) 0%, rgba(14, 16, 28, 0.86) 54%, rgba(18, 18, 18, 0.42) 100%);
+}
+
+.parallax-glow {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(12px);
+  opacity: 0.72;
+}
+
+.parallax-glow-primary {
+  width: min(38vw, 520px);
+  height: min(38vw, 520px);
+  top: 10%;
+  left: 8%;
+  background: radial-gradient(circle, rgba(229, 9, 20, 0.24) 0%, rgba(229, 9, 20, 0.08) 45%, transparent 74%);
+}
+
+.parallax-glow-secondary {
+  width: min(28vw, 420px);
+  height: min(28vw, 420px);
+  right: 10%;
+  top: 16%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 44%, transparent 76%);
+}
+
+.parallax-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.92), transparent 84%);
+  opacity: 0.24;
+}
+
+.content-container {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  background: linear-gradient(180deg, rgba(18, 18, 18, 0.2) 0%, rgba(18, 18, 18, 0.74) 18%, rgba(18, 18, 18, 0.96) 100%);
+}
+
+[data-theme="light"] .content-container {
+  background: linear-gradient(180deg, rgba(244, 241, 234, 0.24) 0%, rgba(244, 241, 234, 0.76) 18%, rgba(244, 241, 234, 0.96) 100%);
+}
+
 .app-shell {
   max-width: 1200px;
   margin: 0 auto;
@@ -220,15 +292,10 @@
 .tab-transition-viewport {
   position: relative;
   width: 100%;
-  overflow: hidden;
+  overflow: visible;
   isolation: isolate;
   display: block;
   perspective: 1600px;
-  border-radius: 16px;
-}
-
-.tab-transition-viewport-about {
-  overflow: visible;
   border-radius: 0;
 }
 
@@ -237,10 +304,6 @@
   width: 100%;
   display: grid;
   transform-style: preserve-3d;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.014), rgba(255, 255, 255, 0));
-}
-
-.tab-transition-stage-about {
   background: transparent;
 }
 
@@ -250,15 +313,12 @@
   width: 100%;
   will-change: transform, opacity, filter;
   backface-visibility: hidden;
-}
-
-.tab-transition-panel-about {
   background: transparent;
 }
 
 .catalog-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
   gap: 18px;
   padding: 10px 0 18px;
   overflow: visible;
@@ -277,6 +337,22 @@
 }
 
 @media (max-width: 720px) {
+  .parallax-container {
+    transform: translateZ(-1px) scale(2.5);
+  }
+
+  .parallax-glow-primary {
+    width: 70vw;
+    height: 70vw;
+    left: -6%;
+  }
+
+  .parallax-glow-secondary {
+    width: 54vw;
+    height: 54vw;
+    right: -4%;
+  }
+
   .app-shell {
     padding: 14px;
   }
@@ -287,7 +363,7 @@
   }
 
   .catalog-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(161px, 1fr));
     gap: 12px;
     padding: 8px 0 12px;
   }
