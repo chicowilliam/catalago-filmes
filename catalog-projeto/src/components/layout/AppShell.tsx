@@ -10,28 +10,36 @@ interface AppShellProps {
 
 export function AppShell({ children, username, onLogout }: AppShellProps) {
   return (
-    <>
-      <header className="app-header">
-        <div className="header-inner">
-          <div>
-            <p className="brand-kicker">Streaming Portfolio</p>
-            <h1 className="brand-title">Catalogo X</h1>
-          </div>
-
-          <div className="header-actions">
-            {username ? <span className="user-chip">{username}</span> : null}
-            <ThemeToggle />
-            <button type="button" className="secondary-btn" onClick={onLogout}>
-              Sair
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <div className="app-shell">
-        <main className="app-main">{children}</main>
-        <Footer />
+    <div className="main-container">
+      <div className="parallax-container" aria-hidden="true">
+        <div className="parallax-glow parallax-glow-primary" />
+        <div className="parallax-glow parallax-glow-secondary" />
+        <div className="parallax-grid" />
       </div>
-    </>
+
+      <div className="content-container">
+        <header className="app-header">
+          <div className="header-inner">
+            <div>
+              <p className="brand-kicker">Streaming Portfolio</p>
+              <h1 className="brand-title">Catalogo X</h1>
+            </div>
+
+            <div className="header-actions">
+              {username ? <span className="user-chip">{username}</span> : null}
+              <ThemeToggle />
+              <button type="button" className="secondary-btn" onClick={onLogout}>
+                Sair
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div className="app-shell">
+          <main className="app-main">{children}</main>
+          <Footer />
+        </div>
+      </div>
+    </div>
   );
 }
