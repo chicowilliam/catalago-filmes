@@ -4,9 +4,12 @@ export interface CatalogItem {
   id: number;
   title: string;
   image: string;
+  backdrop?: string;
   type: "movie" | "series";
   synopsis: string;
   trailerId?: string;
+  year?: string;
+  rating?: number | null;
 }
 
 export interface PaginationInfo {
