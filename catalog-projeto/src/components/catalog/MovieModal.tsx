@@ -20,12 +20,21 @@ export function MovieModal({ item, rating, onClose, onRate }: MovieModalProps) {
       }
     };
 
-    const previousOverflow = document.body.style.overflow;
+    const scrollRoot = document.querySelector(".main-container") as HTMLElement | null;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousScrollOverflow = scrollRoot?.style.overflow ?? "";
+
     document.body.style.overflow = "hidden";
+    if (scrollRoot) {
+      scrollRoot.style.overflow = "hidden";
+    }
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+      if (scrollRoot) {
+        scrollRoot.style.overflow = previousScrollOverflow;
+      }
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [item, onClose]);
@@ -62,7 +71,13 @@ export function MovieModal({ item, rating, onClose, onRate }: MovieModalProps) {
             </button>
 
             <h2 className="modal-title">{item.title}</h2>
-            <p className="modal-type">{item.type === "movie" ? "Filme" : "Série"}</p>
+            <div className="modal-meta">
+              <p className="modal-type">{item.type === "movie" ? "Filme" : "Série"}</p>
+              {item.year && <span className="modal-meta-year">{item.year}</span>}
+              {item.rating != null && (
+                <span className="modal-meta-tmdb-rating">⭐ {item.rating} <span className="modal-meta-tmdb-label">TMDB</span></span>
+              )}
+            </div>
             <p className="modal-synopsis">{item.synopsis}</p>
 
             {item.trailerId && (
