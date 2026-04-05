@@ -7,6 +7,7 @@
     "postinstall": "npm --prefix catalog-projeto install",
     "start": "npm --prefix catalog-projeto run preview",
     "dev": "npm --prefix catalog-projeto run dev",
+    "dev:full": "node ./scripts/dev-full.cjs",
     "preview": "npm --prefix catalog-projeto run preview",
     "dev:api": "node ./node_modules/nodemon/bin/nodemon.js server.js",
     "start:api": "node server.js",
