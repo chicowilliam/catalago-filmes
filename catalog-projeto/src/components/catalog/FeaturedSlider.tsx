@@ -1,8 +1,10 @@
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 
 import type { CatalogItem } from "@/types/catalog";
 
 const MAX_FEATURED_ITEMS = 4;
+const FEATURED_ROTATION_MS = 4200;
 
 interface FeaturedSliderProps {
   items: CatalogItem[];
@@ -10,18 +12,44 @@ interface FeaturedSliderProps {
 }
 
 export function FeaturedSlider({ items, onOpenModal }: FeaturedSliderProps) {
-  const featuredItems = items
-    .filter((i) => i.image && !i.image.startsWith("data:"))
-    .slice(0, MAX_FEATURED_ITEMS);
+  const [rotationIndex, setRotationIndex] = useState(0);
+
+  const itemsWithImage = useMemo(
+    () => items.filter((item) => item.image && !item.image.startsWith("data:")),
+    [items]
+  );
+
+  const featuredItems = useMemo(() => {
+    if (itemsWithImage.length <= MAX_FEATURED_ITEMS) {
+      return itemsWithImage;
+    }
+
+    return Array.from({ length: MAX_FEATURED_ITEMS }, (_, offset) => {
+      const index = (rotationIndex + offset) % itemsWithImage.length;
+      return itemsWithImage[index];
+    });
+  }, [itemsWithImage, rotationIndex]);
+
+  useEffect(() => {
+    if (itemsWithImage.length <= MAX_FEATURED_ITEMS) {
+      setRotationIndex(0);
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setRotationIndex((currentIndex) => (currentIndex + 1) % itemsWithImage.length);
+    }, FEATURED_ROTATION_MS);
+
+    return () => window.clearInterval(timer);
+  }, [itemsWithImage]);
 
   if (featuredItems.length === 0) return null;
 
   return (
     <div className="hero-panel">
-      <section className="featured-card featured-compact-shell" aria-label="Destaques do catálogo">
+      <section className="featured-card featured-compact-shell" aria-label="Sugestões do catálogo">
         <div className="featured-compact-header">
-          <p className="featured-compact-kicker">Em destaque</p>
-          <h2 className="featured-compact-title">Escolhas da semana</h2>
+          <h2 className="featured-compact-title">Sugestões especialmente para você</h2>
         </div>
 
         <div className="featured-compact-grid">
@@ -39,11 +67,15 @@ export function FeaturedSlider({ items, onOpenModal }: FeaturedSliderProps) {
                 onClick={() => onOpenModal(item)}
                 aria-label={`Abrir destaque: ${item.title}`}
               >
-                <img src={item.image} alt={item.title} className="featured-compact-image" loading="lazy" />
+                <img src={item.backdrop || item.image} alt={item.title} className="featured-compact-image" loading="lazy" />
                 <div className="featured-compact-overlay" aria-hidden="true" />
                 <div className="featured-compact-content">
                   <span className="featured-tag">{item.type === "movie" ? "Filme" : "Série"}</span>
                   <h3 className="featured-compact-item-title">{item.title}</h3>
+                  <div className="featured-compact-meta">
+                    {item.year && <span className="featured-meta-year">{item.year}</span>}
+                    {item.rating != null && <span className="featured-meta-rating">⭐ {item.rating}</span>}
+                  </div>
                   <span className="featured-compact-cta">Ver detalhes</span>
                 </div>
               </button>
