@@ -15,6 +15,7 @@ const logger = require("../utils/logger");
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
+const TMDB_BACKDROP_BASE = "https://image.tmdb.org/t/p/w1280";
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
 
 // Cache em memória — válido para instância única de Node.
@@ -95,18 +96,30 @@ function mapItem(tmdbItem) {
     tmdbItem.media_type === "movie" ||
     (!tmdbItem.media_type && !!tmdbItem.title && !tmdbItem.name);
   const posterPath = tmdbItem.poster_path;
-  
+  const backdropPath = tmdbItem.backdrop_path;
+
   if (!posterPath) {
     logger.warn("Item sem poster_path", { tmdbId: tmdbItem.id, title: tmdbItem.title || tmdbItem.name });
   }
-  
+
+  const rawDate = tmdbItem.release_date || tmdbItem.first_air_date || "";
+  const year = rawDate.slice(0, 4) || "";
+
+  const rawRating = tmdbItem.vote_average;
+  const rating = rawRating != null && rawRating > 0
+    ? Number(rawRating.toFixed(1))
+    : null;
+
   return {
     id: `tmdb-${tmdbItem.id}`,
     title: tmdbItem.title || tmdbItem.name || "Título indisponível",
     type: isMovie ? "movie" : "series",
     image: posterPath ? `${TMDB_IMAGE_BASE}${posterPath}` : "",
+    backdrop: backdropPath ? `${TMDB_BACKDROP_BASE}${backdropPath}` : "",
     synopsis: tmdbItem.overview || "Sinopse indisponível.",
     trailerId: "",
+    year,
+    rating,
   };
 }
 
