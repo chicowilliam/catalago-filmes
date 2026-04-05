@@ -17,11 +17,11 @@ import type { CatalogType } from "@/types/catalog";
 
 const pageSlideVariants: Variants = {
   enter: (direction: number) => ({
-    x: direction >= 0 ? "56%" : "-56%",
+    x: 0,
     rotateY: 0,
-    scale: 1,
-    opacity: 1,
-    filter: "blur(0px)",
+    scale: 0.995,
+    opacity: 0,
+    filter: "blur(2px)",
     zIndex: 1,
     transformOrigin: direction >= 0 ? "100% 50%" : "0% 50%",
   }),
@@ -35,11 +35,11 @@ const pageSlideVariants: Variants = {
     transformOrigin: "50% 50%",
   },
   exit: (direction: number) => ({
-    x: direction >= 0 ? "-56%" : "56%",
+    x: 0,
     rotateY: 0,
-    scale: 1,
-    opacity: 1,
-    filter: "blur(0px)",
+    scale: [1, 1, 0.995],
+    opacity: [1, 1, 0],
+    filter: ["blur(0px)", "blur(0px)", "blur(2px)"],
     zIndex: 1,
     transformOrigin: direction >= 0 ? "0% 50%" : "100% 50%",
   }),
@@ -197,26 +197,22 @@ export function CatalogPage() {
           <SearchBar open={showCatalog} defaultValue={search} onSearch={submitSearch} isLoading={isLoading} />
         </div>
 
-        <div
-          className={`tab-transition-viewport${activeType === "about" ? " tab-transition-viewport-about" : ""}`}
-          aria-live="polite"
-        >
-          <div className={`tab-transition-stage${activeType === "about" ? " tab-transition-stage-about" : ""}`}>
+        <div className="tab-transition-viewport" aria-live="polite">
+          <div className="tab-transition-stage">
             <AnimatePresence initial={false} mode="sync" custom={direction}>
               <motion.div
                 key={activeType}
-                className={`tab-transition-panel${activeType === "about" ? " tab-transition-panel-about" : ""}`}
+                className="tab-transition-panel"
                 custom={direction}
                 variants={pageSlideVariants}
                 initial="enter"
                 animate="center"
                 exit="exit"
                 transition={{
-                  x: { type: "spring", stiffness: 460, damping: 46, mass: 0.68 },
                   rotateY: { duration: 0.23, ease: [0.4, 0, 0.2, 1] },
-                  scale: { duration: 0.23, ease: [0.4, 0, 0.2, 1] },
-                  opacity: { duration: 0.18, ease: "linear" },
-                  filter: { duration: 0.23, ease: [0.4, 0, 0.2, 1] },
+                  scale: { duration: 0.24, times: [0, 0.5, 1], ease: [0.4, 0, 0.2, 1] },
+                  opacity: { duration: 0.24, times: [0, 0.5, 1], ease: "linear" },
+                  filter: { duration: 0.24, times: [0, 0.5, 1], ease: [0.4, 0, 0.2, 1] },
                 }}
               >
                 {activeType === "about" ? (
