@@ -31,7 +31,8 @@ if (!isProduction && !/^\$2[ab]\$\d{2}\$/.test(process.env.ADMIN_PASSWORD)) {
 }
 
 if (!process.env.TMDB_BEARER_TOKEN && !process.env.TMDB_API_KEY) {
-   throw new Error("TMDB_BEARER_TOKEN ou TMDB_API_KEY nao definido. Configure no .env antes de iniciar o servidor.");
+   console.warn("⚠️  TMDB_BEARER_TOKEN ou TMDB_API_KEY nao definido.");
+   console.warn("   A API vai iniciar, mas o catalogo respondera erro 503 ate a TMDB ser configurada no .env.");
 }
 
 if (isProduction) {
