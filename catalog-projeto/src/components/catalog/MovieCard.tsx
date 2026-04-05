@@ -34,6 +34,16 @@ export function MovieCard({
       transition={{ type: "spring", stiffness: 280, damping: 20 }}
       style={{ "--card-pop-delay": `${popDelayRef.current}ms` } as React.CSSProperties}
       aria-label={`Abrir detalhes de ${item.title}`}
+      role="button"
+      tabIndex={0}
+      aria-haspopup="dialog"
+      onClick={() => onOpenModal(item)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onOpenModal(item);
+        }
+      }}
     >
       {/* ── Frente: poster + info (desaparece no hover) ── */}
       <div className="card-face-front">
@@ -87,7 +97,10 @@ export function MovieCard({
           <button
             type="button"
             className="movie-image-btn"
-            onClick={() => onOpenModal(item)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onOpenModal(item);
+            }}
             aria-label={`Ver detalhes de ${item.title}`}
           >
             ▶ Ver detalhes
@@ -99,6 +112,14 @@ export function MovieCard({
       <div className="card-face-back" aria-hidden="true">
         <span className="card-back-type">{typeLabel}</span>
         <h3 className="card-back-title">{item.title}</h3>
+        {(item.year || item.rating != null) && (
+          <div className="card-back-meta">
+            {item.year && <span className="card-back-year">{item.year}</span>}
+            {item.rating != null && (
+              <span className="card-back-tmdb-rating">⭐ {item.rating}</span>
+            )}
+          </div>
+        )}
         {truncatedSynopsis && (
           <p className="card-back-synopsis">{truncatedSynopsis}</p>
         )}
