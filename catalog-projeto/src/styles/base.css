@@ -30,7 +30,6 @@
   --text: var(--text-primary);
   --text-soft: var(--text-secondary);
   --border: var(--card-border);
-  --scroll-progress: 0;
 
   color: var(--text-primary);
   background:
@@ -85,12 +84,19 @@ html.theme-transition *::after {
     border-color 300ms ease !important;
 }
 
+html {
+  height: 100%;
+  scroll-behavior: auto;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
+  height: 100%;
   line-height: 1.6;
   letter-spacing: 0.012em;
   color: var(--text-primary);
+  overflow: hidden;
   background:
     radial-gradient(1100px 520px at 88% -14%, rgba(229, 9, 20, 0.18), transparent 68%),
     radial-gradient(920px 460px at 0% 8%, rgba(255, 255, 255, 0.04), transparent 62%),
@@ -98,23 +104,9 @@ body {
     var(--bg-primary);
 }
 
-/* ── Barra de progresso de scroll ──────────────────── */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: calc(var(--scroll-progress) * 100%);
-  height: 2px;
-  background: var(--transition-strip);
-  z-index: 1800;
-  pointer-events: none;
-  transform-origin: left center;
-  box-shadow: var(--transition-strip-shadow);
-}
-
 #root {
   min-height: 100vh;
+  height: 100vh;
 }
 
 h1,
@@ -190,17 +182,6 @@ h3,
   }
 }
 
-@keyframes sectionReveal {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes techItemIn {
   from {
     opacity: 0;
@@ -243,50 +224,6 @@ h3,
 /* ── Section block ───────────────────────────────── */
 .section-block {
   margin-bottom: 32px;
-  animation: sectionReveal 550ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-/* ── Reveal ao scroll ─────────────────────────────── */
-.reveal {
-  opacity: 0;
-  transform: translateY(20px) scale(0.988);
-  transition:
-    opacity 0.62s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
-    transform 0.70s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
-}
-
-.reveal.reveal-visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-/* Aparição automática via CSS (Chrome moderno) */
-@supports (animation-timeline: view()) {
-  .section-block,
-  .stack-folder,
-  .about-fact-card {
-    animation: appear linear both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 40%;
-  }
-
-  .reveal,
-  .reveal.reveal-visible {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-}
-
-@keyframes appear {
-  from {
-    opacity: 0;
-    transform: translateY(14px) scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
