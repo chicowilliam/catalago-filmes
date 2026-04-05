@@ -435,6 +435,26 @@
   letter-spacing: 0.09em;
 }
 
+.card-back-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.card-back-year {
+  font-size: 0.72rem;
+  color: var(--text-secondary, #aaa);
+  font-weight: 500;
+}
+
+.card-back-tmdb-rating {
+  font-size: 0.72rem;
+  color: #ffd700;
+  font-weight: 600;
+}
+
 /* Desabilita face-swap em touch (sem hover real) */
 @media (hover: none) {
   .card-face-back {
@@ -672,17 +692,9 @@
 .featured-compact-header {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
+  justify-content: center;
   gap: 12px;
   margin-bottom: 12px;
-}
-
-.featured-compact-kicker {
-  color: color-mix(in srgb, #ffffff 84%, var(--accent));
-  font-size: 0.74rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 700;
 }
 
 .featured-compact-title {
@@ -787,6 +799,25 @@
   font-weight: 600;
 }
 
+.featured-compact-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.featured-meta-year {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 500;
+}
+
+.featured-meta-rating {
+  font-size: 0.72rem;
+  color: #ffd700;
+  font-weight: 600;
+}
+
 @media (max-width: 900px) {
   .featured-compact-content {
     margin-top: -68px;
@@ -865,9 +896,37 @@
   padding-right: 28px;
 }
 
+.modal-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
+}
+
 .modal-type {
   font-size: 13px;
   color: var(--text-soft);
+}
+
+.modal-meta-year {
+  font-size: 13px;
+  color: var(--text-soft);
+}
+
+.modal-meta-tmdb-rating {
+  font-size: 13px;
+  color: #ffd700;
+  font-weight: 600;
+}
+
+.modal-meta-tmdb-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-left: 2px;
 }
 
 .modal-synopsis {
@@ -891,34 +950,49 @@
 
 .modal-rating {
   display: grid;
-  gap: 6px;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .modal-rating-label {
   font-size: 14px;
   color: var(--text-soft);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .star-selector {
   display: flex;
-  gap: 4px;
+  gap: 8px;
 }
 
 .star-btn {
   background: none;
   border: none;
-  font-size: 26px;
-  color: var(--text-soft);
+  font-size: 32px;
+  color: rgba(255, 255, 255, 0.24);
   cursor: pointer;
-  transition: color 0.12s, transform 0.12s;
+  transition: color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
   line-height: 1;
-  padding: 2px;
+  padding: 4px;
+  border-radius: 8px;
+  will-change: transform, filter;
 }
 
-.star-btn:hover,
+.star-btn:hover {
+  color: #ffd700;
+  transform: scale(1.25) rotate(-8deg);
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.4));
+}
+
 .star-btn.is-filled {
-  color: #e8b84b;
+  color: #ffd700;
   transform: scale(1.15);
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.3));
 }
 
 /* ── Sobre / Stack ──────────────────────────────────── */
