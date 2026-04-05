@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import type { CatalogItem } from "@/types/catalog";
 
 const MAX_FEATURED_ITEMS = 4;
-const FEATURED_ROTATION_MS = 4200;
+const FEATURED_ROTATION_MS = 8300;
 
 interface FeaturedSliderProps {
   items: CatalogItem[];
@@ -37,7 +37,7 @@ export function FeaturedSlider({ items, onOpenModal }: FeaturedSliderProps) {
     }
 
     const timer = window.setInterval(() => {
-      setRotationIndex((currentIndex) => (currentIndex + 1) % itemsWithImage.length);
+      setRotationIndex((currentIndex) => (currentIndex + MAX_FEATURED_ITEMS) % itemsWithImage.length);
     }, FEATURED_ROTATION_MS);
 
     return () => window.clearInterval(timer);
@@ -67,7 +67,14 @@ export function FeaturedSlider({ items, onOpenModal }: FeaturedSliderProps) {
                 onClick={() => onOpenModal(item)}
                 aria-label={`Abrir destaque: ${item.title}`}
               >
-                <img src={item.backdrop || item.image} alt={item.title} className="featured-compact-image" loading="lazy" />
+                <img
+                  src={item.backdrop || item.image}
+                  alt={item.title}
+                  className="featured-compact-image"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  fetchPriority={index === 0 ? "high" : "auto"}
+                  decoding="async"
+                />
                 <div className="featured-compact-overlay" aria-hidden="true" />
                 <div className="featured-compact-content">
                   <span className="featured-tag">{item.type === "movie" ? "Filme" : "Série"}</span>

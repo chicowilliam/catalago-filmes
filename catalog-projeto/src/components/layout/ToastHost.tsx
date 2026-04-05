@@ -9,11 +9,12 @@ interface ToastItem {
 interface ToastHostProps {
   toasts: ToastItem[];
   onDismiss: (id: number) => void;
+  className?: string;
 }
 
-export function ToastHost({ toasts, onDismiss }: ToastHostProps) {
+export function ToastHost({ toasts, onDismiss, className }: ToastHostProps) {
   return (
-    <div className="toast-host" aria-live="polite" aria-atomic="true">
+    <div className={`toast-host${className ? ` ${className}` : ""}`} aria-live="polite" aria-atomic="true">
       <AnimatePresence>
         {toasts.map((toast) => (
           <motion.button

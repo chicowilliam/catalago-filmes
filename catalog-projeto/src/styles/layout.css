@@ -3,33 +3,18 @@
   height: 100vh;
   overflow-x: hidden;
   overflow-y: auto;
-  perspective: 1px;
-  transform-style: preserve-3d;
+  perspective: none;
 }
 
 .parallax-container {
-  position: absolute;
-  inset: 0 0 auto;
-  z-index: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  overflow: hidden;
-  pointer-events: none;
-  transform: translateZ(-1px) scale(2.15);
-  transform-origin: center top;
-  background:
-    radial-gradient(50% 36% at 16% 18%, rgba(229, 9, 20, 0.18), transparent 72%),
-    radial-gradient(44% 30% at 84% 12%, rgba(255, 255, 255, 0.07), transparent 78%),
-    linear-gradient(180deg, rgba(7, 10, 18, 0.96) 0%, rgba(14, 16, 28, 0.86) 54%, rgba(18, 18, 18, 0.42) 100%);
+  display: none;
 }
 
 .parallax-glow {
   position: absolute;
   border-radius: 999px;
-  filter: blur(12px);
-  opacity: 0.72;
+  filter: blur(16px);
+  opacity: 0.34;
 }
 
 .parallax-glow-primary {
@@ -37,7 +22,7 @@
   height: min(38vw, 520px);
   top: 10%;
   left: 8%;
-  background: radial-gradient(circle, rgba(229, 9, 20, 0.24) 0%, rgba(229, 9, 20, 0.08) 45%, transparent 74%);
+  background: radial-gradient(circle, rgba(229, 9, 20, 0.12) 0%, rgba(229, 9, 20, 0.04) 45%, transparent 74%);
 }
 
 .parallax-glow-secondary {
@@ -52,28 +37,27 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px);
   background-size: 34px 34px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.92), transparent 84%);
-  opacity: 0.24;
+  mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.8) 12%, transparent 84%);
+  opacity: 0.14;
 }
 
 .content-container {
   position: relative;
   z-index: 1;
   min-height: 100vh;
-  background: linear-gradient(180deg, rgba(18, 18, 18, 0.2) 0%, rgba(18, 18, 18, 0.74) 18%, rgba(18, 18, 18, 0.96) 100%);
+  background: var(--bg-primary);
 }
 
 [data-theme="light"] .content-container {
-  background: linear-gradient(180deg, rgba(244, 241, 234, 0.24) 0%, rgba(244, 241, 234, 0.76) 18%, rgba(244, 241, 234, 0.96) 100%);
+  background: var(--bg-primary);
 }
 
 .app-shell {
-  max-width: 1200px;
+  max-width: 1380px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 8px 32px 32px;
 }
 
 /* Header sticky em largura total */
@@ -81,19 +65,30 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: color-mix(in srgb, var(--bg-primary) 72%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--bg-primary);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .header-inner {
-  max-width: 1200px;
+  max-width: 1380px;
   margin: 0 auto;
-  padding: 14px 24px;
+  padding: 12px 24px;
   display: flex;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   align-items: center;
+}
+
+.header-brand {
+  flex-shrink: 0;
+}
+
+.header-nav {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
 }
 
 .brand-kicker {
@@ -120,7 +115,7 @@
 }
 
 .app-main {
-  margin-top: 18px;
+  margin-top: 0;
 }
 
 .login-screen {
@@ -311,17 +306,21 @@
   grid-area: 1 / 1;
   position: relative;
   width: 100%;
-  will-change: transform, opacity, filter;
   backface-visibility: hidden;
   background: transparent;
 }
 
 .catalog-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
   gap: 18px;
   padding: 10px 0 18px;
   overflow: visible;
+  contain: layout;
+}
+
+.catalog-grid > * {
+  height: 100%;
 }
 
 /* Dimming: apaga os outros cards enquanto um está em hover */
@@ -354,16 +353,32 @@
   }
 
   .app-shell {
-    padding: 14px;
+    padding: 8px 14px 14px;
   }
 
   .app-header {
     align-items: flex-start;
-    flex-direction: column;
+  }
+
+  .header-inner {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .header-nav {
+    order: 3;
+    flex: 0 0 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .header-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .catalog-grid {
-    grid-template-columns: repeat(auto-fill, minmax(161px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(188px, 1fr));
     gap: 12px;
     padding: 8px 0 12px;
   }

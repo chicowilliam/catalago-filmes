@@ -134,14 +134,25 @@ async function fetchTrailerId(item) {
   const cached = trailerCache.get(cacheKey);
   if (cached !== null) return cached;
 
-  try {
-    const url = `${TMDB_BASE_URL}/${mediaType}/${tmdbId}/videos?language=pt-BR`;
-    const response = await httpGetJson(url);
-    const results = Array.isArray(response.results) ? response.results : [];
+  const findTrailer = (results) =>
+    results.find((v) => v.site === "YouTube" && v.type === "Trailer") ||
+    results.find((v) => v.site === "YouTube" && v.type === "Teaser") ||
+    results.find((v) => v.site === "YouTube");
 
-    const preferred = results.find((video) => video.site === "YouTube" && video.type === "Trailer")
-      || results.find((video) => video.site === "YouTube" && video.type === "Teaser")
-      || results.find((video) => video.site === "YouTube");
+  try {
+    // 1ª tentativa: pt-BR
+    const ptUrl = `${TMDB_BASE_URL}/${mediaType}/${tmdbId}/videos?language=pt-BR`;
+    const ptResponse = await httpGetJson(ptUrl);
+    const ptResults = Array.isArray(ptResponse.results) ? ptResponse.results : [];
+    let preferred = findTrailer(ptResults);
+
+    // 2ª tentativa: en-US como fallback (a grande maioria dos trailers está em inglês)
+    if (!preferred) {
+      const enUrl = `${TMDB_BASE_URL}/${mediaType}/${tmdbId}/videos?language=en-US`;
+      const enResponse = await httpGetJson(enUrl);
+      const enResults = Array.isArray(enResponse.results) ? enResponse.results : [];
+      preferred = findTrailer(enResults);
+    }
 
     const key = preferred && preferred.key ? preferred.key : "";
     trailerCache.set(cacheKey, key);
@@ -172,6 +183,16 @@ async function attachTrailers(items, maxItems = 12) {
   );
 
   return enriched;
+}
+
+// --- Utilitário de embaralhamento (Fisher-Yates in-place) ---
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
 
 async function resolvePosterForTitle(title, type) {
@@ -245,14 +266,19 @@ async function fetchFromTmdb(type, search) {
         Promise.all(tvReqs),
       ]);
 
-      const movies = moviePages.flatMap((r) =>
+      const movies = shuffle(moviePages.flatMap((r) =>
         Array.isArray(r.results) ? r.results.map((i) => ({ ...i, media_type: "movie" })) : []
-      );
-      const series = tvPages.flatMap((r) =>
+      ));
+      const series = shuffle(tvPages.flatMap((r) =>
         Array.isArray(r.results) ? r.results.map((i) => ({ ...i, media_type: "tv" })) : []
-      );
+      ));
 
-      rawItems = movies.concat(series);
+      // Interleave movies e series para garantir distribuição igual
+      const maxLen = Math.max(movies.length, series.length);
+      for (let i = 0; i < maxLen; i++) {
+        if (i < movies.length) rawItems.push(movies[i]);
+        if (i < series.length) rawItems.push(series[i]);
+      }
     }
 
     // Mapear, filtrar sem imagem e deduplicar
@@ -299,4 +325,63 @@ async function fetchFromTmdb(type, search) {
   }
 }
 
-module.exports = { fetchFromTmdb, attachTrailers, resolvePosterForTitle };
+/**
+ * Busca um pool diversificado de itens para o FeaturedSlider.
+ * Usa trending/week + popular + top_rated de filmes e séries.
+ * Retorna 16 itens aleatórios com backdrop disponível.
+ */
+const featuredCache = new CacheStore(CACHE_TTL_MS);
+
+async function fetchFeatured() {
+  const cacheKey = "featured";
+  const cached = featuredCache.get(cacheKey);
+  if (cached) return cached;
+
+  logger.info("Buscando featured na TMDB");
+
+  try {
+    const endpoints = [
+      `${TMDB_BASE_URL}/trending/movie/week?language=pt-BR&page=1`,
+      `${TMDB_BASE_URL}/trending/tv/week?language=pt-BR&page=1`,
+      `${TMDB_BASE_URL}/movie/popular?language=pt-BR&page=1`,
+      `${TMDB_BASE_URL}/tv/popular?language=pt-BR&page=1`,
+      `${TMDB_BASE_URL}/movie/top_rated?language=pt-BR&page=1`,
+      `${TMDB_BASE_URL}/tv/top_rated?language=pt-BR&page=1`,
+      `${TMDB_BASE_URL}/movie/now_playing?language=pt-BR&page=1`,
+      `${TMDB_BASE_URL}/tv/on_the_air?language=pt-BR&page=1`,
+    ];
+
+    const responses = await Promise.all(endpoints.map((url) => httpGetJson(url).catch(() => null)));
+
+    const mediaTypes = ["movie", "tv", "movie", "tv", "movie", "tv", "movie", "tv"];
+    const seen = new Set();
+    let all = [];
+
+    responses.forEach((r, idx) => {
+      if (!r || !Array.isArray(r.results)) return;
+      r.results.forEach((item) => {
+        if (!item || !item.backdrop_path) return;
+        const tagged = { ...item, media_type: mediaTypes[idx] };
+        const key = `${mediaTypes[idx]}-${item.id}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          all.push(tagged);
+        }
+      });
+    });
+
+    // Embaralha e pega 16 com backdrop
+    const shuffled = shuffle(all).slice(0, 16);
+    const items = shuffled.map(mapItem).filter((i) => i.image && i.backdrop);
+
+    featuredCache.set(cacheKey, items);
+    return items;
+  } catch (err) {
+    const stale = featuredCache.getStale(cacheKey);
+    if (stale) return stale;
+    logger.warn("fetchFeatured falhou", { error: err.message });
+    return [];
+  }
+}
+
+module.exports = { fetchFromTmdb, attachTrailers, resolvePosterForTitle, fetchTrailerById: fetchTrailerId, fetchFeatured };

@@ -8,12 +8,19 @@ import { FilterTabs } from "@/components/catalog/FilterTabs";
 import { MovieModal } from "@/components/catalog/MovieModal";
 import { SearchBar } from "@/components/catalog/SearchBar";
 import { ToastHost } from "@/components/layout/ToastHost";
+import { AppShell } from "@/components/layout/AppShell";
 import { useCatalog } from "@/hooks/useCatalog";
+import { useFeatured } from "@/hooks/useFeatured";
 import { useModal } from "@/hooks/useModal";
 import { useRatings } from "@/hooks/useRatings";
 import { useToast } from "@/hooks/useToast";
 import type { Variants } from "framer-motion";
-import type { CatalogType } from "@/types/catalog";
+import type { CatalogItem, CatalogType } from "@/types/catalog";
+
+interface CatalogPageProps {
+  username?: string;
+  onLogout: () => void;
+}
 
 const pageSlideVariants: Variants = {
   enter: (direction: number) => ({
@@ -52,10 +59,9 @@ function getTabIndex(type: CatalogType) {
   return index === -1 ? 0 : index;
 }
 
-export function CatalogPage() {
+export function CatalogPage({ username, onLogout }: CatalogPageProps) {
   const {
     items,
-    allItems,
     activeType,
     setActiveType,
     search,
@@ -70,6 +76,8 @@ export function CatalogPage() {
     totalPages,
   } = useCatalog();
 
+  const featuredItems = useFeatured();
+
   const { getRating, setRating } = useRatings();
   const { openItem, open, close } = useModal();
   const { toasts, pushToast, removeToast } = useToast();
@@ -79,6 +87,15 @@ export function CatalogPage() {
   // ── Wipe curtain (CSS transition inline, Portal renderiza direto no body) ──
   const curtainRef  = useRef<HTMLDivElement>(null);
   const isWipingRef = useRef(false);
+
+  function scrollToTopOnTabChange() {
+    const scrollRoot = document.querySelector(".main-container") as HTMLElement | null;
+    if (scrollRoot) {
+      scrollRoot.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      return;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }
 
   /**
    * Wipe lateral com visual glass/futurista usando CSS transition + setTimeout.
@@ -102,6 +119,7 @@ export function CatalogPage() {
     if (!curtain) {
       console.warn('[wipe] curtainRef.current é null — Portal ainda não montado?');
       setActiveType(nextType);
+      scrollToTopOnTabChange();
       return;
     }
 
@@ -126,6 +144,7 @@ export function CatalogPage() {
     setTimeout(() => {
       console.log('[wipe] cobertura completa — trocando conteúdo');
       setActiveType(nextType); // troca invisível (curtain cobre tudo)
+      scrollToTopOnTabChange();
 
       // PASSO 4: inicia saída após um tick para React commitar o novo DOM
       setTimeout(() => {
@@ -145,8 +164,6 @@ export function CatalogPage() {
   };
   // ─────────────────────────────────────────────────────────────────────────
 
-  const showCatalog = activeType !== "about";
-
   function handleTabChange(nextType: CatalogType) {
     if (nextType === activeType || isWipingRef.current) return;
 
@@ -162,10 +179,7 @@ export function CatalogPage() {
     runWipe(nextType, dir);
   }
 
-  function handleToggleFavorite(itemId: number) {
-    const item = items.find((entry) => entry.id === itemId);
-    if (!item) return;
-
+  function handleToggleFavorite(item: CatalogItem) {
     const alreadyFavorite = favoriteIds.has(item.id);
     toggleFavorite(item);
     pushToast(
@@ -178,24 +192,24 @@ export function CatalogPage() {
 
   function handleRate(itemId: number, stars: number) {
     setRating(itemId, stars);
-    const item = items.find((entry) => entry.id === itemId) ?? openItem;
-    if (item) {
-      pushToast(`Você avaliou ${item.title} com ${stars} estrela${stars > 1 ? "s" : ""}.`, "info");
-    }
   }
 
+  const hasSearch = search.trim().length > 0;
+  const hasSearchResults = hasSearch && !isLoading && !error;
+
   return (
-    <>
+    <AppShell
+      username={username}
+      onLogout={onLogout}
+      nav={<FilterTabs activeType={activeType} onChange={handleTabChange} />}
+      searchSlot={<SearchBar defaultValue={search} onSearch={submitSearch} isLoading={isLoading} />}
+    >
+      <>
       <section className="catalog-page">
         {/* ── Destaque compacto — visível apenas na aba Início ── */}
-        {activeType === "all" && !isLoading && allItems.length > 0 && (
-          <FeaturedSlider items={allItems} onOpenModal={open} />
+        {activeType === "all" && !hasSearch && !isLoading && featuredItems.length > 0 && (
+          <FeaturedSlider items={featuredItems} onOpenModal={open} />
         )}
-
-        <div className="catalog-toolbar">
-          <FilterTabs activeType={activeType} onChange={handleTabChange} />
-          <SearchBar open={showCatalog} defaultValue={search} onSearch={submitSearch} isLoading={isLoading} />
-        </div>
 
         <div className="tab-transition-viewport" aria-live="polite">
           <div className="tab-transition-stage">
@@ -219,6 +233,13 @@ export function CatalogPage() {
                   <AboutSection />
                 ) : (
                   <>
+                    {hasSearchResults && (
+                      <div className="search-results-summary" aria-live="polite">
+                        {items.length > 0
+                          ? `Foram encontrados ${items.length} filme${items.length > 1 ? "s" : ""}/serie${items.length > 1 ? "s" : ""} com o titulo de "${search}".`
+                          : `Nao existe titulo com o nome "${search}", lamento.`}
+                      </div>
+                    )}
                     {activeType !== "all" && (
                       <div className="section-headline section-block">
                         <h2 className="section-title">
@@ -231,8 +252,6 @@ export function CatalogPage() {
                       isLoading={isLoading}
                       error={error}
                       onRetry={retry}
-                      favoriteIds={favoriteIds}
-                      onFavoriteToggle={(item) => handleToggleFavorite(item.id)}
                       onOpenModal={open}
                       getRating={getRating}
                     />
@@ -267,14 +286,22 @@ export function CatalogPage() {
         </div>
       </section>
 
-      <MovieModal
-        item={openItem}
-        rating={openItem != null ? getRating(openItem.id) : 0}
-        onClose={close}
-        onRate={handleRate}
-      />
-
       <ToastHost toasts={toasts} onDismiss={removeToast} />
+
+      {/* Modal renderizado via Portal direto no <body> — fora de qualquer
+          stacking context (willChange: transform no motion.div do App.tsx,
+          perspective no main-container), garantindo z-index correto */}
+      {createPortal(
+        <MovieModal
+          item={openItem}
+          rating={openItem != null ? getRating(openItem.id) : 0}
+          isFavorite={openItem != null ? favoriteIds.has(openItem.id) : false}
+          onClose={close}
+          onRate={handleRate}
+          onFavoriteToggle={handleToggleFavorite}
+        />,
+        document.body
+      )}
 
       {/* Cortina renderizada via Portal direto no <body> — fora de qualquer
           stacking context do component tree (isolation, perspective, etc.) */}
@@ -282,6 +309,7 @@ export function CatalogPage() {
         <div ref={curtainRef} className="wipe-curtain" aria-hidden="true" />,
         document.body
       )}
-    </>
+      </>
+    </AppShell>
   );
 }

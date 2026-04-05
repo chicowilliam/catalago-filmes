@@ -12,5 +12,7 @@ const catalog = require("../controllers/catalog.controller");
 
 // O catálogo é somente-leitura via TMDB. Apenas GET está disponível.
 router.get("/", catalog.list);
+router.get("/featured", catalog.featured);
+router.get("/:id/trailer", catalog.trailer);
 
 module.exports = router;

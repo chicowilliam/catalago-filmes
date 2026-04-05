@@ -8,22 +8,17 @@ const PLACEHOLDER_IMAGE =
 
 interface MovieCardProps {
   item: CatalogItem;
-  isFavorite: boolean;
   rating: number;
-  onFavoriteToggle: (item: CatalogItem) => void;
   onOpenModal: (item: CatalogItem) => void;
 }
 
 export function MovieCard({
   item,
-  isFavorite,
   rating,
-  onFavoriteToggle,
   onOpenModal,
 }: MovieCardProps) {
   const [imgSrc, setImgSrc] = useState(item.image);
   const popDelayRef = useRef(Math.round(Math.random() * 140));
-  const typeLabel = item.type === "movie" ? "Filme" : "Série";
   const synopsis = item.synopsis ?? "";
   const truncatedSynopsis = synopsis.length > 117 ? synopsis.slice(0, 117) + "…" : synopsis;
 
@@ -48,36 +43,12 @@ export function MovieCard({
       {/* ── Frente: poster + info (desaparece no hover) ── */}
       <div className="card-face-front">
         <div className="movie-media">
-          <span className="badge" aria-hidden="true">
-            {typeLabel}
-          </span>
-
-          {/* Botão favorito flutuante no canto do poster */}
-          <button
-            type="button"
-            className={`favorite-btn ${isFavorite ? "favorited" : "not-favorited"}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onFavoriteToggle(item);
-            }}
-            aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-            aria-pressed={isFavorite}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="heart-icon"
-              aria-hidden="true"
-            >
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-            </svg>
-          </button>
-
           <img
             className="movie-image"
             src={imgSrc}
             alt={item.title}
             loading="lazy"
+            decoding="async"
             onError={() => setImgSrc(PLACEHOLDER_IMAGE)}
           />
         </div>
@@ -85,7 +56,6 @@ export function MovieCard({
         {/* Info abaixo do poster */}
         <div className="card-info">
           <h3 className="movie-title">{item.title}</h3>
-          <p className="movie-meta">{typeLabel}</p>
 
           {rating > 0 && (
             <div className="star-row" aria-label={`Avaliação: ${rating} de 5 estrelas`}>
@@ -110,7 +80,6 @@ export function MovieCard({
 
       {/* ── Verso: cobre o card inteiro no hover ── */}
       <div className="card-face-back" aria-hidden="true">
-        <span className="card-back-type">{typeLabel}</span>
         <h3 className="card-back-title">{item.title}</h3>
         {(item.year || item.rating != null) && (
           <div className="card-back-meta">

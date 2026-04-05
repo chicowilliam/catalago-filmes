@@ -40,7 +40,38 @@ async function list(req, res, next) {
   }
 }
 
+/**
+ * GET /api/catalog/:id/trailer
+ * Busca o trailerId (YouTube key) de um item sob demanda.
+ * Não bloqueia o carregamento do catálogo.
+ */
+async function trailer(req, res, next) {
+  try {
+    const result = await catalogService.getTrailer(req.params.id, req.query.type);
+    res.json({ status: "success", ...result });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/catalog/featured
+ * Retorna pool diversificado para o FeaturedSlider (trending + popular + top rated).
+ */
+async function featured(req, res, next) {
+  try {
+    const result = await catalogService.listFeatured();
+    res.json({
+      status: "success",
+      data: result.data,
+      count: result.data.length,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 // Nota: o catálogo é somente-leitura via TMDB.
 // Operações de escrita (POST/PUT/DELETE) não estão disponíveis enquanto
 // a fonte de dados for a API externa.
-module.exports = { list };
+module.exports = { list, trailer, featured };

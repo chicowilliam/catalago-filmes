@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 
 import { MovieCard } from "@/components/catalog/MovieCard";
@@ -7,18 +6,11 @@ import type { CatalogItem } from "@/types/catalog";
 
 const SKELETON_COUNT = 8;
 
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.06 } },
-};
-
 interface CatalogGridProps {
   items: CatalogItem[];
   isLoading: boolean;
   error: string | null;
   onRetry: () => void;
-  favoriteIds: Set<number>;
-  onFavoriteToggle: (item: CatalogItem) => void;
   onOpenModal: (item: CatalogItem) => void;
   getRating: (id: number) => number;
 }
@@ -28,12 +20,9 @@ export function CatalogGrid({
   isLoading,
   error,
   onRetry,
-  favoriteIds,
-  onFavoriteToggle,
   onOpenModal,
   getRating,
 }: CatalogGridProps) {
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
 
   if (isLoading) {
     return (
@@ -65,29 +54,17 @@ export function CatalogGrid({
     <motion.section
       className="catalog-grid"
       aria-live="polite"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
     >
-      {items.map((item) => (
+      {items.map((item, index) => (
         <motion.div
           key={item.id}
-          initial={{ opacity: 0, y: 18 }}
-          animate={{
-            opacity: hoveredId && hoveredId !== item.id ? 0.55 : 1,
-            y: 0,
-            scale: hoveredId === item.id ? 1.06 : 1,
-          }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          onHoverStart={() => setHoveredId(item.id)}
-          onHoverEnd={() => setHoveredId(null)}
-          style={{ transformOrigin: "center top" }}
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.28, delay: Math.min(index * 0.04, 0.32), ease: "easeOut" }}
         >
           <MovieCard
             item={item}
-            isFavorite={favoriteIds.has(item.id)}
             rating={getRating(item.id)}
-            onFavoriteToggle={onFavoriteToggle}
             onOpenModal={onOpenModal}
           />
         </motion.div>

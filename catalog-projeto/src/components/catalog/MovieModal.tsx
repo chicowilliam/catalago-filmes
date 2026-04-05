@@ -1,16 +1,50 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
+import { getTrailer } from "@/services/catalogService";
+import { ToastHost } from "@/components/layout/ToastHost";
+import { useToast } from "@/hooks/useToast";
 import type { CatalogItem } from "@/types/catalog";
 
 interface MovieModalProps {
   item: CatalogItem | null;
   rating: number;
+  isFavorite: boolean;
   onClose: () => void;
   onRate: (itemId: number, stars: number) => void;
+  onFavoriteToggle: (item: CatalogItem) => void;
 }
 
-export function MovieModal({ item, rating, onClose, onRate }: MovieModalProps) {
+export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavoriteToggle }: MovieModalProps) {
+  const [trailerId, setTrailerId] = useState<string | null>(item?.trailerId ?? null);
+  const { toasts, pushToast, removeToast } = useToast();
+
+  function handleRateInsideModal(stars: number) {
+    if (!item) return;
+    onRate(item.id, stars);
+    pushToast(`Voce avaliou ${item.title} com ${stars} estrela${stars > 1 ? "s" : ""}.`, "info");
+  }
+
+  // Busca trailer sob demanda quando o modal abre
+  useEffect(() => {
+    if (!item) {
+      setTrailerId(null);
+      return;
+    }
+    // Se o item já veio com trailerId, usa diretamente
+    if (item.trailerId) {
+      setTrailerId(item.trailerId);
+      return;
+    }
+    // Senão, busca lazy
+    setTrailerId(null);
+    let cancelled = false;
+    void getTrailer({ id: item.id, type: item.type }).then((id) => {
+      if (!cancelled) setTrailerId(id);
+    });
+    return () => { cancelled = true; };
+  }, [item]);
+
   useEffect(() => {
     if (!item) return;
 
@@ -63,6 +97,23 @@ export function MovieModal({ item, rating, onClose, onRate }: MovieModalProps) {
           >
             <button
               type="button"
+              className={`favorite-btn modal-favorite-btn ${isFavorite ? "favorited" : "not-favorited"}`}
+              onClick={() => onFavoriteToggle(item)}
+              aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+              aria-pressed={isFavorite}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="heart-icon"
+                aria-hidden="true"
+              >
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
               className="modal-close"
               onClick={onClose}
               aria-label="Fechar modal"
@@ -80,17 +131,19 @@ export function MovieModal({ item, rating, onClose, onRate }: MovieModalProps) {
             </div>
             <p className="modal-synopsis">{item.synopsis}</p>
 
-            {item.trailerId && (
+            {trailerId ? (
               <div className="modal-trailer">
                 <iframe
-                  src={`https://www.youtube.com/embed/${item.trailerId}`}
+                  src={`https://www.youtube.com/embed/${trailerId}`}
                   title={`Trailer de ${item.title}`}
                   allowFullScreen
                   loading="lazy"
                   sandbox="allow-scripts allow-same-origin allow-presentation"
                 />
               </div>
-            )}
+            ) : trailerId === null && item.id ? (
+              <div className="modal-trailer-loading" aria-label="Carregando trailer..." />
+            ) : null}
 
             <div className="modal-rating">
               <p className="modal-rating-label">Sua nota:</p>
@@ -100,7 +153,7 @@ export function MovieModal({ item, rating, onClose, onRate }: MovieModalProps) {
                     key={star}
                     type="button"
                     className={`star-btn${rating >= star ? " is-filled" : ""}`}
-                    onClick={() => onRate(item.id, star)}
+                    onClick={() => handleRateInsideModal(star)}
                     aria-label={`${star} estrela${star > 1 ? "s" : ""}`}
                   >
                     {rating >= star ? "★" : "☆"}
@@ -108,6 +161,8 @@ export function MovieModal({ item, rating, onClose, onRate }: MovieModalProps) {
                 ))}
               </div>
             </div>
+
+            <ToastHost toasts={toasts} onDismiss={removeToast} className="toast-host-modal" />
           </motion.div>
         </motion.div>
       )}

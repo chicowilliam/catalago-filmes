@@ -18,3 +18,28 @@ export async function listCatalog(search = "", signal?: AbortSignal) {
     retry: true,
   });
 }
+
+export async function getTrailer(item: { id: number | string; type: string }): Promise<string | null> {
+  if (!USE_BACKEND_API) return null;
+  try {
+    const result = await apiRequest<{ status: string; trailerId: string | null }>(
+      `/api/catalog/${String(item.id)}/trailer?type=${encodeURIComponent(item.type)}`,
+      { method: "GET", retry: false }
+    );
+    return result.trailerId ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getFeatured(): Promise<{ data: import("@/types/catalog").CatalogItem[] }> {
+  if (!USE_BACKEND_API) return { data: [] };
+  try {
+    return await apiRequest<{ data: import("@/types/catalog").CatalogItem[] }>(
+      "/api/catalog/featured",
+      { method: "GET", retry: true }
+    );
+  } catch {
+    return { data: [] };
+  }
+}

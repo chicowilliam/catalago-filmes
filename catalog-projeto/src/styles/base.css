@@ -1,8 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=Sofia+Sans:wght@500;600;700;800&display=swap");
 @import url("https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css");
 
 :root {
   --font-sans: "PT Sans", "Segoe UI", sans-serif;
+  --font-featured: "Sofia Sans", "PT Sans", "Segoe UI", sans-serif;
   --bg-primary: #121212;
   --bg-secondary: #1b1b1b;
   --bg-tertiary: #242424;
@@ -32,11 +33,7 @@
   --border: var(--card-border);
 
   color: var(--text-primary);
-  background:
-    radial-gradient(1100px 520px at 88% -14%, rgba(229, 9, 20, 0.18), transparent 68%),
-    radial-gradient(920px 460px at 0% 8%, rgba(255, 255, 255, 0.04), transparent 62%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0%, transparent 22%),
-    var(--bg-primary);
+  background: var(--bg-primary);
   font-family: var(--font-sans);
 }
 
@@ -97,11 +94,7 @@ body {
   letter-spacing: 0.012em;
   color: var(--text-primary);
   overflow: hidden;
-  background:
-    radial-gradient(1100px 520px at 88% -14%, rgba(229, 9, 20, 0.18), transparent 68%),
-    radial-gradient(920px 460px at 0% 8%, rgba(255, 255, 255, 0.04), transparent 62%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.015) 0%, transparent 22%),
-    var(--bg-primary);
+  background: var(--bg-primary);
 }
 
 #root {

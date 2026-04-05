@@ -2,24 +2,33 @@ const tmdbService = require("./tmdb.service");
 const { getCatalogLimit, isTmdbEnabled } = require("../config/catalog.config");
 const AppError = require("../utils/AppError");
 
+function shuffleArr(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 function limitAndBalance(items, type, search) {
   const limit = getCatalogLimit();
-  if (!Array.isArray(items) || items.length <= limit) return items;
+  if (!Array.isArray(items) || items.length === 0) return items;
 
-  if (search || (type && type !== "all")) return items.slice(0, limit);
+  if (search || (type && type !== "all")) {
+    return shuffleArr(items).slice(0, limit);
+  }
 
-  const movieTarget = Math.ceil(limit / 2);
-  const seriesTarget = Math.floor(limit / 2);
-  const movies = items.filter((i) => i.type === "movie");
-  const series = items.filter((i) => i.type === "series");
+  const half = Math.floor(limit / 2);
+  const movies = shuffleArr(items.filter((i) => i.type === "movie")).slice(0, half);
+  const series = shuffleArr(items.filter((i) => i.type === "series")).slice(0, half);
 
-  let result = movies.slice(0, movieTarget).concat(series.slice(0, seriesTarget));
-
-  if (result.length < limit) {
-    result = result
-      .concat(movies.slice(movieTarget))
-      .concat(series.slice(seriesTarget))
-      .slice(0, limit);
+  // Interleave: 1 filme, 1 série, ...
+  const result = [];
+  const maxLen = Math.max(movies.length, series.length);
+  for (let i = 0; i < maxLen; i++) {
+    if (i < movies.length) result.push(movies[i]);
+    if (i < series.length) result.push(series[i]);
   }
 
   return result;
@@ -51,13 +60,31 @@ async function listCatalog(type, search, { page = 1, pageSize = 20 } = {}) {
   const start = (page - 1) * pageSize;
   const paged = limited.slice(start, start + pageSize);
 
-  const withTrailers = await tmdbService.attachTrailers(paged, 12);
+  // Trailers são buscados sob demanda por /api/catalog/:id/trailer
+  // para não bloquear a resposta do catálogo.
   return {
     source: stale ? "tmdb-stale" : "tmdb",
-    data: withTrailers,
+    data: paged,
     pagination: { page, pageSize, total, totalPages },
     ...(stale && { warning: "Catalogo temporariamente em cache. TMDB pode estar indisponivel." }),
   };
 }
 
-module.exports = { listCatalog };
+async function getTrailer(itemId, mediaType) {
+  if (!isTmdbEnabled()) {
+    throw new AppError("TMDB nao configurado.", 503, "TMDB_NOT_CONFIGURED");
+  }
+  // Constrói objeto esperado por fetchTrailerById: { id, type }
+  const trailerId = await tmdbService.fetchTrailerById({ id: itemId, type: mediaType });
+  return { trailerId: trailerId || null };
+}
+
+async function listFeatured() {
+  if (!isTmdbEnabled()) {
+    throw new AppError("TMDB nao configurado.", 503, "TMDB_NOT_CONFIGURED");
+  }
+  const items = await tmdbService.fetchFeatured();
+  return { data: items };
+}
+
+module.exports = { listCatalog, getTrailer, listFeatured };

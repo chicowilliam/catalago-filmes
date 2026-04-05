@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { LoginForm } from "@/components/auth/LoginForm";
-import { AppShell } from "@/components/layout/AppShell";
 import { useAuth } from "@/hooks/useAuth";
 import { CatalogPage } from "@/pages/CatalogPage";
 
@@ -47,7 +46,7 @@ function App() {
   }
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence mode="sync" initial={false}>
       {!canAccessCatalog ? (
         <motion.div
           key="login"
@@ -73,12 +72,10 @@ function App() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.56, ease: [0.22, 1, 0.36, 1] }}
         >
-          <AppShell
+          <CatalogPage
             username={auth.user?.username ?? (auth.isGuest ? "Visitante" : undefined)}
-            onLogout={auth.isAuthenticated ? auth.logout : () => { /* guest: sem logout */ }}
-          >
-            <CatalogPage />
-          </AppShell>
+            onLogout={auth.isAuthenticated ? auth.logout : () => { /* guest */ }}
+          />
         </motion.div>
       )}
     </AnimatePresence>

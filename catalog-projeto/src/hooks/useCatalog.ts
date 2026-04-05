@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ApiClientError } from "@/services/apiClient";
 
-const AUTO_REFRESH_MS = 5 * 60 * 1000; // 5 minutos
+const AUTO_REFRESH_MS = 2 * 60 * 1000; // 2 minutos
 const PAGE_SIZE = 20;
 
 import { listCatalog } from "@/services/catalogService";

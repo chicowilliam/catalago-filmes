@@ -6,7 +6,6 @@
  *  - Clique na imagem abre o modal
  *  - Estrelas aparecem quando há rating
  *  - Fallback de imagem quando a URL falha
- *  - Botão de favorito chama o callback correto
  */
 
 import { render, screen, fireEvent } from "@testing-library/react";
@@ -41,9 +40,7 @@ describe("MovieCard", () => {
     render(
       <MovieCard
         item={mockItem}
-        isFavorite={false}
         rating={0}
-        onFavoriteToggle={vi.fn()}
         onOpenModal={vi.fn()}
       />
     );
@@ -56,9 +53,7 @@ describe("MovieCard", () => {
     render(
       <MovieCard
         item={mockItem}
-        isFavorite={false}
         rating={0}
-        onFavoriteToggle={vi.fn()}
         onOpenModal={onOpenModal}
       />
     );
@@ -70,9 +65,7 @@ describe("MovieCard", () => {
     render(
       <MovieCard
         item={mockItem}
-        isFavorite={false}
         rating={3}
-        onFavoriteToggle={vi.fn()}
         onOpenModal={vi.fn()}
       />
     );
@@ -83,9 +76,7 @@ describe("MovieCard", () => {
     render(
       <MovieCard
         item={mockItem}
-        isFavorite={false}
         rating={0}
-        onFavoriteToggle={vi.fn()}
         onOpenModal={vi.fn()}
       />
     );
@@ -93,20 +84,5 @@ describe("MovieCard", () => {
     // Simula falha de carregamento da imagem
     fireEvent.error(img);
     expect(img.getAttribute("src")).toContain("data:image/svg+xml");
-  });
-
-  it("deve chamar onFavoriteToggle ao clicar no botão de favorito", () => {
-    const onFavoriteToggle = vi.fn();
-    render(
-      <MovieCard
-        item={mockItem}
-        isFavorite={false}
-        rating={0}
-        onFavoriteToggle={onFavoriteToggle}
-        onOpenModal={vi.fn()}
-      />
-    );
-    fireEvent.click(screen.getByRole("button", { name: /adicionar aos favoritos/i }));
-    expect(onFavoriteToggle).toHaveBeenCalledWith(mockItem);
   });
 });
