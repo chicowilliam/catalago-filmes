@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { useAuth } from "@/hooks/useAuth";
@@ -40,6 +41,15 @@ function CheckingScreen() {
 function App() {
   const auth = useAuth();
   const canAccessCatalog = auth.isAuthenticated || auth.isGuest;
+  const previousCanAccessRef = useRef(canAccessCatalog);
+  const [playCatalogIntro, setPlayCatalogIntro] = useState(false);
+
+  useEffect(() => {
+    if (!previousCanAccessRef.current && canAccessCatalog) {
+      setPlayCatalogIntro(true);
+    }
+    previousCanAccessRef.current = canAccessCatalog;
+  }, [canAccessCatalog]);
 
   if (auth.status === "checking") {
     return <CheckingScreen />;
@@ -69,9 +79,10 @@ function App() {
         <motion.div
           key="catalog"
           style={{ willChange: "transform, opacity" }}
-          initial={{ opacity: 0, y: 16 }}
+          initial={playCatalogIntro ? { opacity: 0, y: 18, scale: 0.985, filter: "blur(8px)" } : false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.56, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: playCatalogIntro ? 0.58 : 0.28, ease: [0.22, 1, 0.36, 1] }}
+          onAnimationComplete={() => setPlayCatalogIntro(false)}
         >
           <CatalogPage
             username={auth.user?.username ?? (auth.isGuest ? "Visitante" : undefined)}
