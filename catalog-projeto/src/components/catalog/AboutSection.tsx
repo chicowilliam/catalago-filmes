@@ -56,6 +56,12 @@ const socialLinks: SocialLink[] = [
     badgeSrc: "https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white",
   },
   {
+    id: "github",
+    label: "GitHub",
+    href: "https://github.com/chicowilliam",
+    badgeSrc: "https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white",
+  },
+  {
     id: "instagram",
     label: "Instagram",
     href: "https://www.instagram.com/williamvx__/",
@@ -75,9 +81,6 @@ export function AboutSection() {
       <div className="section-headline about-headline section-block">
         <div>
           <h2 className="section-title">Sobre mim</h2>
-          <span className="section-subtitle">
-            Apresentação profissional e visão geral do projeto.
-          </span>
         </div>
       </div>
 
@@ -131,9 +134,6 @@ export function AboutSection() {
       <div className="section-headline social-headline section-block">
         <div>
           <h3 className="section-title">Redes sociais</h3>
-          <span className="section-subtitle">
-            Contatos e perfis para networking profissional.
-          </span>
         </div>
       </div>
 
@@ -150,6 +150,13 @@ export function AboutSection() {
             <img src={social.badgeSrc} alt={`Badge ${social.label}`} loading="lazy" />
           </a>
         ))}
+        <a
+          className="social-badge-link social-text-link"
+          href="mailto:viniciuswilliam91@gmail.com"
+          aria-label="Enviar e-mail para Vinicius William"
+        >
+          viniciuswilliam91@gmail.com
+        </a>
       </div>
     </section>
   );
