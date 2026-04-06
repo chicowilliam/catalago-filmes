@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 
 import type { CatalogItem } from "@/types/catalog";
@@ -18,7 +18,7 @@ export function MovieCard({
   onOpenModal,
 }: MovieCardProps) {
   const [imgSrc, setImgSrc] = useState(item.image);
-  const popDelayRef = useRef(Math.round(Math.random() * 140));
+  const popDelay = useMemo(() => ((item.id * 37) % 141), [item.id]);
   const synopsis = item.synopsis ?? "";
   const truncatedSynopsis = synopsis.length > 117 ? synopsis.slice(0, 117) + "…" : synopsis;
 
@@ -27,7 +27,7 @@ export function MovieCard({
       className="movie-card"
       whileTap={{ scale: 0.97 }}
       transition={{ type: "spring", stiffness: 280, damping: 20 }}
-      style={{ "--card-pop-delay": `${popDelayRef.current}ms` } as React.CSSProperties}
+      style={{ "--card-pop-delay": `${popDelay}ms` } as React.CSSProperties}
       aria-label={`Abrir detalhes de ${item.title}`}
       role="button"
       tabIndex={0}

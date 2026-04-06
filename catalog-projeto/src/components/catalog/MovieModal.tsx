@@ -39,8 +39,9 @@ const modalItemVariants = {
 };
 
 export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavoriteToggle }: MovieModalProps) {
-  const [trailerId, setTrailerId] = useState<string | null>(item?.trailerId ?? null);
+  const [fetchedTrailer, setFetchedTrailer] = useState<{ itemId: number; trailerId: string | null } | null>(null);
   const { toasts, pushToast, removeToast } = useToast();
+  const trailerId = item?.trailerId ?? (item && fetchedTrailer?.itemId === item.id ? fetchedTrailer.trailerId : null);
 
   function handleRateInsideModal(stars: number) {
     if (!item) return;
@@ -50,21 +51,16 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
 
   // Busca trailer sob demanda quando o modal abre
   useEffect(() => {
-    if (!item) {
-      setTrailerId(null);
-      return;
-    }
-    // Se o item já veio com trailerId, usa diretamente
-    if (item.trailerId) {
-      setTrailerId(item.trailerId);
-      return;
-    }
-    // Senão, busca lazy
-    setTrailerId(null);
+    if (!item || item.trailerId) return undefined;
+
     let cancelled = false;
+
     void getTrailer({ id: item.id, type: item.type }).then((id) => {
-      if (!cancelled) setTrailerId(id);
+      if (!cancelled) {
+        setFetchedTrailer({ itemId: item.id, trailerId: id });
+      }
     });
+
     return () => { cancelled = true; };
   }, [item]);
 

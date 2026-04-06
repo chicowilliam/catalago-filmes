@@ -2,7 +2,8 @@ import { MovieCard } from "@/components/catalog/MovieCard";
 import { SkeletonCard } from "@/components/catalog/SkeletonCard";
 import type { CatalogItem } from "@/types/catalog";
 
-const SKELETON_COUNT = 8;
+const SKELETON_KEYS = ["skeleton-1", "skeleton-2", "skeleton-3", "skeleton-4", "skeleton-5", "skeleton-6", "skeleton-7", "skeleton-8"];
+
 
 interface CatalogGridProps {
   items: CatalogItem[];
@@ -25,9 +26,8 @@ export function CatalogGrid({
   if (isLoading) {
     return (
       <section className="catalog-grid" aria-label="Carregando catálogo" aria-busy="true">
-        {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-          // eslint-disable-next-line react/no-array-index-key
-          <SkeletonCard key={i} />
+        {SKELETON_KEYS.map((key) => (
+          <SkeletonCard key={key} />
         ))}
       </section>
     );

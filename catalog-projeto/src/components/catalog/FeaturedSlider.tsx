@@ -31,10 +31,7 @@ export function FeaturedSlider({ items, onOpenModal }: FeaturedSliderProps) {
   }, [itemsWithImage, rotationIndex]);
 
   useEffect(() => {
-    if (itemsWithImage.length <= MAX_FEATURED_ITEMS) {
-      setRotationIndex(0);
-      return;
-    }
+    if (itemsWithImage.length <= MAX_FEATURED_ITEMS) return undefined;
 
     const timer = window.setInterval(() => {
       setRotationIndex((currentIndex) => (currentIndex + MAX_FEATURED_ITEMS) % itemsWithImage.length);

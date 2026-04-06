@@ -16,6 +16,7 @@ export function useAuth() {
   const [status, setStatus] = useState<AuthStatus>(() =>
     authService.hasGuestSession() ? "guest" : "checking"
   );
+  const [catalogIntroToken, setCatalogIntroToken] = useState(0);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +58,7 @@ export function useAuth() {
       const response = await authService.login(username, password);
       setUser(response.user);
       setStatus("authenticated");
+      setCatalogIntroToken((current) => current + 1);
       return true;
     } catch (err) {
       if (err instanceof ApiClientError) {
@@ -88,6 +90,7 @@ export function useAuth() {
     setUser(null);
     setError(null);
     setStatus("guest");
+    setCatalogIntroToken((current) => current + 1);
   }, []);
 
   return useMemo(
@@ -96,6 +99,7 @@ export function useAuth() {
       user,
       error,
       isSubmitting,
+      catalogIntroToken,
       isAuthenticated: status === "authenticated",
       isGuest: status === "guest",
       login,
@@ -103,6 +107,6 @@ export function useAuth() {
       enterAsGuest,
       retrySessionCheck: checkSession,
     }),
-    [status, user, error, isSubmitting, login, logout, enterAsGuest, checkSession]
+    [status, user, error, isSubmitting, catalogIntroToken, login, logout, enterAsGuest, checkSession]
   );
 }

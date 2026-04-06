@@ -8,7 +8,9 @@ function getInitialTheme(): Theme {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === "light" || saved === "dark") return saved;
-  } catch {}
+  } catch {
+    // Ambiente sem localStorage disponível.
+  }
   return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
 }
 
@@ -22,7 +24,9 @@ export function ThemeToggle() {
     const timer = window.setTimeout(() => html.classList.remove("theme-transition"), 350);
     try {
       localStorage.setItem(STORAGE_KEY, theme);
-    } catch {}
+    } catch {
+      // Ignora falha de persistência para não quebrar UX.
+    }
     return () => window.clearTimeout(timer);
   }, [theme]);
 

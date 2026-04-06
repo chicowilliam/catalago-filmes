@@ -18,10 +18,6 @@ export function FilterTabs({ activeType, onChange }: FilterTabsProps) {
   useClickOutside(menuRef, () => setIsMenuOpen(false), isMenuOpen);
 
   useEffect(() => {
-    setIsMenuOpen(false);
-  }, [activeType]);
-
-  useEffect(() => {
     if (!isMenuOpen) return undefined;
 
     function handleKeyDown(event: KeyboardEvent) {

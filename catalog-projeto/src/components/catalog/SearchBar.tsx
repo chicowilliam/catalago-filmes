@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 
 interface SearchBarProps {
@@ -36,13 +36,13 @@ export function SearchBar({ defaultValue, onSearch, isLoading }: SearchBarProps)
     inputRef.current?.focus();
   }
 
-  function handleCollapse() {
+  const handleCollapse = useCallback(() => {
     setExpanded(false);
     if (value) {
       setValue("");
       void onSearch("");
     }
-  }
+  }, [onSearch, value]);
 
   // Fecha e limpa ao clicar fora da busca
   useEffect(() => {
@@ -59,7 +59,7 @@ export function SearchBar({ defaultValue, onSearch, isLoading }: SearchBarProps)
     return () => {
       document.removeEventListener("mousedown", handlePointerDown);
     };
-  }, [expanded, value]);
+  }, [expanded, handleCollapse]);
 
   return (
     <div className="search-toggle-wrap" ref={wrapRef}>
