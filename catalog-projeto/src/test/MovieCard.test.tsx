@@ -14,10 +14,9 @@ import type { CatalogItem } from "@/types/catalog";
 
 // Mock do framer-motion para rodar em ambiente de teste (jsdom).
 // Substitui `motion.article` por um <article> simples, sem animações.
-// Nota: usa require() síncrono dentro do vi.mock, padrão suportado pelo Vitest.
-vi.mock("framer-motion", () => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any
-  const { createElement } = require("react") as any;
+// Nota: usa import dinâmico para evitar `require` e manter compatibilidade no build TS.
+vi.mock("framer-motion", async () => {
+  const { createElement } = await import("react");
   return {
     motion: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
