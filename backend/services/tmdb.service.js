@@ -17,6 +17,13 @@ const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
 const TMDB_BACKDROP_BASE = "https://image.tmdb.org/t/p/w1280";
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
+const CIRCUIT_FAILURE_THRESHOLD = 3;
+const CIRCUIT_COOLDOWN_MS = 20 * 1000;
+
+const tmdbCircuit = {
+  failures: 0,
+  openUntil: 0,
+};
 
 // Cache em memória — válido para instância única de Node.
 // Para múltiplas instâncias (PM2 cluster / deploy horizontal), migrar para Redis.
@@ -65,6 +72,10 @@ function withApiKey(urlString) {
 // --- Requisição HTTP usando fetch nativo (disponível a partir do Node 18) ---
 
 async function httpGetJson(url) {
+  if (Date.now() < tmdbCircuit.openUntil) {
+    throw new AppError("TMDB temporariamente indisponível", 503, "TMDB_CIRCUIT_OPEN");
+  }
+
   let res;
   try {
     res = await fetch(withApiKey(url), {
@@ -72,6 +83,15 @@ async function httpGetJson(url) {
       signal: AbortSignal.timeout(getTmdbTimeoutMs()),
     });
   } catch (err) {
+    tmdbCircuit.failures += 1;
+    if (tmdbCircuit.failures >= CIRCUIT_FAILURE_THRESHOLD) {
+      tmdbCircuit.openUntil = Date.now() + CIRCUIT_COOLDOWN_MS;
+      logger.warn("tmdb_circuit_opened", {
+        failures: tmdbCircuit.failures,
+        cooldownMs: CIRCUIT_COOLDOWN_MS,
+      });
+    }
+
     if (err.name === "TimeoutError") {
       throw new AppError("Tempo limite excedido ao consultar TMDB", 504, "TMDB_TIMEOUT");
     }
@@ -79,8 +99,20 @@ async function httpGetJson(url) {
   }
 
   if (!res.ok) {
+    tmdbCircuit.failures += 1;
+    if (tmdbCircuit.failures >= CIRCUIT_FAILURE_THRESHOLD) {
+      tmdbCircuit.openUntil = Date.now() + CIRCUIT_COOLDOWN_MS;
+      logger.warn("tmdb_circuit_opened", {
+        failures: tmdbCircuit.failures,
+        cooldownMs: CIRCUIT_COOLDOWN_MS,
+        status: res.status,
+      });
+    }
     throw new AppError(`TMDB retornou status ${res.status}`, 502, "TMDB_REQUEST_ERROR");
   }
+
+  tmdbCircuit.failures = 0;
+  tmdbCircuit.openUntil = 0;
 
   try {
     return await res.json();

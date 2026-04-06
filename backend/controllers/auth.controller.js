@@ -22,9 +22,14 @@ function login(req, res, next) {
     }
 
     const user = authService.verifyCredentials(value.username, value.password);
-    req.session.user = user;
+    req.session.regenerate((sessionError) => {
+      if (sessionError) {
+        return next(new AppError("Falha ao iniciar sessão", 500, "SESSION_INIT_ERROR"));
+      }
 
-    return res.json({ status: "success", message: "Login successful", user });
+      req.session.user = user;
+      return res.json({ status: "success", message: "Login successful", user });
+    });
   } catch (err) {
     next(err);
   }

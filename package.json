@@ -34,6 +34,7 @@
     "joi": "^17.9.0"
   },
   "devDependencies": {
+    "caniuse-lite": "^1.0.30001786",
     "jest": "^29.0.0",
     "jsdom": "^29.0.1",
     "nodemon": "^3.1.14",

@@ -8,6 +8,7 @@ const logger = require("../utils/logger");
 const isProduction = process.env.NODE_ENV === "production";
 
 function errorHandler(err, req, res, next) {
+  const requestId = req.id || "unknown";
   const status = err.status || 500;
   const timestamp = err.timestamp || new Date().toISOString();
 
@@ -24,9 +25,22 @@ function errorHandler(err, req, res, next) {
 
   // Log sempre no servidor — em produção inclui stack para debugging
   if (!isOperational) {
-    logger.error("Unexpected error", { status, stack: err.stack || err.message });
+    logger.error("unexpected_error", {
+      requestId,
+      status,
+      stack: err.stack || err.message,
+      path: req.originalUrl,
+      method: req.method,
+    });
   } else {
-    logger.error(`${code} (${status}): ${err.message}`);
+    logger.error("operational_error", {
+      requestId,
+      status,
+      code,
+      message: err.message,
+      path: req.originalUrl,
+      method: req.method,
+    });
   }
 
   res.status(status).json({
@@ -34,6 +48,7 @@ function errorHandler(err, req, res, next) {
     code,
     message,
     timestamp,
+    requestId,
   });
 }
 

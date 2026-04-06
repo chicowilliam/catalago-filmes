@@ -6,10 +6,13 @@ const helmet = require("helmet");
 const path = require("path");
 const fs = require("fs");
 const rateLimit = require("express-rate-limit");
+const { version } = require("./package.json");
 
 const authRoutes = require("./backend/routes/auth.routes");
 const catalogRoutes = require("./backend/routes/catalog.routes");
 const errorHandler = require("./backend/middlewares/errorHandler");
+const requestContext = require("./backend/middlewares/requestContext");
+const requestLogger = require("./backend/middlewares/requestLogger");
 
 const app = express();
 const isProduction = process.env.NODE_ENV === "production";
@@ -74,6 +77,8 @@ app.use(helmet({
    referrerPolicy: { policy: "strict-origin-when-cross-origin" }
 }));
 app.use(globalLimiter);
+app.use(requestContext);
+app.use(requestLogger);
 
 // Validação: exigir Content-Type correto em POST/PUT
 app.use((req, res, next) => {
@@ -93,10 +98,12 @@ app.use((req, res, next) => {
 app.use(
   session({
       name: "portfolio.sid",
+      proxy: isProduction,
     secret: process.env.SESSION_SECRET,
     resave: false,
       saveUninitialized: false,
       unset: "destroy",
+      rolling: true,
       cookie: {
          httpOnly: true,
          sameSite: "lax",
@@ -109,23 +116,18 @@ app.use(
 /* =========================
    ROTAS DA API
 ========================= */
-const catalogLimiter = rateLimit({
-   windowMs: 60 * 1000,
-   limit: 20,
-   standardHeaders: "draft-8",
-   legacyHeaders: false,
-   message: { status: "error", code: "RATE_LIMIT_EXCEEDED", message: "Muitas requisicoes ao catalogo. Aguarde antes de tentar novamente." }
-});
-
 app.use("/api/auth", authRoutes);
-app.use("/api/catalog", catalogLimiter, catalogRoutes);
+app.use("/api/catalog", catalogRoutes);
 
 app.get("/api/health", (req, res) => {
    res.json({
       status: "success",
       service: "catalog-api",
+      version,
+      environment: process.env.NODE_ENV || "development",
       uptime: process.uptime(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      requestId: req.id
    });
 });
 
