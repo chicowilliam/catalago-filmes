@@ -308,6 +308,179 @@
   display: none;
 }
 
+.filter-nav-shell {
+  position: relative;
+}
+
+.filter-tabs-desktop {
+  display: flex;
+}
+
+.filter-menu-mobile {
+  display: none;
+  position: relative;
+}
+
+.filter-menu-toggle {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 14px;
+  border: 1px solid color-mix(in srgb, var(--border) 82%, rgba(255, 255, 255, 0.06));
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--panel) 92%, transparent), color-mix(in srgb, var(--panel-2) 95%, transparent));
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  text-align: left;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+}
+
+.filter-menu-toggle-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.filter-menu-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.filter-menu-current {
+  font-family: var(--font-featured);
+  font-size: 1rem;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.filter-menu-icon {
+  width: 20px;
+  height: 16px;
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.filter-menu-icon span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--text-primary);
+  transition: transform 200ms ease, opacity 200ms ease;
+}
+
+.filter-menu-toggle.is-open .filter-menu-icon span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.filter-menu-toggle.is-open .filter-menu-icon span:nth-child(2) {
+  opacity: 0;
+}
+
+.filter-menu-toggle.is-open .filter-menu-icon span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.filter-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  border: 0;
+  background: rgba(3, 5, 8, 0.54);
+  z-index: 1200;
+}
+
+.filter-menu-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(86vw, 360px);
+  padding: 18px 14px 16px;
+  background:
+    radial-gradient(680px 260px at 104% -10%, rgba(229, 9, 20, 0.22), transparent 72%),
+    linear-gradient(180deg, color-mix(in srgb, var(--panel) 94%, #030303), color-mix(in srgb, var(--panel-2) 96%, #020202));
+  border-left: 1px solid color-mix(in srgb, var(--border) 80%, rgba(255, 255, 255, 0.08));
+  box-shadow: -18px 0 34px rgba(0, 0, 0, 0.36);
+  z-index: 1210;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.filter-menu-drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 86%, rgba(255, 255, 255, 0.03));
+}
+
+.filter-menu-drawer-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.filter-menu-close {
+  width: 36px;
+  height: 36px;
+  border: 1px solid color-mix(in srgb, var(--border) 84%, rgba(255, 255, 255, 0.08));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--panel-2) 90%, transparent);
+  color: var(--text-primary);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.filter-menu-list {
+  display: grid;
+  gap: 6px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.filter-menu-item {
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.filter-menu-item:hover,
+.filter-menu-item:focus-visible {
+  background: color-mix(in srgb, var(--panel-2) 88%, rgba(255, 255, 255, 0.04));
+  outline: none;
+}
+
+.filter-menu-item.is-active {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 18%, transparent), transparent 80%);
+}
+
+.filter-menu-item-mark {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
 .filter-btn {
   position: relative;
   z-index: 1;
@@ -360,6 +533,21 @@
 .filter-btn.is-active {
   color: var(--text);
   text-shadow: 0 0 10px rgba(225, 230, 236, 0.12);
+}
+
+@media (max-width: 720px) {
+  .filter-tabs-desktop {
+    display: none;
+  }
+
+  .filter-menu-mobile {
+    display: block;
+    width: min(100%, 320px);
+  }
+}
+
+body.mobile-menu-open {
+  overflow: hidden;
 }
 
 .movie-card {
