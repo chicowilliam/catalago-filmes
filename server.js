@@ -146,6 +146,8 @@ app.get("/api/health", async (req, res) => {
       timestamp: new Date().toISOString(),
       requestId: req.id,
       ...(deepTmdbCheck ? { dependencies } : {}),
+      requestId: req.id,
+      ...(deepTmdbCheck ? { dependencies } : {}),
    });
 });
 
