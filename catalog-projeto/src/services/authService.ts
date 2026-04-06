@@ -7,6 +7,56 @@ import type {
 } from "@/types/auth";
 
 const LOCAL_SESSION_KEY = "catalogx.local.auth";
+const BACKEND_SESSION_HINT_KEY = "catalogx.backend.session.hint";
+const GUEST_SESSION_KEY = "catalogx.guest.session";
+
+function hasBackendSessionHint() {
+  try {
+    return localStorage.getItem(BACKEND_SESSION_HINT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function setBackendSessionHint() {
+  try {
+    localStorage.setItem(BACKEND_SESSION_HINT_KEY, "1");
+  } catch {
+    // ignora falha de storage
+  }
+}
+
+function clearBackendSessionHint() {
+  try {
+    localStorage.removeItem(BACKEND_SESSION_HINT_KEY);
+  } catch {
+    // ignora falha de storage
+  }
+}
+
+export function hasGuestSession(): boolean {
+  try {
+    return localStorage.getItem(GUEST_SESSION_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function markGuestSession(): void {
+  try {
+    localStorage.setItem(GUEST_SESSION_KEY, "1");
+  } catch {
+    // ignora falha de storage
+  }
+}
+
+export function clearGuestSession(): void {
+  try {
+    localStorage.removeItem(GUEST_SESSION_KEY);
+  } catch {
+    // ignora falha de storage
+  }
+}
 
 function readLocalSession(): AuthUser | null {
   try {
@@ -54,25 +104,35 @@ export async function login(username: string, password: string) {
     return response;
   }
 
-  return apiRequest<LoginSuccessResponse>("/api/auth/login", {
+  const response = await apiRequest<LoginSuccessResponse>("/api/auth/login", {
     method: "POST",
     body: JSON.stringify({ username, password }),
   });
+
+  setBackendSessionHint();
+  return response;
 }
 
 export async function logout() {
   if (!USE_BACKEND_API) {
     clearLocalSession();
+    clearBackendSessionHint();
+    clearGuestSession();
     return { status: "success", message: "Logout local realizado." };
   }
 
-  return apiRequest<{ status: "success"; message: string }>(
-    "/api/auth/logout",
-    {
-      method: "POST",
-      body: JSON.stringify({}),
-    }
-  );
+  try {
+    return await apiRequest<{ status: "success"; message: string }>(
+      "/api/auth/logout",
+      {
+        method: "POST",
+        body: JSON.stringify({}),
+      }
+    );
+  } finally {
+    clearBackendSessionHint();
+    clearGuestSession();
+  }
 }
 
 export async function me() {
@@ -86,7 +146,19 @@ export async function me() {
     return response;
   }
 
-  return apiRequest<MeSuccessResponse>("/api/auth/me", {
-    method: "GET",
-  });
+  // Evita chamada inicial ao /me quando ainda nao houve login nesta instancia.
+  if (!hasBackendSessionHint()) {
+    throw new ApiClientError("Nao autenticado.", 401, "UNAUTHORIZED");
+  }
+
+  try {
+    return await apiRequest<MeSuccessResponse>("/api/auth/me", {
+      method: "GET",
+    });
+  } catch (err) {
+    if (err instanceof ApiClientError && err.status === 401) {
+      clearBackendSessionHint();
+    }
+    throw err;
+  }
 }

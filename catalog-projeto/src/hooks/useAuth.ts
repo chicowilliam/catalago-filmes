@@ -13,7 +13,9 @@ interface LoginInput {
 }
 
 export function useAuth() {
-  const [status, setStatus] = useState<AuthStatus>("checking");
+  const [status, setStatus] = useState<AuthStatus>(() =>
+    authService.hasGuestSession() ? "guest" : "checking"
+  );
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +45,7 @@ export function useAuth() {
   }, []);
 
   useEffect(() => {
+    if (authService.hasGuestSession()) return; // já restaurado do localStorage
     void checkSession();
   }, [checkSession]);
 
@@ -81,6 +84,7 @@ export function useAuth() {
   }, []);
 
   const enterAsGuest = useCallback(() => {
+    authService.markGuestSession();
     setUser(null);
     setError(null);
     setStatus("guest");
