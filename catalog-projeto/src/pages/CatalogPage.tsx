@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
+import { startTransition, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { AboutSection } from "@/components/catalog/AboutSection";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
 import { FeaturedSlider } from "@/components/catalog/FeaturedSlider";
+import { FeaturedSkeleton } from "@/components/catalog/FeaturedSkeleton";
 import { FilterTabs } from "@/components/catalog/FilterTabs";
 import { MovieModal } from "@/components/catalog/MovieModal";
 import { SearchBar } from "@/components/catalog/SearchBar";
@@ -117,8 +118,7 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
   const runWipe = (nextType: CatalogType, dir: number) => {
     const curtain = curtainRef.current;
     if (!curtain) {
-      console.warn('[wipe] curtainRef.current é null — Portal ainda não montado?');
-      setActiveType(nextType);
+      startTransition(() => { setActiveType(nextType); });
       scrollToTopOnTabChange();
       return;
     }
@@ -128,39 +128,39 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
     const startX   = dir >= 0 ? '110%' : '-110%';
     const endX     = dir >= 0 ? '-110%' : '110%';
 
-    console.log(`[wipe] iniciando: ${activeType} → ${nextType} dir=${dir}`);
     isWipingRef.current = true;
 
-    // PASSO 1: posição instantânea fora da tela (sem transição)
-    curtain.style.transition = 'none';
-    curtain.style.transform  = `translateX(${startX})`;
-    void curtain.offsetHeight; // força reflow — garante que o browser "viu" o passo 1
+    // rAF: reflow fora do event handler → INP mede apenas o microtask síncrono
+    requestAnimationFrame(() => {
+      // PASSO 1: posição instantânea fora da tela (sem transição)
+      curtain.style.transition = 'none';
+      curtain.style.transform  = `translateX(${startX})`;
+      void curtain.offsetHeight; // força reflow fora do event handler
 
-    // PASSO 2: desliza para cobrir a tela
-    curtain.style.transition = `transform ${ENTER_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`;
-    curtain.style.transform  = 'translateX(0%)';
+      // PASSO 2: desliza para cobrir a tela
+      curtain.style.transition = `transform ${ENTER_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+      curtain.style.transform  = 'translateX(0%)';
 
-    // PASSO 3: após cobertura completa, troca o conteúdo
-    setTimeout(() => {
-      console.log('[wipe] cobertura completa — trocando conteúdo');
-      setActiveType(nextType); // troca invisível (curtain cobre tudo)
-      scrollToTopOnTabChange();
-
-      // PASSO 4: inicia saída após um tick para React commitar o novo DOM
+      // PASSO 3: após cobertura completa, troca o conteúdo (não-urgente)
       setTimeout(() => {
-        void curtain.offsetHeight;
-        curtain.style.transition = `transform ${EXIT_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`;
-        curtain.style.transform  = `translateX(${endX})`;
+        startTransition(() => { setActiveType(nextType); }); // re-render não bloqueia input
+        scrollToTopOnTabChange();
 
-        // PASSO 5: limpeza — reseta para off-screen padrão
+        // PASSO 4: inicia saída após um tick para React commitar o novo DOM
         setTimeout(() => {
-          curtain.style.transition = 'none';
-          curtain.style.transform  = 'translateX(110%)';
-          isWipingRef.current = false;
-          console.log('[wipe] concluído');
-        }, EXIT_MS + 60);
-      }, 16); // 1 frame (16ms)
-    }, ENTER_MS);
+          void curtain.offsetHeight;
+          curtain.style.transition = `transform ${EXIT_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+          curtain.style.transform  = `translateX(${endX})`;
+
+          // PASSO 5: limpeza
+          setTimeout(() => {
+            curtain.style.transition = 'none';
+            curtain.style.transform  = 'translateX(110%)';
+            isWipingRef.current = false;
+          }, EXIT_MS + 60);
+        }, 16);
+      }, ENTER_MS);
+    });
   };
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -207,8 +207,10 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
       <>
       <section className="catalog-page">
         {/* ── Destaque compacto — visível apenas na aba Início ── */}
-        {activeType === "all" && !hasSearch && !isLoading && featuredItems.length > 0 && (
-          <FeaturedSlider items={featuredItems} onOpenModal={open} />
+        {activeType === "all" && !hasSearch && (
+          isLoading
+            ? <FeaturedSkeleton />
+            : featuredItems.length > 0 && <FeaturedSlider items={featuredItems} onOpenModal={open} />
         )}
 
         <div className="tab-transition-viewport" aria-live="polite">
