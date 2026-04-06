@@ -1403,6 +1403,38 @@ body.modal-open .card-face-back {
   display: block;
 }
 
+.modal-trailer-fallback {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-trailer-fallback-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.modal-trailer-fallback-copy {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--text-soft);
+}
+
+.modal-trailer-fallback-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.modal-trailer-fallback-actions .secondary-btn {
+  text-decoration: none;
+}
+
 .modal-rating {
   display: grid;
   gap: 10px;

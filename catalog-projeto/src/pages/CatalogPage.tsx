@@ -1,6 +1,5 @@
-import { startTransition, useRef, useState } from "react";
+import { startTransition, useRef } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion } from "framer-motion";
 import { AboutSection } from "@/components/catalog/AboutSection";
 import { CatalogGrid } from "@/components/catalog/CatalogGrid";
 import { FeaturedSlider } from "@/components/catalog/FeaturedSlider";
@@ -8,47 +7,17 @@ import { FeaturedSkeleton } from "@/components/catalog/FeaturedSkeleton";
 import { FilterTabs } from "@/components/catalog/FilterTabs";
 import { MovieModal } from "@/components/catalog/MovieModal";
 import { SearchBar } from "@/components/catalog/SearchBar";
-import { ToastHost } from "@/components/layout/ToastHost";
 import { AppShell } from "@/components/layout/AppShell";
 import { useCatalog } from "@/hooks/useCatalog";
 import { useFeatured } from "@/hooks/useFeatured";
 import { useModal } from "@/hooks/useModal";
 import { useRatings } from "@/hooks/useRatings";
-import { useToast } from "@/hooks/useToast";
-import type { Variants } from "framer-motion";
 import type { CatalogItem, CatalogType } from "@/types/catalog";
 
 interface CatalogPageProps {
   username?: string;
   onLogout: () => void;
 }
-
-const pageSlideVariants: Variants = {
-  enter: (direction: number) => ({
-    x: 0,
-    rotateY: 0,
-    scale: 0.995,
-    opacity: 0,
-    zIndex: 1,
-    transformOrigin: direction >= 0 ? "100% 50%" : "0% 50%",
-  }),
-  center: {
-    x: 0,
-    rotateY: 0,
-    scale: 1,
-    opacity: 1,
-    zIndex: 2,
-    transformOrigin: "50% 50%",
-  },
-  exit: (direction: number) => ({
-    x: 0,
-    rotateY: 0,
-    scale: [1, 1, 0.995],
-    opacity: [1, 1, 0],
-    zIndex: 1,
-    transformOrigin: direction >= 0 ? "0% 50%" : "100% 50%",
-  }),
-};
 
 const TAB_ORDER: CatalogType[] = ["all", "movie", "series", "favorites", "about"];
 
@@ -78,8 +47,6 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
 
   const { getRating, setRating } = useRatings();
   const { openItem, open, close } = useModal();
-  const { toasts, pushToast, removeToast } = useToast();
-  const [direction, setDirection] = useState(1);
   const previousTabIndexRef = useRef(getTabIndex(activeType));
 
   // ── Wipe curtain (CSS transition inline, Portal renderiza direto no body) ──
@@ -169,7 +136,6 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
     const dir          = nextIndex > previousIndex ? 1 : -1;
 
     if (nextIndex !== previousIndex) {
-      setDirection(dir);
       previousTabIndexRef.current = nextIndex;
     }
 
@@ -177,14 +143,7 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
   }
 
   function handleToggleFavorite(item: CatalogItem) {
-    const alreadyFavorite = favoriteIds.has(item.id);
     toggleFavorite(item);
-    pushToast(
-      alreadyFavorite
-        ? `${item.title} removido dos favoritos`
-        : `${item.title} adicionado aos favoritos`,
-      "success"
-    );
   }
 
   function handleRate(itemId: number, stars: number) {
@@ -210,82 +169,60 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
             : featuredItems.length > 0 && <FeaturedSlider items={featuredItems} onOpenModal={open} />
         )}
 
-        <div className="tab-transition-viewport" aria-live="polite">
-          <div className="tab-transition-stage">
-            <AnimatePresence initial={false} mode="sync" custom={direction}>
-              <motion.div
-                key={activeType}
-                className="tab-transition-panel"
-                custom={direction}
-                variants={pageSlideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{
-                  rotateY: { duration: 0.23, ease: [0.4, 0, 0.2, 1] },
-                  scale: { duration: 0.24, times: [0, 0.5, 1], ease: [0.4, 0, 0.2, 1] },
-                  opacity: { duration: 0.24, times: [0, 0.5, 1], ease: "linear" },
-                  filter: { duration: 0.24, times: [0, 0.5, 1], ease: [0.4, 0, 0.2, 1] },
-                }}
-              >
-                {activeType === "about" ? (
-                  <AboutSection />
-                ) : (
-                  <>
-                    {hasSearchResults && (
-                      <div className="search-results-summary" aria-live="polite">
-                        {items.length > 0
-                          ? `Foram encontrados ${items.length} filme${items.length > 1 ? "s" : ""}/serie${items.length > 1 ? "s" : ""} com o titulo de "${search}".`
-                          : `Nao existe titulo com o nome "${search}", lamento.`}
-                      </div>
-                    )}
-                    {activeType !== "all" && (
-                      <div className="section-headline section-block">
-                        <h2 className="section-title">
-                          {activeType === "movie" ? "Filmes" : activeType === "series" ? "Séries" : "Favoritos"}
-                        </h2>
-                      </div>
-                    )}
-                    <CatalogGrid
-                      items={items}
-                      isLoading={isLoading}
-                      error={error}
-                      onRetry={retry}
-                      onOpenModal={open}
-                      getRating={getRating}
-                    />
-                    {!isLoading && !error && totalPages > 1 && (
-                      <nav className="catalog-pagination" aria-label="Paginação do catálogo">
-                        <button
-                          className="pagination-btn"
-                          disabled={page === 1}
-                          onClick={() => setPage(page - 1)}
-                          aria-label="Página anterior"
-                        >
-                          ←
-                        </button>
-                        <span className="pagination-info">
-                          {page} / {totalPages}
-                        </span>
-                        <button
-                          className="pagination-btn"
-                          disabled={page === totalPages}
-                          onClick={() => setPage(page + 1)}
-                          aria-label="Próxima página"
-                        >
-                          →
-                        </button>
-                      </nav>
-                    )}
-                  </>
-                )}
-              </motion.div>
-            </AnimatePresence>
-          </div>
+        <div aria-live="polite">
+          {activeType === "about" ? (
+            <AboutSection />
+          ) : (
+            <>
+              {hasSearchResults && (
+                <div className="search-results-summary" aria-live="polite">
+                  {items.length > 0
+                    ? `Foram encontrados ${items.length} filme${items.length > 1 ? "s" : ""}/serie${items.length > 1 ? "s" : ""} com o titulo de "${search}".`
+                    : `Nao existe titulo com o nome "${search}", lamento.`}
+                </div>
+              )}
+              {activeType !== "all" && (
+                <div className="section-headline section-block">
+                  <h2 className="section-title">
+                    {activeType === "movie" ? "Filmes" : activeType === "series" ? "Séries" : "Favoritos"}
+                  </h2>
+                </div>
+              )}
+              <CatalogGrid
+                items={items}
+                isLoading={isLoading}
+                error={error}
+                onRetry={retry}
+                onOpenModal={open}
+                getRating={getRating}
+              />
+              {!isLoading && !error && totalPages > 1 && (
+                <nav className="catalog-pagination" aria-label="Paginação do catálogo">
+                  <button
+                    className="pagination-btn"
+                    disabled={page === 1}
+                    onClick={() => setPage(page - 1)}
+                    aria-label="Página anterior"
+                  >
+                    ←
+                  </button>
+                  <span className="pagination-info">
+                    {page} / {totalPages}
+                  </span>
+                  <button
+                    className="pagination-btn"
+                    disabled={page === totalPages}
+                    onClick={() => setPage(page + 1)}
+                    aria-label="Próxima página"
+                  >
+                    →
+                  </button>
+                </nav>
+              )}
+            </>
+          )}
         </div>
       </section>
-
-      <ToastHost toasts={toasts} onDismiss={removeToast} />
 
       {/* Modal renderizado via Portal direto no <body> — fora de qualquer
           stacking context (willChange: transform no motion.div do App.tsx,

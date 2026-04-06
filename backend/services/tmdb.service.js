@@ -190,7 +190,6 @@ async function fetchTrailerId(item) {
     trailerCache.set(cacheKey, key);
     return key;
   } catch {
-    trailerCache.set(cacheKey, "");
     return "";
   }
 }

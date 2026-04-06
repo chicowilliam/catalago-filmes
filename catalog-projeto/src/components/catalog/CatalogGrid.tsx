@@ -54,7 +54,7 @@ export function CatalogGrid({
         <div
           key={item.id}
           className="catalog-item"
-          style={{ "--item-delay": `${Math.min(index * 38, 300)}ms` } as React.CSSProperties}
+          style={{ "--item-delay": `${Math.min(index * 12, 120)}ms` } as React.CSSProperties}
         >
           <MovieCard
             item={item}

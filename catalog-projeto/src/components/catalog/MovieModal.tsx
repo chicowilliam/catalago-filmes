@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, cubicBezier } from "framer-motion";
 
 import { getTrailer } from "@/services/catalogService";
@@ -39,9 +39,52 @@ const modalItemVariants = {
 };
 
 export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavoriteToggle }: MovieModalProps) {
-  const [fetchedTrailer, setFetchedTrailer] = useState<{ itemId: number; trailerId: string | null } | null>(null);
+  const [fetchedTrailers, setFetchedTrailers] = useState<Record<string, string | null>>({});
+  const [isTrailerLoading, setIsTrailerLoading] = useState(false);
   const { toasts, pushToast, removeToast } = useToast();
-  const trailerId = item?.trailerId ?? (item && fetchedTrailer?.itemId === item.id ? fetchedTrailer.trailerId : null);
+  const itemKey = item ? `${item.type}:${String(item.id)}` : null;
+  const fetchedTrailer = itemKey ? fetchedTrailers[itemKey] : undefined;
+  const trailerId = item?.trailerId || fetchedTrailer || null;
+  const trailerSearchUrl = useMemo(() => {
+    if (!item) return "";
+    return `https://www.youtube.com/results?search_query=${encodeURIComponent(`${item.title} trailer oficial`)}`;
+  }, [item]);
+
+  async function fetchTrailerForItem(nextItem: CatalogItem, force = false) {
+    const nextKey = `${nextItem.type}:${String(nextItem.id)}`;
+    if (!force && nextKey in fetchedTrailers) return;
+
+    setIsTrailerLoading(true);
+    try {
+      const id = await getTrailer({ id: nextItem.id, type: nextItem.type });
+      setFetchedTrailers((prev) => ({ ...prev, [nextKey]: id ?? null }));
+    } finally {
+      setIsTrailerLoading(false);
+    }
+  }
+
+  async function handleRetryTrailer() {
+    if (!item) return;
+    const currentKey = `${item.type}:${String(item.id)}`;
+    setFetchedTrailers((prev) => {
+      const next = { ...prev };
+      delete next[currentKey];
+      return next;
+    });
+    await fetchTrailerForItem(item, true);
+  }
+
+  function handleFavoriteInsideModal() {
+    if (!item) return;
+    const alreadyFavorite = isFavorite;
+    onFavoriteToggle(item);
+    pushToast(
+      alreadyFavorite
+        ? `${item.title} removido dos favoritos`
+        : `${item.title} adicionado aos favoritos`,
+      "success"
+    );
+  }
 
   function handleRateInsideModal(stars: number) {
     if (!item) return;
@@ -53,15 +96,11 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
   useEffect(() => {
     if (!item || item.trailerId) return undefined;
 
-    let cancelled = false;
+    void (async () => {
+      await fetchTrailerForItem(item);
+    })();
 
-    void getTrailer({ id: item.id, type: item.type }).then((id) => {
-      if (!cancelled) {
-        setFetchedTrailer({ itemId: item.id, trailerId: id });
-      }
-    });
-
-    return () => { cancelled = true; };
+    return undefined;
   }, [item]);
 
   useEffect(() => {
@@ -123,7 +162,7 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
             <motion.button
               type="button"
               className={`favorite-btn modal-favorite-btn ${isFavorite ? "favorited" : "not-favorited"}`}
-              onClick={() => onFavoriteToggle(item)}
+              onClick={handleFavoriteInsideModal}
               aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
               aria-pressed={isFavorite}
               variants={modalItemVariants}
@@ -168,16 +207,42 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
               {trailerId ? (
                 <motion.div className="modal-trailer" variants={modalItemVariants}>
                   <iframe
-                    src={`https://www.youtube.com/embed/${trailerId}`}
+                    src={`https://www.youtube.com/embed/${trailerId}?autoplay=0&modestbranding=1&rel=0&playsinline=1`}
                     title={`Trailer de ${item.title}`}
                     allowFullScreen
                     loading="lazy"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     sandbox="allow-scripts allow-same-origin allow-presentation"
                   />
                 </motion.div>
-              ) : trailerId === null && item.id ? (
+              ) : isTrailerLoading && item.id ? (
                 <motion.div className="modal-trailer-loading" aria-label="Carregando trailer..." variants={modalItemVariants} />
               ) : null}
+
+              {!trailerId && !isTrailerLoading && item && (
+                <motion.div className="modal-trailer-fallback" variants={modalItemVariants}>
+                  <p className="modal-trailer-fallback-title">Trailer indisponível no momento</p>
+                  <p className="modal-trailer-fallback-copy">Você pode tentar novamente ou abrir no YouTube.</p>
+                  <div className="modal-trailer-fallback-actions">
+                    <button
+                      type="button"
+                      className="secondary-btn"
+                      onClick={handleRetryTrailer}
+                    >
+                      Tentar novamente
+                    </button>
+                    <a
+                      href={trailerSearchUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="secondary-btn"
+                    >
+                      Abrir no YouTube
+                    </a>
+                  </div>
+                </motion.div>
+              )}
 
               <motion.div className="modal-rating" variants={modalItemVariants}>
                 <p className="modal-rating-label">Sua nota:</p>

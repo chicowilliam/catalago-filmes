@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import type { CatalogItem } from "@/types/catalog";
 
 const MAX_FEATURED_ITEMS = 4;
-const FEATURED_ROTATION_MS = 8300;
+const FEATURED_ROTATION_MS = 15000;
 
 interface FeaturedSliderProps {
   items: CatalogItem[];

@@ -24,7 +24,7 @@ export async function getTrailer(item: { id: number | string; type: string }): P
   try {
     const result = await apiRequest<{ status: string; trailerId: string | null }>(
       `/api/catalog/${String(item.id)}/trailer?type=${encodeURIComponent(item.type)}`,
-      { method: "GET", retry: false }
+      { method: "GET", retry: true }
     );
     return result.trailerId ?? null;
   } catch {
