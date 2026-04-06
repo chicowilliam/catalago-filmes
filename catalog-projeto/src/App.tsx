@@ -70,7 +70,7 @@ function App() {
         <motion.div
           key={`catalog-${auth.catalogIntroToken}`}
           style={{ willChange: "transform, opacity" }}
-          initial={playCatalogIntro ? { opacity: 0, y: 18, scale: 0.985, filter: "blur(8px)" } : false}
+          initial={playCatalogIntro ? { opacity: 0, y: 18, scale: 0.985 } : false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: playCatalogIntro ? 0.58 : 0.28, ease: [0.22, 1, 0.36, 1] }}
         >
