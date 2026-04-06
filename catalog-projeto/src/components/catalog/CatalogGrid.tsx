@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-
 import { MovieCard } from "@/components/catalog/MovieCard";
 import { SkeletonCard } from "@/components/catalog/SkeletonCard";
 import type { CatalogItem } from "@/types/catalog";
@@ -51,24 +49,20 @@ export function CatalogGrid({
   }
 
   return (
-    <motion.section
-      className="catalog-grid"
-      aria-live="polite"
-    >
+    <section className="catalog-grid" aria-live="polite">
       {items.map((item, index) => (
-        <motion.div
+        <div
           key={item.id}
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, delay: Math.min(index * 0.04, 0.32), ease: "easeOut" }}
+          className="catalog-item"
+          style={{ "--item-delay": `${Math.min(index * 38, 300)}ms` } as React.CSSProperties}
         >
           <MovieCard
             item={item}
             rating={getRating(item.id)}
             onOpenModal={onOpenModal}
           />
-        </motion.div>
+        </div>
       ))}
-    </motion.section>
+    </section>
   );
 }

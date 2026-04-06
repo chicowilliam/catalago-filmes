@@ -147,10 +147,10 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
     linear-gradient(0deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-  background-size: 44px 44px;
-  opacity: 0.22;
+  background-size: 52px 52px;
+  opacity: 0.14;
   mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.78) 0%, transparent 76%);
   pointer-events: none;
 }
@@ -169,8 +169,8 @@
   border-radius: 20px;
   border: 1px solid color-mix(in srgb, var(--card-border) 72%, rgba(255, 255, 255, 0.2));
   background: color-mix(in srgb, var(--surface-glass) 92%, transparent);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
   padding: 30px 28px 24px;
   display: flex;
   flex-direction: column;
@@ -407,6 +407,23 @@
 
 .catalog-grid > * {
   height: 100%;
+}
+
+.catalog-item {
+  height: 100%;
+  animation: cardEnter 0.26s ease-out both;
+  animation-delay: var(--item-delay, 0ms);
+}
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* Dimming: apaga os outros cards enquanto um está em hover */

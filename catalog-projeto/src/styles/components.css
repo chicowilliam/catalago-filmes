@@ -838,6 +838,33 @@ body.modal-open .card-face-back {
   }
 }
 
+/* ── Featured Skeleton (reserva espaço para evitar CLS) ─ */
+.featured-skeleton-shell {
+  pointer-events: none;
+}
+
+.featured-skeleton-title {
+  height: 22px;
+  width: clamp(180px, 40%, 340px);
+  border-radius: 6px;
+  background: var(--panel-2);
+}
+
+.featured-skeleton-card {
+  background: var(--panel-2);
+  cursor: default;
+  animation: skeletonShimmer 1.6s ease-in-out infinite;
+}
+
+.featured-skeleton-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%);
+  animation: skeletonShimmer 1.6s ease-in-out infinite;
+}
+
 /* ── Featured Compact Grid ───────────────────────────── */
 .hero-panel {
   margin-bottom: 20px;
