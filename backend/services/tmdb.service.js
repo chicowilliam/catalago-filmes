@@ -416,4 +416,24 @@ async function fetchFeatured() {
   }
 }
 
-module.exports = { fetchFromTmdb, attachTrailers, resolvePosterForTitle, fetchTrailerById: fetchTrailerId, fetchFeatured };
+async function pingTmdb() {
+  if (!(process.env.TMDB_BEARER_TOKEN || process.env.TMDB_API_KEY)) {
+    throw new AppError(
+      "Catalogo local foi removido. Configure TMDB_BEARER_TOKEN ou TMDB_API_KEY no ambiente.",
+      503,
+      "TMDB_NOT_CONFIGURED"
+    );
+  }
+
+  await httpGetJson(`${TMDB_BASE_URL}/configuration`);
+  return { status: "up" };
+}
+
+module.exports = {
+  fetchFromTmdb,
+  attachTrailers,
+  resolvePosterForTitle,
+  fetchTrailerById: fetchTrailerId,
+  fetchFeatured,
+  pingTmdb,
+};

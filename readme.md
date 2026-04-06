@@ -13,8 +13,13 @@
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
+- [Deploy on Vercel](#deploy-on-vercel)
+- [Production Checklist](#production-checklist)
 - [Environment Variables](#environment-variables)
 - [API Reference](#api-reference)
+- [Healthcheck](#healthcheck)
+- [CI Pipeline](#ci-pipeline)
+- [Troubleshooting](#troubleshooting)
 - [Testing](#testing)
 - [Project Structure](#project-structure)
 - [Author](#author)
@@ -116,6 +121,46 @@
    npm --prefix catalog-projeto run dev
    ```
 
+## 🚢 Deploy on Vercel
+
+1. Build local final validation:
+
+   ```bash
+   npm --prefix catalog-projeto run lint
+   npm --prefix catalog-projeto run build
+   npm test -- --runInBand
+   ```
+
+2. Configure Vercel environment variables:
+   - `ADMIN_USERNAME`
+   - `ADMIN_PASSWORD`
+   - `SESSION_SECRET`
+   - `TMDB_BEARER_TOKEN` (recommended) or `TMDB_API_KEY`
+   - `NODE_ENV=production`
+
+3. Deploy:
+
+   ```bash
+   vercel --prod
+   ```
+
+4. Post-deploy smoke tests:
+   - Login admin
+   - Entrar como visitante
+   - Busca e filtros
+   - Abrir modal e trailer
+   - Favoritos e logout
+
+## ✅ Production Checklist
+
+- [ ] `npm --prefix catalog-projeto run lint` sem erros
+- [ ] `npm --prefix catalog-projeto run build` sem erros
+- [ ] `npm test -- --runInBand` sem falhas
+- [ ] `/api/health` responde `status: success`
+- [ ] `/api/health?deep=tmdb` responde dependência TMDB corretamente
+- [ ] Variáveis de ambiente configuradas no Vercel
+- [ ] Fluxos principais validados em mobile e desktop
+
 ## ⚙️ Environment Variables
 
 Create a `.env` file in the project root:
@@ -178,6 +223,34 @@ SESSION_SECRET=a_long_random_secret_string
   }
 }
 ```
+
+## 🩺 Healthcheck
+
+- `GET /api/health`
+  - Retorna status da API, versão, ambiente, uptime e `requestId`.
+
+- `GET /api/health?deep=tmdb`
+  - Faz checagem opcional da integração com TMDB.
+  - Retorna campo `dependencies.tmdb.status` como `up` ou `down`.
+
+## 🧩 CI Pipeline
+
+GitHub Actions em [ .github/workflows/ci.yml ](.github/workflows/ci.yml):
+
+- Job `Backend Tests`: instala dependências e roda Jest.
+- Job `Frontend Lint Build Test`: lint, build e testes do React.
+- Dispara em `push` e `pull_request` para `master`.
+
+## 🛠️ Troubleshooting
+
+- Erro de build TS em `ignoreDeprecations`:
+  - manter `"ignoreDeprecations": "5.0"` com TypeScript atual.
+
+- Falha de testes por módulo ausente em ambiente local:
+  - rodar `npm install` na raiz para sincronizar `package-lock.json`.
+
+- Healthcheck profundo retorna TMDB indisponível:
+  - conferir `TMDB_BEARER_TOKEN`/`TMDB_API_KEY` e permissões da conta TMDB.
 
 ## 🧪 Testing
 

@@ -13,6 +13,7 @@ const catalogRoutes = require("./backend/routes/catalog.routes");
 const errorHandler = require("./backend/middlewares/errorHandler");
 const requestContext = require("./backend/middlewares/requestContext");
 const requestLogger = require("./backend/middlewares/requestLogger");
+const { pingTmdb } = require("./backend/services/tmdb.service");
 
 const app = express();
 const isProduction = process.env.NODE_ENV === "production";
@@ -119,7 +120,23 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/catalog", catalogRoutes);
 
-app.get("/api/health", (req, res) => {
+app.get("/api/health", async (req, res) => {
+   const deepTmdbCheck = String(req.query.deep || "") === "tmdb";
+   const dependencies = {};
+
+   if (deepTmdbCheck) {
+      try {
+         await pingTmdb();
+         dependencies.tmdb = { status: "up" };
+      } catch (err) {
+         dependencies.tmdb = {
+            status: "down",
+            code: err.code || "TMDB_HEALTHCHECK_ERROR",
+            message: err.message || "Falha ao validar TMDB"
+         };
+      }
+   }
+
    res.json({
       status: "success",
       service: "catalog-api",
@@ -127,7 +144,8 @@ app.get("/api/health", (req, res) => {
       environment: process.env.NODE_ENV || "development",
       uptime: process.uptime(),
       timestamp: new Date().toISOString(),
-      requestId: req.id
+      requestId: req.id,
+      ...(deepTmdbCheck ? { dependencies } : {}),
    });
 });
 
