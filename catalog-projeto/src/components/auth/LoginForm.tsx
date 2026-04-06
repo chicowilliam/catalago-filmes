@@ -38,7 +38,11 @@ export function LoginForm({ isSubmitting, error, onSubmit, onGuestAccess }: Logi
   return (
     <section className="login-screen" aria-label="Tela de login">
       <form className="login-box" onSubmit={handleSubmit}>
-        <h1 className="login-title">Acesso</h1>
+        <div className="login-brand">
+          <p className="login-kicker">Catalogo X</p>
+          <h1 className="login-title">Bem-vindo de volta</h1>
+          <p className="login-subtitle">Entre para continuar sua experiência no catálogo.</p>
+        </div>
         <input
           id="username"
           value={username}
@@ -81,6 +85,8 @@ export function LoginForm({ isSubmitting, error, onSubmit, onGuestAccess }: Logi
           <span className="login-text">Acessar como visitante</span>
           <span className="login-spinner" aria-hidden="true" />
         </button>
+
+        <p className="login-helper">No modo visitante, seus favoritos ficam salvos neste navegador.</p>
 
         <p className="login-error">{error ?? ""}</p>
       </form>
