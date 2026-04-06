@@ -8,14 +8,34 @@ const PAGE_SIZE = 20;
 import { listCatalog } from "@/services/catalogService";
 import type { CatalogItem, CatalogType } from "@/types/catalog";
 
+const FAVORITES_STORAGE_KEY = "catalogx.cache.favorites";
+const LEGACY_FAVORITES_STORAGE_KEY = "favorites";
+
 function readFavoriteIds() {
   try {
-    const raw = localStorage.getItem("favorites");
+    const raw =
+      localStorage.getItem(FAVORITES_STORAGE_KEY) ??
+      localStorage.getItem(LEGACY_FAVORITES_STORAGE_KEY);
+
     if (!raw) return new Set<number>();
-    const parsed = JSON.parse(raw) as CatalogItem[];
-    const ids = parsed
-      .map((item) => item?.id)
-      .filter((id): id is number => Number.isInteger(id));
+
+    const parsed = JSON.parse(raw) as number[] | CatalogItem[];
+
+    const ids = Array.isArray(parsed)
+      ? parsed
+          .map((entry) =>
+            typeof entry === "number"
+              ? entry
+              : typeof entry === "object" && entry != null
+                ? entry.id
+                : null
+          )
+          .filter((id): id is number => Number.isInteger(id))
+      : [];
+
+    // Migra silenciosamente para o formato novo por IDs.
+    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(ids));
+
     return new Set(ids);
   } catch {
     return new Set<number>();
@@ -134,15 +154,15 @@ export function useCatalog() {
           next.add(item.id);
         }
         try {
-          const favItems = items.filter((i) => next.has(i.id));
-          localStorage.setItem("favorites", JSON.stringify(favItems));
+          const favoriteIdList = Array.from(next);
+          localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriteIdList));
         } catch {
           /* ignora erros de storage */
         }
         return next;
       });
     },
-    [items]
+    []
   );
 
   return {
