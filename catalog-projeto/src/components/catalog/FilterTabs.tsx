@@ -2,14 +2,17 @@ import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CATALOG_FILTERS } from "@/config/catalogFilters";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import type { CatalogType } from "@/types/catalog";
 
 interface FilterTabsProps {
   activeType: CatalogType;
   onChange: (value: CatalogType) => void;
+  username?: string;
+  onLogout?: () => void;
 }
 
-export function FilterTabs({ activeType, onChange }: FilterTabsProps) {
+export function FilterTabs({ activeType, onChange, username, onLogout }: FilterTabsProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
@@ -112,6 +115,25 @@ export function FilterTabs({ activeType, onChange }: FilterTabsProps) {
                 exit={{ x: "100%" }}
                 transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
               >
+                <div className="filter-menu-user-top">
+                  {username ? <span className="user-chip filter-menu-user-chip">{username}</span> : <span />}
+                  <div className="filter-menu-user-actions">
+                    <ThemeToggle />
+                    {onLogout ? (
+                      <button
+                        type="button"
+                        className="secondary-btn filter-menu-logout"
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          onLogout();
+                        }}
+                      >
+                        Sair
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+
                 <div className="filter-menu-drawer-head">
                   <div className="filter-menu-drawer-copy">
                     <span className="filter-menu-label">Navegação</span>

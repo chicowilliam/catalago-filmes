@@ -43,7 +43,7 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
     totalPages,
   } = useCatalog();
 
-  const featuredItems = useFeatured();
+  const { items: featuredItems, isLoading: isFeaturedLoading } = useFeatured();
 
   const { getRating, setRating } = useRatings();
   const { openItem, open, close } = useModal();
@@ -157,14 +157,14 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
     <AppShell
       username={username}
       onLogout={onLogout}
-      nav={<FilterTabs activeType={activeType} onChange={handleTabChange} />}
+      nav={<FilterTabs activeType={activeType} onChange={handleTabChange} username={username} onLogout={onLogout} />}
       searchSlot={<SearchBar defaultValue={search} onSearch={submitSearch} isLoading={isLoading} />}
     >
       <>
       <section className="catalog-page">
         {/* ── Destaque compacto — visível apenas na aba Início ── */}
         {activeType === "all" && !hasSearch && (
-          isLoading
+          isFeaturedLoading
             ? <FeaturedSkeleton />
             : featuredItems.length > 0 && <FeaturedSlider items={featuredItems} onOpenModal={open} />
         )}

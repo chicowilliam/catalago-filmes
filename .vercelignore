@@ -1,0 +1,25 @@
+# Pasta duplicada da versão antiga do projeto
+catalago-filmes/
+
+# Cobertura de testes e artefatos de CI
+coverage/
+reports/
+
+# Logs e arquivos temporários de dev
+*.log
+server_test.log
+jest-*.txt
+jest-*.json
+check-result.txt
+dep-check*.txt
+
+# Docs internos que não são necessários em produção
+DIAGNÓSTICO_IMAGENS.md
+PORTFOLIO_MAP.md
+REVISÃO_SEGURANÇA_RESUMO.md
+SEGURANÇA.md
+
+# Variáveis de ambiente locais (nunca devem ir ao servidor)
+.env
+.env.local
+.env*.local

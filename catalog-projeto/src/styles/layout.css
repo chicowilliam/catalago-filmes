@@ -464,11 +464,10 @@
   }
 
   .header-inner {
-    grid-template-columns: 1fr auto;
-    grid-template-areas:
-      "brand actions"
-      "nav nav";
+    grid-template-columns: auto auto 1fr;
+    grid-template-areas: "brand nav actions";
     gap: 8px;
+    align-items: center;
   }
 
   .header-brand {
@@ -478,12 +477,18 @@
   .header-nav {
     grid-area: nav;
     justify-content: flex-start;
-    width: 100%;
+    width: auto;
   }
 
   .header-actions {
     grid-area: actions;
     gap: 8px;
+  }
+
+  .header-actions > .user-chip,
+  .header-actions > .secondary-btn,
+  .header-actions > .theme-toggle {
+    display: none;
   }
 
   .catalog-grid {
