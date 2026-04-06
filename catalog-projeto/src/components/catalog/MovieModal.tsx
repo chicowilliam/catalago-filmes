@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, cubicBezier } from "framer-motion";
 
 import { getTrailer } from "@/services/catalogService";
@@ -50,7 +50,7 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
     return `https://www.youtube.com/results?search_query=${encodeURIComponent(`${item.title} trailer oficial`)}`;
   }, [item]);
 
-  async function fetchTrailerForItem(nextItem: CatalogItem, force = false) {
+  const fetchTrailerForItem = useCallback(async (nextItem: CatalogItem, force = false) => {
     const nextKey = `${nextItem.type}:${String(nextItem.id)}`;
     if (!force && nextKey in fetchedTrailers) return;
 
@@ -61,7 +61,7 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
     } finally {
       setIsTrailerLoading(false);
     }
-  }
+  }, [fetchedTrailers]);
 
   async function handleRetryTrailer() {
     if (!item) return;
@@ -101,7 +101,7 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
     })();
 
     return undefined;
-  }, [item]);
+  }, [item, fetchTrailerForItem]);
 
   useEffect(() => {
     if (!item) {
