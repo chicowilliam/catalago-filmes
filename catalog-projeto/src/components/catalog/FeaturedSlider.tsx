@@ -57,9 +57,9 @@ export function FeaturedSlider({ items, onOpenModal }: FeaturedSliderProps) {
             <motion.div
               key={item.id}
               className="featured-compact-item"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 3 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.06 }}
+              transition={{ duration: 0.16, delay: index * 0.025, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
               <button
                 type="button"

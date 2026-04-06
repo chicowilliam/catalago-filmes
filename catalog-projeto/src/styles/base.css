@@ -83,7 +83,7 @@ html.theme-transition *::after {
 
 html {
   height: 100%;
-  scroll-behavior: auto;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -147,12 +147,13 @@ h3,
 @keyframes featureReveal {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.984);
+    transform: translateY(6px) scale(0.988);
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+}
 }
 
 @keyframes heroBackgroundDrift {
