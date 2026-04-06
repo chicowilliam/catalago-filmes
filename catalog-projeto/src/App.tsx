@@ -50,13 +50,13 @@ function App() {
       {!canAccessCatalog ? (
         <motion.div
           key="login"
-          initial={{ opacity: 0, y: 8 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           style={{ willChange: "opacity" }}
           exit={{
             opacity: 0,
           }}
-          transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
+          transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
           <LoginForm
             isSubmitting={auth.isSubmitting}

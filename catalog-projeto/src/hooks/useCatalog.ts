@@ -10,6 +10,50 @@ import type { CatalogItem, CatalogType } from "@/types/catalog";
 
 const FAVORITES_STORAGE_KEY = "catalogx.cache.favorites";
 const LEGACY_FAVORITES_STORAGE_KEY = "favorites";
+const CATALOG_CACHE_KEY = "catalogx.cache.catalog.all";
+const CATALOG_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutos
+
+interface CatalogCachePayload {
+  data: CatalogItem[];
+  source: string;
+  cachedAt: number;
+}
+
+function readCatalogCache(): CatalogCachePayload | null {
+  try {
+    const raw = localStorage.getItem(CATALOG_CACHE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as Partial<CatalogCachePayload>;
+    if (!parsed || !Array.isArray(parsed.data) || typeof parsed.cachedAt !== "number") {
+      return null;
+    }
+
+    const isExpired = Date.now() - parsed.cachedAt > CATALOG_CACHE_TTL_MS;
+    if (isExpired) return null;
+
+    return {
+      data: parsed.data,
+      source: typeof parsed.source === "string" ? parsed.source : "cache",
+      cachedAt: parsed.cachedAt,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeCatalogCache(data: CatalogItem[], source: string) {
+  try {
+    const payload: CatalogCachePayload = {
+      data,
+      source,
+      cachedAt: Date.now(),
+    };
+    localStorage.setItem(CATALOG_CACHE_KEY, JSON.stringify(payload));
+  } catch {
+    // ignora falhas de storage
+  }
+}
 
 function readFavoriteIds() {
   try {
@@ -43,14 +87,17 @@ function readFavoriteIds() {
 }
 
 export function useCatalog() {
-  const [items, setItems] = useState<CatalogItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [initialCatalogCache] = useState<CatalogCachePayload | null>(() => readCatalogCache());
+  const [items, setItems] = useState<CatalogItem[]>(() => initialCatalogCache?.data ?? []);
+  const [isLoading, setIsLoading] = useState(() => !initialCatalogCache);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [activeType, setActiveType] = useState<CatalogType>("all");
-  const [source, setSource] = useState<string>("local");
+  const [source, setSource] = useState<string>(() => initialCatalogCache?.source ?? "local");
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(
+    () => (initialCatalogCache ? new Date(initialCatalogCache.cachedAt) : null)
+  );
   const [page, setPage] = useState(1);
 
   const fetchCatalog = useCallback(async (searchValue = "", silent = false, signal?: AbortSignal) => {
@@ -64,6 +111,9 @@ export function useCatalog() {
       setItems(response.data);
       setSource(response.source);
       setLastUpdated(new Date());
+      if (!searchValue.trim()) {
+        writeCatalogCache(response.data, response.source);
+      }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
       if (err instanceof ApiClientError) {
@@ -87,9 +137,20 @@ export function useCatalog() {
   useEffect(() => {
     setFavoriteIds(readFavoriteIds());
     const controller = new AbortController();
+    if (initialCatalogCache?.data.length) {
+      const timer = window.setTimeout(() => {
+        void fetchCatalog("", true, controller.signal);
+      }, 320);
+
+      return () => {
+        window.clearTimeout(timer);
+        controller.abort();
+      };
+    }
+
     void fetchCatalog("", false, controller.signal);
     return () => controller.abort();
-  }, [fetchCatalog]);
+  }, [fetchCatalog, initialCatalogCache]);
 
   // Reseta a página ao mudar tipo ou busca
   useEffect(() => {
