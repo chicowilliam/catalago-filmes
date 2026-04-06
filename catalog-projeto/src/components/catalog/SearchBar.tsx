@@ -25,6 +25,17 @@ export function SearchBar({ defaultValue, onSearch, isLoading }: SearchBarProps)
     }
   }, [expanded]);
 
+  // Busca automática ao digitar (debounce 350ms)
+  useEffect(() => {
+    if (!expanded) return;
+    // só dispara se o valor mudou em relação ao que já está aplicado
+    if (value.trim() === defaultValue.trim()) return;
+    const timer = window.setTimeout(() => {
+      void onSearch(value.trim());
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [value, expanded, onSearch, defaultValue]);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     await onSearch(value.trim());
