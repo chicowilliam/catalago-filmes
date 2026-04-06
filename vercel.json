@@ -15,7 +15,8 @@
   ],
   "functions": {
     "api/index.js": {
-      "includeFiles": "backend/data/**"
+      "includeFiles": "backend/data/**",
+      "maxDuration": 10
     }
   },
   "routes": [
