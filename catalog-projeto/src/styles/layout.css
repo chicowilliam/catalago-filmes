@@ -504,7 +504,8 @@
 
   .header-actions > .user-chip,
   .header-actions > .secondary-btn,
-  .header-actions > .theme-toggle {
+  .header-actions > .theme-toggle,
+  .header-actions > .search-toggle-wrap {
     display: none;
   }
 

@@ -465,6 +465,28 @@
   gap: 8px;
 }
 
+.filter-menu-search {
+  margin-top: -2px;
+  margin-bottom: 4px;
+}
+
+.filter-menu-search .search-toggle-wrap {
+  width: 100%;
+}
+
+.filter-menu-search .search-toggle-btn {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 14px;
+  justify-content: flex-start;
+  padding-left: 12px;
+}
+
+.filter-menu-search .search-box-expanded {
+  width: 100%;
+  border-radius: 14px;
+}
+
 .filter-menu-user-chip {
   font-weight: 700;
 }

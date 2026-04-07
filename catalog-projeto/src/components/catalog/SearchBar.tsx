@@ -6,9 +6,10 @@ interface SearchBarProps {
   defaultValue: string;
   onSearch: (value: string) => Promise<void>;
   isLoading?: boolean;
+  placeholder?: string;
 }
 
-export function SearchBar({ defaultValue, onSearch, isLoading }: SearchBarProps) {
+export function SearchBar({ defaultValue, onSearch, isLoading, placeholder = "Buscar filmes e series" }: SearchBarProps) {
   const [expanded, setExpanded] = useState(false);
   const [value, setValue] = useState(defaultValue);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -95,7 +96,7 @@ export function SearchBar({ defaultValue, onSearch, isLoading }: SearchBarProps)
               type="search"
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              placeholder="Buscar filmes e séries..."
+              placeholder={placeholder}
               className="search-input"
               aria-label="Buscar no catálogo"
             />

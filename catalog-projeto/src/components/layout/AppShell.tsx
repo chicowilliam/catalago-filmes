@@ -25,12 +25,15 @@ export function AppShell({ children, username, onLogout, nav, searchSlot }: AppS
     }
 
     function handleScroll() {
+      const scrollHost = containerRef.current;
+      if (!scrollHost) return;
+
       if (!isDesktopViewport()) {
         setIsDesktopNavVisible(true);
         return;
       }
 
-      const currentScrollTop = container.scrollTop;
+      const currentScrollTop = scrollHost.scrollTop;
       const delta = currentScrollTop - lastScrollTopRef.current;
 
       if (currentScrollTop <= 18 || delta < -7) {

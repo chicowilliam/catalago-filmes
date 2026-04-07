@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CATALOG_FILTERS } from "@/config/catalogFilters";
 import { useClickOutside } from "@/hooks/useClickOutside";
@@ -10,9 +11,10 @@ interface FilterTabsProps {
   onChange: (value: CatalogType) => void;
   username?: string;
   onLogout?: () => void;
+  mobileSearchSlot?: ReactNode;
 }
 
-export function FilterTabs({ activeType, onChange, username, onLogout }: FilterTabsProps) {
+export function FilterTabs({ activeType, onChange, username, onLogout, mobileSearchSlot }: FilterTabsProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
@@ -133,6 +135,8 @@ export function FilterTabs({ activeType, onChange, username, onLogout }: FilterT
                     ) : null}
                   </div>
                 </div>
+
+                {mobileSearchSlot ? <div className="filter-menu-search">{mobileSearchSlot}</div> : null}
 
                 <div className="filter-menu-drawer-head">
                   <div className="filter-menu-drawer-copy">

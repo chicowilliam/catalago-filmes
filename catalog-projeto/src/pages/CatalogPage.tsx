@@ -157,8 +157,30 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
     <AppShell
       username={username}
       onLogout={onLogout}
-      nav={<FilterTabs activeType={activeType} onChange={handleTabChange} username={username} onLogout={onLogout} />}
-      searchSlot={<SearchBar defaultValue={search} onSearch={submitSearch} isLoading={isLoading} />}
+      nav={(
+        <FilterTabs
+          activeType={activeType}
+          onChange={handleTabChange}
+          username={username}
+          onLogout={onLogout}
+          mobileSearchSlot={
+            <SearchBar
+              defaultValue={search}
+              onSearch={submitSearch}
+              isLoading={isLoading}
+              placeholder="Buscar filmes e series"
+            />
+          }
+        />
+      )}
+      searchSlot={
+        <SearchBar
+          defaultValue={search}
+          onSearch={submitSearch}
+          isLoading={isLoading}
+          placeholder="Buscar filmes e series"
+        />
+      }
     >
       <>
       <section className="catalog-page">
