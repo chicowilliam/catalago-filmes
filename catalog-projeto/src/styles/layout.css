@@ -176,6 +176,20 @@
   pointer-events: none;
 }
 
+.checking-featured-shell {
+  width: min(1080px, 100%);
+  z-index: 1;
+}
+
+.checking-featured-frame {
+  width: min(1040px, 100%);
+  margin: 0 auto;
+}
+
+.checking-featured-frame .hero-panel {
+  max-width: none;
+  margin: 0;
+}
 .login-box {
   position: relative;
   width: min(370px, 100%);
@@ -196,6 +210,11 @@
   transition: transform 0.48s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.38s ease;
 }
 
+@media (max-width: 640px) {
+  .checking-featured-shell {
+    width: min(560px, 100%);
+  }
+}
 .login-brand {
   display: grid;
   gap: 6px;
