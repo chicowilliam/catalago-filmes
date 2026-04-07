@@ -134,7 +134,7 @@ export function useCatalog() {
         setIsLoading(false);
       }
     }
-  }, [locale, text, text.apiFailure, text.catalogLoadError, text.catalogQueryError, text.tmdbNotConfigured]);
+  }, [locale, text]);
 
   useEffect(() => {
     setFavoriteIds(readFavoriteIds());

@@ -1152,7 +1152,8 @@ body.modal-open .card-face-back {
 
 /* ── Featured Compact Grid ───────────────────────────── */
 .hero-panel {
-  margin-bottom: 20px;
+  max-width: 1040px;
+  margin: 0 auto 20px;
   animation: featureReveal 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
 
@@ -1165,7 +1166,7 @@ body.modal-open .card-face-back {
 }
 
 .featured-compact-shell {
-  padding: clamp(14px, 2vw, 20px);
+  padding: clamp(12px, 1.8vw, 18px);
   background: var(--panel);
   color: #fff;
   border-radius: 18px;
@@ -1176,7 +1177,7 @@ body.modal-open .card-face-back {
   align-items: baseline;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .featured-compact-title {
@@ -1192,7 +1193,7 @@ body.modal-open .card-face-back {
 .featured-compact-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 .featured-compact-item {
@@ -1210,7 +1211,7 @@ body.modal-open .card-face-back {
   padding: 0;
   text-align: left;
   background: var(--panel-2);
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 8 / 5;
   transform: translate3d(0, 0, 0) scale(1);
   transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -1248,7 +1249,7 @@ body.modal-open .card-face-back {
   left: 0;
   right: 0;
   z-index: 1;
-  padding: 16px 12px 12px;
+  padding: 14px 11px 10px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
