@@ -1152,8 +1152,6 @@ body.modal-open .card-face-back {
 
 /* ── Featured Compact Grid ───────────────────────────── */
 .hero-panel {
-  max-width: 1120px;
-  margin: 0 auto 20px;
   margin-bottom: 20px;
   animation: featureReveal 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
@@ -1167,7 +1165,7 @@ body.modal-open .card-face-back {
 }
 
 .featured-compact-shell {
-  padding: clamp(12px, 1.6vw, 16px);
+  padding: clamp(14px, 2vw, 20px);
   background: var(--panel);
   color: #fff;
   border-radius: 18px;
@@ -1178,7 +1176,7 @@ body.modal-open .card-face-back {
   align-items: baseline;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .featured-compact-title {
@@ -1194,7 +1192,7 @@ body.modal-open .card-face-back {
 .featured-compact-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 12px;
 }
 
 .featured-compact-item {
@@ -1212,7 +1210,7 @@ body.modal-open .card-face-back {
   padding: 0;
   text-align: left;
   background: var(--panel-2);
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 3 / 2;
   transform: translate3d(0, 0, 0) scale(1);
   transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -1250,11 +1248,11 @@ body.modal-open .card-face-back {
   left: 0;
   right: 0;
   z-index: 1;
-  padding: 14px 11px 10px;
+  padding: 16px 12px 12px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 5px;
+  gap: 6px;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
 }
 
@@ -1327,18 +1325,20 @@ body.modal-open .card-face-back {
 }
 
 @media (max-width: 640px) {
-  .hero-panel {
-    max-width: none;
-    margin: 0 0 20px;
-  }
-
   .featured-compact-shell {
     padding: 12px;
   }
 
   .featured-compact-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
+  }
+
+  /* 3 itens: 2 em cima + 1 centralizado embaixo */
+  .featured-compact-item:nth-child(3) {
+    grid-column: 1 / -1;
+    width: min(72%, 320px);
+    justify-self: center;
   }
 
   .featured-compact-card-btn {
