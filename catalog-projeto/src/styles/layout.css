@@ -57,7 +57,7 @@
 .app-shell {
   max-width: 1380px;
   margin: 0 auto;
-  padding: 8px 32px 32px;
+  padding: 4px 32px 32px;
 }
 
 /* Header sticky em largura total */
@@ -73,7 +73,7 @@
 .header-inner {
   max-width: 1380px;
   margin: 0 auto;
-  padding: 12px 24px;
+  padding: 8px 24px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
@@ -90,6 +90,19 @@
   display: flex;
   justify-content: center;
   min-width: 0;
+  transition: opacity 220ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.header-nav.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.header-nav.is-hidden {
+  opacity: 0;
+  transform: translateY(-12px);
+  pointer-events: none;
 }
 
 .brand-kicker {
@@ -478,6 +491,10 @@
     grid-area: nav;
     justify-content: flex-start;
     width: auto;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    transition: none;
   }
 
   .header-actions {

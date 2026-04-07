@@ -310,6 +310,7 @@
 
 .filter-nav-shell {
   position: relative;
+  transform: translateY(-4px);
 }
 
 .filter-tabs-desktop {
@@ -561,6 +562,10 @@
 }
 
 @media (max-width: 720px) {
+  .filter-nav-shell {
+    transform: none;
+  }
+
   .filter-tabs-desktop {
     display: none;
   }
