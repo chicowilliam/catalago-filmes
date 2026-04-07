@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { FeaturedSkeleton } from "@/components/catalog/FeaturedSkeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { CatalogPage } from "@/pages/CatalogPage";
@@ -10,26 +11,14 @@ function CheckingScreen() {
   return (
     <section className="login-screen">
       <motion.div
-        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}
+        style={{ width: "min(1040px, 100%)", display: "flex", flexDirection: "column", alignItems: "stretch" }}
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
       >
-        {/* Spinner animado */}
-        <motion.span
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: "50%",
-            border: "3px solid var(--border)",
-            borderTopColor: "var(--accent, #e50914)",
-            display: "block",
-          }}
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
-        />
+        <FeaturedSkeleton />
         <motion.p
-          style={{ color: "var(--text-muted, #888)", fontSize: 14 }}
+          style={{ color: "var(--text-muted, #888)", fontSize: 14, textAlign: "center" }}
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
         >

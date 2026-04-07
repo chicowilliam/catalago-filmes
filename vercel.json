@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "installCommand": "npm install",
+  "installCommand": "npm install --omit=dev --ignore-scripts; npm --prefix catalog-projeto install",
   "buildCommand": "npm --prefix catalog-projeto run build",
   "outputDirectory": "catalog-projeto/dist",
   "functions": {
