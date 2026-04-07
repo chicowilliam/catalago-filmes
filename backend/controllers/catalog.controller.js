@@ -17,7 +17,7 @@ const AppError = require("../utils/AppError");
  */
 async function list(req, res, next) {
   try {
-    const { type, search } = req.query;
+    const { type, search, lang } = req.query;
     if (type && !["movie", "series", "all"].includes(type)) {
       throw new AppError('Tipo inválido. Use "movie", "series" ou "all"', 400, "INVALID_TYPE");
     }
@@ -25,7 +25,7 @@ async function list(req, res, next) {
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const pageSize = Math.min(100, Math.max(1, parseInt(req.query.pageSize, 10) || 20));
 
-    const result = await catalogService.listCatalog(type, search, { page, pageSize });
+    const result = await catalogService.listCatalog(type, search, { page, pageSize, lang });
 
     res.json({
       status: "success",
@@ -47,7 +47,7 @@ async function list(req, res, next) {
  */
 async function trailer(req, res, next) {
   try {
-    const result = await catalogService.getTrailer(req.params.id, req.query.type);
+    const result = await catalogService.getTrailer(req.params.id, req.query.type, req.query.lang);
     res.json({ status: "success", ...result });
   } catch (err) {
     next(err);
@@ -60,7 +60,7 @@ async function trailer(req, res, next) {
  */
 async function featured(req, res, next) {
   try {
-    const result = await catalogService.listFeatured();
+    const result = await catalogService.listFeatured(req.query.lang);
     res.json({
       status: "success",
       data: result.data,

@@ -88,7 +88,7 @@ function readFavoriteIds() {
 }
 
 export function useCatalog() {
-  const { text } = useLanguage();
+  const { locale, text } = useLanguage();
   const [initialCatalogCache] = useState<CatalogCachePayload | null>(() => readCatalogCache());
   const [items, setItems] = useState<CatalogItem[]>(() => initialCatalogCache?.data ?? []);
   const [isLoading, setIsLoading] = useState(() => !initialCatalogCache);
@@ -109,7 +109,7 @@ export function useCatalog() {
     }
 
     try {
-      const response = await listCatalog(searchValue, signal);
+      const response = await listCatalog(searchValue, signal, locale);
       setItems(response.data);
       setSource(response.source);
       setLastUpdated(new Date());
@@ -134,7 +134,7 @@ export function useCatalog() {
         setIsLoading(false);
       }
     }
-  }, [text.apiFailure, text.catalogLoadError, text.catalogQueryError, text.tmdbNotConfigured]);
+  }, [locale, text.apiFailure, text.catalogLoadError, text.catalogQueryError, text.tmdbNotConfigured]);
 
   useEffect(() => {
     setFavoriteIds(readFavoriteIds());
@@ -152,7 +152,7 @@ export function useCatalog() {
 
     void fetchCatalog("", false, controller.signal);
     return () => controller.abort();
-  }, [fetchCatalog, initialCatalogCache]);
+  }, [fetchCatalog, initialCatalogCache, locale]);
 
   // Reseta a página ao mudar tipo ou busca
   useEffect(() => {

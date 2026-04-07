@@ -59,12 +59,12 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
 
     setIsTrailerLoading(true);
     try {
-      const id = await getTrailer({ id: nextItem.id, type: nextItem.type });
+      const id = await getTrailer({ id: nextItem.id, type: nextItem.type }, locale);
       setFetchedTrailers((prev) => ({ ...prev, [nextKey]: id ?? null }));
     } finally {
       setIsTrailerLoading(false);
     }
-  }, [fetchedTrailers]);
+  }, [fetchedTrailers, locale]);
 
   async function handleRetryTrailer() {
     if (!item) return;

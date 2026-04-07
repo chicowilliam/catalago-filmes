@@ -34,7 +34,12 @@ function limitAndBalance(items, type, search) {
   return result;
 }
 
-async function listCatalog(type, search, { page = 1, pageSize = 20 } = {}) {
+function normalizeLang(lang) {
+  if (lang === "en" || lang === "en-US") return "en-US";
+  return "pt-BR";
+}
+
+async function listCatalog(type, search, { page = 1, pageSize = 20, lang } = {}) {
   if (!isTmdbEnabled()) {
     throw new AppError(
       "Catalogo local foi removido. Configure TMDB_BEARER_TOKEN ou TMDB_API_KEY no ambiente.",
@@ -43,7 +48,8 @@ async function listCatalog(type, search, { page = 1, pageSize = 20 } = {}) {
     );
   }
 
-  const { items, stale } = await tmdbService.fetchFromTmdb(type, search);
+  const language = normalizeLang(lang);
+  const { items, stale } = await tmdbService.fetchFromTmdb(type, search, language);
 
   if (!search && items.length === 0) {
     throw new AppError(
@@ -70,20 +76,22 @@ async function listCatalog(type, search, { page = 1, pageSize = 20 } = {}) {
   };
 }
 
-async function getTrailer(itemId, mediaType) {
+async function getTrailer(itemId, mediaType, lang) {
   if (!isTmdbEnabled()) {
     throw new AppError("TMDB nao configurado.", 503, "TMDB_NOT_CONFIGURED");
   }
+  const language = normalizeLang(lang);
   // Constrói objeto esperado por fetchTrailerById: { id, type }
-  const trailerId = await tmdbService.fetchTrailerById({ id: itemId, type: mediaType });
+  const trailerId = await tmdbService.fetchTrailerById({ id: itemId, type: mediaType }, language);
   return { trailerId: trailerId || null };
 }
 
-async function listFeatured() {
+async function listFeatured(lang) {
   if (!isTmdbEnabled()) {
     throw new AppError("TMDB nao configurado.", 503, "TMDB_NOT_CONFIGURED");
   }
-  const items = await tmdbService.fetchFeatured();
+  const language = normalizeLang(lang);
+  const items = await tmdbService.fetchFeatured(language);
   return { data: items };
 }
 

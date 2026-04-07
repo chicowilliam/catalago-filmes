@@ -157,12 +157,12 @@ function mapItem(tmdbItem) {
 
 
 
-async function fetchTrailerId(item) {
+async function fetchTrailerId(item, language = "pt-BR") {
   const tmdbId = String(item.id || "").replace("tmdb-", "");
   if (!tmdbId) return "";
 
   const mediaType = item.type === "series" ? "tv" : "movie";
-  const cacheKey = `${mediaType}:${tmdbId}`;
+  const cacheKey = `${mediaType}:${tmdbId}:${language}`;
   const cached = trailerCache.get(cacheKey);
   if (cached !== null) return cached;
 
@@ -172,18 +172,19 @@ async function fetchTrailerId(item) {
     results.find((v) => v.site === "YouTube");
 
   try {
-    // 1ª tentativa: pt-BR
-    const ptUrl = `${TMDB_BASE_URL}/${mediaType}/${tmdbId}/videos?language=pt-BR`;
-    const ptResponse = await httpGetJson(ptUrl);
-    const ptResults = Array.isArray(ptResponse.results) ? ptResponse.results : [];
-    let preferred = findTrailer(ptResults);
+    const preferredLang = language === "en-US" ? "en-US" : "pt-BR";
+    const fallbackLang = preferredLang === "en-US" ? "pt-BR" : "en-US";
 
-    // 2ª tentativa: en-US como fallback (a grande maioria dos trailers está em inglês)
+    const preferredUrl = `${TMDB_BASE_URL}/${mediaType}/${tmdbId}/videos?language=${preferredLang}`;
+    const preferredResponse = await httpGetJson(preferredUrl);
+    const preferredResults = Array.isArray(preferredResponse.results) ? preferredResponse.results : [];
+    let preferred = findTrailer(preferredResults);
+
     if (!preferred) {
-      const enUrl = `${TMDB_BASE_URL}/${mediaType}/${tmdbId}/videos?language=en-US`;
-      const enResponse = await httpGetJson(enUrl);
-      const enResults = Array.isArray(enResponse.results) ? enResponse.results : [];
-      preferred = findTrailer(enResults);
+      const fallbackUrl = `${TMDB_BASE_URL}/${mediaType}/${tmdbId}/videos?language=${fallbackLang}`;
+      const fallbackResponse = await httpGetJson(fallbackUrl);
+      const fallbackResults = Array.isArray(fallbackResponse.results) ? fallbackResponse.results : [];
+      preferred = findTrailer(fallbackResults);
     }
 
     const key = preferred && preferred.key ? preferred.key : "";
@@ -262,11 +263,11 @@ async function resolvePosterForTitle(title, type) {
  * @param {string} search - texto de busca (opcional)
  * @returns {Promise<{ items: Array, stale: boolean }>}
  */
-async function fetchFromTmdb(type, search) {
+async function fetchFromTmdb(type, search, language = "pt-BR") {
   const safeSearch = (search || "").trim();
   const autoPages = getTmdbAutoPages();
   const limit = getCatalogLimit();
-  const cacheKey = `${type || "all"}::${safeSearch.toLowerCase()}::${autoPages}::${limit}`;
+  const cacheKey = `${type || "all"}::${safeSearch.toLowerCase()}::${autoPages}::${limit}::${language}`;
 
   const cached = cache.get(cacheKey);
   if (cached) {
@@ -280,7 +281,7 @@ async function fetchFromTmdb(type, search) {
     let rawItems = [];
 
     if (safeSearch) {
-      const url = `${TMDB_BASE_URL}/search/multi?language=pt-BR&query=${encodeURIComponent(safeSearch)}&include_adult=false&page=1`;
+      const url = `${TMDB_BASE_URL}/search/multi?language=${language}&query=${encodeURIComponent(safeSearch)}&include_adult=false&page=1`;
       const response = await httpGetJson(url);
       rawItems = Array.isArray(response.results) ? response.results : [];
     } else {
@@ -288,8 +289,8 @@ async function fetchFromTmdb(type, search) {
       const tvReqs = [];
 
       for (let page = 1; page <= autoPages; page++) {
-        movieReqs.push(httpGetJson(`${TMDB_BASE_URL}/trending/movie/week?language=pt-BR&page=${page}`));
-        tvReqs.push(httpGetJson(`${TMDB_BASE_URL}/trending/tv/week?language=pt-BR&page=${page}`));
+        movieReqs.push(httpGetJson(`${TMDB_BASE_URL}/trending/movie/week?language=${language}&page=${page}`));
+        tvReqs.push(httpGetJson(`${TMDB_BASE_URL}/trending/tv/week?language=${language}&page=${page}`));
       }
 
       const [moviePages, tvPages] = await Promise.all([
@@ -363,8 +364,8 @@ async function fetchFromTmdb(type, search) {
  */
 const featuredCache = new CacheStore(CACHE_TTL_MS);
 
-async function fetchFeatured() {
-  const cacheKey = "featured";
+async function fetchFeatured(language = "pt-BR") {
+  const cacheKey = `featured:${language}`;
   const cached = featuredCache.get(cacheKey);
   if (cached) return cached;
 
@@ -372,14 +373,14 @@ async function fetchFeatured() {
 
   try {
     const endpoints = [
-      `${TMDB_BASE_URL}/trending/movie/week?language=pt-BR&page=1`,
-      `${TMDB_BASE_URL}/trending/tv/week?language=pt-BR&page=1`,
-      `${TMDB_BASE_URL}/movie/popular?language=pt-BR&page=1`,
-      `${TMDB_BASE_URL}/tv/popular?language=pt-BR&page=1`,
-      `${TMDB_BASE_URL}/movie/top_rated?language=pt-BR&page=1`,
-      `${TMDB_BASE_URL}/tv/top_rated?language=pt-BR&page=1`,
-      `${TMDB_BASE_URL}/movie/now_playing?language=pt-BR&page=1`,
-      `${TMDB_BASE_URL}/tv/on_the_air?language=pt-BR&page=1`,
+      `${TMDB_BASE_URL}/trending/movie/week?language=${language}&page=1`,
+      `${TMDB_BASE_URL}/trending/tv/week?language=${language}&page=1`,
+      `${TMDB_BASE_URL}/movie/popular?language=${language}&page=1`,
+      `${TMDB_BASE_URL}/tv/popular?language=${language}&page=1`,
+      `${TMDB_BASE_URL}/movie/top_rated?language=${language}&page=1`,
+      `${TMDB_BASE_URL}/tv/top_rated?language=${language}&page=1`,
+      `${TMDB_BASE_URL}/movie/now_playing?language=${language}&page=1`,
+      `${TMDB_BASE_URL}/tv/on_the_air?language=${language}&page=1`,
     ];
 
     const responses = await Promise.all(endpoints.map((url) => httpGetJson(url).catch(() => null)));
