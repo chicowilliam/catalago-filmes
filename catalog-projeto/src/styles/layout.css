@@ -203,6 +203,12 @@
   margin-bottom: 6px;
 }
 
+.login-box-topbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
 .login-kicker {
   color: color-mix(in srgb, var(--text-secondary) 84%, #ffffff 16%);
   text-transform: uppercase;

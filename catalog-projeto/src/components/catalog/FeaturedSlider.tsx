@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 
+import { useLanguage } from "@/i18n/LanguageContext";
 import type { CatalogItem } from "@/types/catalog";
 
 const MOBILE_BREAKPOINT = "(max-width: 640px)";
@@ -15,6 +16,7 @@ interface FeaturedSliderProps {
 
 export function FeaturedSlider({ items, onOpenModal }: FeaturedSliderProps) {
   const [rotationIndex, setRotationIndex] = useState(0);
+  const { text } = useLanguage();
   const [maxFeaturedItems, setMaxFeaturedItems] = useState(() => {
     if (typeof window === "undefined") return DESKTOP_FEATURED_ITEMS;
     return window.matchMedia(MOBILE_BREAKPOINT).matches ? MOBILE_FEATURED_ITEMS : DESKTOP_FEATURED_ITEMS;
@@ -65,9 +67,9 @@ export function FeaturedSlider({ items, onOpenModal }: FeaturedSliderProps) {
 
   return (
     <div className="hero-panel">
-      <section className="featured-card featured-compact-shell" aria-label="Sugestões do catálogo">
+      <section className="featured-card featured-compact-shell" aria-label={text.featuredCatalogLabel}>
         <div className="featured-compact-header">
-          <h2 className="featured-compact-title">Sugestões especialmente para você</h2>
+          <h2 className="featured-compact-title">{text.featuredTitle}</h2>
         </div>
 
         <div className="featured-compact-grid">
@@ -83,7 +85,7 @@ export function FeaturedSlider({ items, onOpenModal }: FeaturedSliderProps) {
                 type="button"
                 className="featured-compact-card-btn"
                 onClick={() => onOpenModal(item)}
-                aria-label={`Abrir destaque: ${item.title}`}
+                aria-label={text.openDetailsOf(item.title)}
               >
                 <img
                   src={item.backdrop || item.image}
@@ -95,13 +97,13 @@ export function FeaturedSlider({ items, onOpenModal }: FeaturedSliderProps) {
                 />
                 <div className="featured-compact-overlay" aria-hidden="true" />
                 <div className="featured-compact-content">
-                  <span className="featured-tag">{item.type === "movie" ? "Filme" : "Série"}</span>
+                  <span className="featured-tag">{item.type === "movie" ? text.movieLabel : text.seriesLabel}</span>
                   <h3 className="featured-compact-item-title">{item.title}</h3>
                   <div className="featured-compact-meta">
                     {item.year && <span className="featured-meta-year">{item.year}</span>}
                     {item.rating != null && <span className="featured-meta-rating">⭐ {item.rating}</span>}
                   </div>
-                  <span className="featured-compact-cta">Ver detalhes</span>
+                  <span className="featured-compact-cta">{text.viewDetails}</span>
                 </div>
               </button>
             </motion.div>

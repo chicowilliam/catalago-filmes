@@ -3,7 +3,9 @@ import type { ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CATALOG_FILTERS } from "@/config/catalogFilters";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { LanguageToggle } from "@/components/layout/LanguageToggle";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { useLanguage } from "@/i18n/LanguageContext";
 import type { CatalogType } from "@/types/catalog";
 
 interface FilterTabsProps {
@@ -19,6 +21,11 @@ export function FilterTabs({ activeType, onChange, username, onLogout, mobileSea
   const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
   const activeFilter = CATALOG_FILTERS.find((filter) => filter.value === activeType) ?? CATALOG_FILTERS[0];
+  const { text } = useLanguage();
+
+  function getFilterLabel(value: CatalogType) {
+    return text.filterLabels[value];
+  }
 
   useClickOutside(menuRef, () => setIsMenuOpen(false), isMenuOpen);
 
@@ -48,7 +55,7 @@ export function FilterTabs({ activeType, onChange, username, onLogout, mobileSea
 
   return (
     <div className="filter-nav-shell">
-      <div className="filter-tabs filter-tabs-desktop" role="tablist" aria-label="Filtros do catálogo">
+      <div className="filter-tabs filter-tabs-desktop" role="tablist" aria-label={text.filtersCatalog}>
         {CATALOG_FILTERS.map((filter) => {
           const isActive = activeType === filter.value;
           return (
@@ -60,7 +67,7 @@ export function FilterTabs({ activeType, onChange, username, onLogout, mobileSea
               className={`filter-btn${isActive ? " is-active" : ""}`}
               onClick={() => handleSelect(filter.value)}
             >
-              {filter.label}
+              {getFilterLabel(filter.value)}
               {isActive && (
                 <motion.div
                   className="filter-underline"
@@ -83,8 +90,8 @@ export function FilterTabs({ activeType, onChange, username, onLogout, mobileSea
           onClick={() => setIsMenuOpen((current) => !current)}
         >
           <span className="filter-menu-toggle-copy">
-            <span className="filter-menu-label">Navegar</span>
-            <strong className="filter-menu-current">{activeFilter.label}</strong>
+            <span className="filter-menu-label">{text.browse}</span>
+            <strong className="filter-menu-current">{getFilterLabel(activeFilter.value)}</strong>
           </span>
           <span className="filter-menu-icon" aria-hidden="true">
             <span />
@@ -98,7 +105,7 @@ export function FilterTabs({ activeType, onChange, username, onLogout, mobileSea
             <>
               <motion.button
                 type="button"
-                aria-label="Fechar menu"
+                aria-label={text.closeMenu}
                 className="filter-menu-backdrop"
                 onClick={() => setIsMenuOpen(false)}
                 initial={{ opacity: 0 }}
@@ -111,7 +118,7 @@ export function FilterTabs({ activeType, onChange, username, onLogout, mobileSea
                 id={menuId}
                 className="filter-menu-drawer"
                 role="menu"
-                aria-label="Navegação do catálogo"
+                aria-label={text.navigation}
                 initial={{ x: "100%" }}
                 animate={{ x: "0%" }}
                 exit={{ x: "100%" }}
@@ -120,6 +127,7 @@ export function FilterTabs({ activeType, onChange, username, onLogout, mobileSea
                 <div className="filter-menu-user-top">
                   {username ? <span className="user-chip filter-menu-user-chip">{username}</span> : <span />}
                   <div className="filter-menu-user-actions">
+                    <LanguageToggle />
                     <ThemeToggle />
                     {onLogout ? (
                       <button
@@ -130,7 +138,7 @@ export function FilterTabs({ activeType, onChange, username, onLogout, mobileSea
                           onLogout();
                         }}
                       >
-                        Sair
+                        {text.logout}
                       </button>
                     ) : null}
                   </div>
@@ -140,14 +148,14 @@ export function FilterTabs({ activeType, onChange, username, onLogout, mobileSea
 
                 <div className="filter-menu-drawer-head">
                   <div className="filter-menu-drawer-copy">
-                    <span className="filter-menu-label">Navegação</span>
-                    <strong className="filter-menu-current">{activeFilter.label}</strong>
+                    <span className="filter-menu-label">{text.navigation}</span>
+                    <strong className="filter-menu-current">{getFilterLabel(activeFilter.value)}</strong>
                   </div>
 
                   <button
                     type="button"
                     className="filter-menu-close"
-                    aria-label="Fechar menu"
+                    aria-label={text.closeMenu}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     ×
@@ -166,8 +174,8 @@ export function FilterTabs({ activeType, onChange, username, onLogout, mobileSea
                         className={`filter-menu-item${isActive ? " is-active" : ""}`}
                         onClick={() => handleSelect(filter.value)}
                       >
-                        <span>{filter.label}</span>
-                        {isActive ? <span className="filter-menu-item-mark">Atual</span> : null}
+                        <span>{getFilterLabel(filter.value)}</span>
+                        {isActive ? <span className="filter-menu-item-mark">{text.current}</span> : null}
                       </button>
                     );
                   })}

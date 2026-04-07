@@ -1,9 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { CatalogPage } from "@/pages/CatalogPage";
 
 function CheckingScreen() {
+  const { text } = useLanguage();
+
   return (
     <section className="login-screen">
       <motion.div
@@ -30,7 +33,7 @@ function CheckingScreen() {
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
         >
-          Validando sessão...
+          {text.checkingSession}
         </motion.p>
       </motion.div>
     </section>
@@ -39,6 +42,7 @@ function CheckingScreen() {
 
 function App() {
   const auth = useAuth();
+  const { text } = useLanguage();
   const canAccessCatalog = auth.isAuthenticated || auth.isGuest;
   const playCatalogIntro = auth.catalogIntroToken > 0;
 
@@ -75,7 +79,7 @@ function App() {
           transition={{ duration: playCatalogIntro ? 0.58 : 0.28, ease: [0.22, 1, 0.36, 1] }}
         >
           <CatalogPage
-            username={auth.user?.username ?? (auth.isGuest ? "Visitante" : undefined)}
+            username={auth.user?.username ?? (auth.isGuest ? text.guestUsername : undefined)}
             onLogout={auth.logout}
           />
         </motion.div>

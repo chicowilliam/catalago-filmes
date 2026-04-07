@@ -10,6 +10,7 @@ import { SearchBar } from "@/components/catalog/SearchBar";
 import { AppShell } from "@/components/layout/AppShell";
 import { useCatalog } from "@/hooks/useCatalog";
 import { useFeatured } from "@/hooks/useFeatured";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { useModal } from "@/hooks/useModal";
 import { useRatings } from "@/hooks/useRatings";
 import type { CatalogItem, CatalogType } from "@/types/catalog";
@@ -27,6 +28,7 @@ function getTabIndex(type: CatalogType) {
 }
 
 export function CatalogPage({ username, onLogout }: CatalogPageProps) {
+  const { text } = useLanguage();
   const {
     items,
     activeType,
@@ -168,7 +170,7 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
               defaultValue={search}
               onSearch={submitSearch}
               isLoading={isLoading}
-              placeholder="Buscar filmes e series"
+              placeholder={text.searchPlaceholder}
             />
           }
         />
@@ -178,7 +180,7 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
           defaultValue={search}
           onSearch={submitSearch}
           isLoading={isLoading}
-          placeholder="Buscar filmes e series"
+          placeholder={text.searchPlaceholder}
         />
       }
     >
@@ -199,14 +201,14 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
               {hasSearchResults && (
                 <div className="search-results-summary" aria-live="polite">
                   {items.length > 0
-                    ? `Foram encontrados ${items.length} filme${items.length > 1 ? "s" : ""}/serie${items.length > 1 ? "s" : ""} com o titulo de "${search}".`
-                    : `Nao existe titulo com o nome "${search}", lamento.`}
+                    ? text.searchResultsFound(items.length, search)
+                    : text.searchResultsEmpty(search)}
                 </div>
               )}
               {activeType !== "all" && (
                 <div className="section-headline section-block">
                   <h2 className="section-title">
-                    {activeType === "movie" ? "Filmes" : activeType === "series" ? "Séries" : "Favoritos"}
+                    {activeType === "movie" ? text.sectionMovies : activeType === "series" ? text.sectionSeries : text.sectionFavorites}
                   </h2>
                 </div>
               )}
@@ -219,12 +221,12 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
                 getRating={getRating}
               />
               {!isLoading && !error && totalPages > 1 && (
-                <nav className="catalog-pagination" aria-label="Paginação do catálogo">
+                <nav className="catalog-pagination" aria-label={text.catalogPagination}>
                   <button
                     className="pagination-btn"
                     disabled={page === 1}
                     onClick={() => setPage(page - 1)}
-                    aria-label="Página anterior"
+                    aria-label={text.previousPage}
                   >
                     ←
                   </button>
@@ -235,7 +237,7 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
                     className="pagination-btn"
                     disabled={page === totalPages}
                     onClick={() => setPage(page + 1)}
-                    aria-label="Próxima página"
+                    aria-label={text.nextPage}
                   >
                     →
                   </button>

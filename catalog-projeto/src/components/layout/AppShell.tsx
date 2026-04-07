@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Footer } from "@/components/layout/Footer";
+import { LanguageToggle } from "@/components/layout/LanguageToggle";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface AppShellProps {
   children: ReactNode;
@@ -15,6 +17,7 @@ export function AppShell({ children, username, onLogout, nav, searchSlot }: AppS
   const containerRef = useRef<HTMLDivElement>(null);
   const lastScrollTopRef = useRef(0);
   const [isDesktopNavVisible, setIsDesktopNavVisible] = useState(true);
+  const { text } = useLanguage();
 
   useEffect(() => {
     const container = containerRef.current;
@@ -82,8 +85,8 @@ export function AppShell({ children, username, onLogout, nav, searchSlot }: AppS
         <header className={`app-header ${isDesktopNavVisible ? "is-visible" : "is-hidden"}`}>
           <div className="header-inner">
             <div className="header-brand">
-              <p className="brand-kicker">Streaming Portfolio</p>
-              <h1 className="brand-title">Catalogo X</h1>
+              <p className="brand-kicker">{text.appBrandKicker}</p>
+              <h1 className="brand-title">{text.appBrandTitle}</h1>
             </div>
 
             {nav && (
@@ -95,9 +98,10 @@ export function AppShell({ children, username, onLogout, nav, searchSlot }: AppS
             <div className="header-actions">
               {searchSlot}
               {username ? <span className="user-chip">{username}</span> : null}
+              <LanguageToggle />
               <ThemeToggle />
               <button type="button" className="secondary-btn" onClick={onLogout}>
-                Sair
+                {text.logout}
               </button>
             </div>
           </div>

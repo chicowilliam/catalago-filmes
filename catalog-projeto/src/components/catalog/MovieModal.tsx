@@ -4,6 +4,7 @@ import { AnimatePresence, motion, cubicBezier } from "framer-motion";
 import { getTrailer } from "@/services/catalogService";
 import { ToastHost } from "@/components/layout/ToastHost";
 import { useToast } from "@/hooks/useToast";
+import { useLanguage } from "@/i18n/LanguageContext";
 import type { CatalogItem } from "@/types/catalog";
 
 interface MovieModalProps {
@@ -42,13 +43,15 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
   const [fetchedTrailers, setFetchedTrailers] = useState<Record<string, string | null>>({});
   const [isTrailerLoading, setIsTrailerLoading] = useState(false);
   const { toasts, pushToast, removeToast } = useToast();
+  const { locale, text } = useLanguage();
   const itemKey = item ? `${item.type}:${String(item.id)}` : null;
   const fetchedTrailer = itemKey ? fetchedTrailers[itemKey] : undefined;
   const trailerId = item?.trailerId || fetchedTrailer || null;
   const trailerSearchUrl = useMemo(() => {
     if (!item) return "";
-    return `https://www.youtube.com/results?search_query=${encodeURIComponent(`${item.title} trailer oficial`)}`;
-  }, [item]);
+    const query = locale === "en" ? `${item.title} official trailer` : `${item.title} trailer oficial`;
+    return `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+  }, [item, locale]);
 
   const fetchTrailerForItem = useCallback(async (nextItem: CatalogItem, force = false) => {
     const nextKey = `${nextItem.type}:${String(nextItem.id)}`;
@@ -80,8 +83,8 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
     onFavoriteToggle(item);
     pushToast(
       alreadyFavorite
-        ? `${item.title} removido dos favoritos`
-        : `${item.title} adicionado aos favoritos`,
+        ? text.favoriteRemoved(item.title)
+        : text.favoriteAdded(item.title),
       "success"
     );
   }
@@ -89,7 +92,7 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
   function handleRateInsideModal(stars: number) {
     if (!item) return;
     onRate(item.id, stars);
-    pushToast(`Voce avaliou ${item.title} com ${stars} estrela${stars > 1 ? "s" : ""}.`, "info");
+    pushToast(text.ratedItem(item.title, stars), "info");
   }
 
   // Busca trailer sob demanda quando o modal abre
@@ -152,7 +155,7 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
             className="modal-panel"
             role="dialog"
             aria-modal="true"
-            aria-label={`Detalhes de ${item.title}`}
+            aria-label={text.modalDetailsOf(item.title)}
             initial={{ scale: 0.995, opacity: 0, y: 3 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.995, opacity: 0, y: 3 }}
@@ -163,7 +166,7 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
               type="button"
               className={`favorite-btn modal-favorite-btn ${isFavorite ? "favorited" : "not-favorited"}`}
               onClick={handleFavoriteInsideModal}
-              aria-label={isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+              aria-label={isFavorite ? text.removeFromFavorites : text.addToFavorites}
               aria-pressed={isFavorite}
               variants={modalItemVariants}
               initial="hidden"
@@ -184,7 +187,7 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
               type="button"
               className="modal-close"
               onClick={onClose}
-              aria-label="Fechar modal"
+              aria-label={text.closeModal}
               variants={modalItemVariants}
               initial="hidden"
               animate="show"
@@ -196,10 +199,10 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
             <motion.div variants={modalContentVariants} initial="hidden" animate="show" exit="hidden">
               <motion.h2 className="modal-title" variants={modalItemVariants}>{item.title}</motion.h2>
               <motion.div className="modal-meta" variants={modalItemVariants}>
-                <p className="modal-type">{item.type === "movie" ? "Filme" : "Série"}</p>
+                <p className="modal-type">{item.type === "movie" ? text.movieLabel : text.seriesLabel}</p>
                 {item.year && <span className="modal-meta-year">{item.year}</span>}
                 {item.rating != null && (
-                  <span className="modal-meta-tmdb-rating">⭐ {item.rating} <span className="modal-meta-tmdb-label">TMDB</span></span>
+                  <span className="modal-meta-tmdb-rating">⭐ {item.rating} <span className="modal-meta-tmdb-label">{text.tmdbLabel}</span></span>
                 )}
               </motion.div>
               <motion.p className="modal-synopsis" variants={modalItemVariants}>{item.synopsis}</motion.p>
@@ -208,7 +211,7 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
                 <motion.div className="modal-trailer" variants={modalItemVariants}>
                   <iframe
                     src={`https://www.youtube.com/embed/${trailerId}?autoplay=0&modestbranding=1&rel=0&playsinline=1`}
-                    title={`Trailer de ${item.title}`}
+                    title={text.trailerOf(item.title)}
                     allowFullScreen
                     loading="lazy"
                     referrerPolicy="strict-origin-when-cross-origin"
@@ -217,20 +220,20 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
                   />
                 </motion.div>
               ) : isTrailerLoading && item.id ? (
-                <motion.div className="modal-trailer-loading" aria-label="Carregando trailer..." variants={modalItemVariants} />
+                <motion.div className="modal-trailer-loading" aria-label={text.trailerLoading} variants={modalItemVariants} />
               ) : null}
 
               {!trailerId && !isTrailerLoading && item && (
                 <motion.div className="modal-trailer-fallback" variants={modalItemVariants}>
-                  <p className="modal-trailer-fallback-title">Trailer indisponível no momento</p>
-                  <p className="modal-trailer-fallback-copy">Você pode tentar novamente ou abrir no YouTube.</p>
+                  <p className="modal-trailer-fallback-title">{text.trailerUnavailable}</p>
+                  <p className="modal-trailer-fallback-copy">{text.trailerUnavailableCopy}</p>
                   <div className="modal-trailer-fallback-actions">
                     <button
                       type="button"
                       className="secondary-btn"
                       onClick={handleRetryTrailer}
                     >
-                      Tentar novamente
+                      {text.retry}
                     </button>
                     <a
                       href={trailerSearchUrl}
@@ -238,22 +241,22 @@ export function MovieModal({ item, rating, isFavorite, onClose, onRate, onFavori
                       rel="noreferrer"
                       className="secondary-btn"
                     >
-                      Abrir no YouTube
+                      {text.openOnYouTube}
                     </a>
                   </div>
                 </motion.div>
               )}
 
               <motion.div className="modal-rating" variants={modalItemVariants}>
-                <p className="modal-rating-label">Sua nota:</p>
-                <div className="star-selector" role="radiogroup" aria-label="Avaliação de 1 a 5 estrelas">
+                <p className="modal-rating-label">{text.yourRating}</p>
+                <div className="star-selector" role="radiogroup" aria-label={text.ratingGroup}>
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
                       type="button"
                       className={`star-btn${rating >= star ? " is-filled" : ""}`}
                       onClick={() => handleRateInsideModal(star)}
-                      aria-label={`${star} estrela${star > 1 ? "s" : ""}`}
+                      aria-label={text.starLabel(star)}
                     >
                       {rating >= star ? "★" : "☆"}
                     </button>

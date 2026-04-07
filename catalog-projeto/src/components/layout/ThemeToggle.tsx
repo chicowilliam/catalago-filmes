@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 type Theme = "dark" | "light";
 
@@ -16,6 +17,7 @@ function getInitialTheme(): Theme {
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const { text } = useLanguage();
 
   useEffect(() => {
     const html = document.documentElement;
@@ -36,10 +38,10 @@ export function ThemeToggle() {
     <button
       className="theme-toggle"
       onClick={() => setTheme(isLight ? "dark" : "light")}
-      aria-label={isLight ? "Ativar modo escuro" : "Ativar modo claro"}
+      aria-label={isLight ? text.activateDarkMode : text.activateLightMode}
       aria-pressed={isLight}
       type="button"
-      title={isLight ? "Modo escuro" : "Modo claro"}
+      title={isLight ? text.darkMode : text.lightMode}
     >
       {isLight ? (
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

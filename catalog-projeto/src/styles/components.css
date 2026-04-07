@@ -77,6 +77,38 @@
   transform: translateY(0) scale(0.96);
 }
 
+.language-toggle {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+}
+
+.language-toggle-btn {
+  min-width: 42px;
+  height: 42px;
+  border: 0;
+  padding: 0 10px;
+  background: transparent;
+  color: var(--text-soft);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.language-toggle-btn:hover {
+  background: color-mix(in srgb, var(--bg-secondary) 76%, var(--accent) 24%);
+  color: var(--text-primary);
+}
+
+.language-toggle-btn.is-active {
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg-secondary) 78%);
+  color: var(--text-primary);
+}
+
 .input-label {
   color: var(--text-soft);
   font-size: 14px;

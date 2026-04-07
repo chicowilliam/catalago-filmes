@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ApiClientError } from "@/services/apiClient";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const AUTO_REFRESH_MS = 2 * 60 * 1000; // 2 minutos
 const PAGE_SIZE = 20;
@@ -87,6 +88,7 @@ function readFavoriteIds() {
 }
 
 export function useCatalog() {
+  const { text } = useLanguage();
   const [initialCatalogCache] = useState<CatalogCachePayload | null>(() => readCatalogCache());
   const [items, setItems] = useState<CatalogItem[]>(() => initialCatalogCache?.data ?? []);
   const [isLoading, setIsLoading] = useState(() => !initialCatalogCache);
@@ -118,21 +120,21 @@ export function useCatalog() {
       if (err instanceof DOMException && err.name === "AbortError") return;
       if (err instanceof ApiClientError) {
         if (err.code === "TMDB_NOT_CONFIGURED") {
-          setError("TMDB nao configurada no backend. Verifique TMDB_API_KEY ou TMDB_BEARER_TOKEN no .env.");
+          setError(text.tmdbNotConfigured);
         } else if (err.status >= 500) {
-          setError(`Falha da API (${err.status}). ${err.message}`);
+          setError(text.apiFailure(err.status, err.message));
         } else {
-          setError(err.message || "Erro ao consultar catalogo.");
+          setError(err.message || text.catalogQueryError);
         }
       } else {
-        setError("Nao foi possivel carregar o catalogo agora.");
+        setError(text.catalogLoadError);
       }
     } finally {
       if (!silent) {
         setIsLoading(false);
       }
     }
-  }, []);
+  }, [text.apiFailure, text.catalogLoadError, text.catalogQueryError, text.tmdbNotConfigured]);
 
   useEffect(() => {
     setFavoriteIds(readFavoriteIds());

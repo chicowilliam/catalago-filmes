@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ApiClientError } from "@/services/apiClient";
 import { USE_BACKEND_API } from "@/config/runtime";
+import { useLanguage } from "@/i18n/LanguageContext";
 import * as authService from "@/services/authService";
 import type { AuthUser } from "@/types/auth";
 
@@ -13,6 +14,7 @@ interface LoginInput {
 }
 
 export function useAuth() {
+  const { text } = useLanguage();
   const [status, setStatus] = useState<AuthStatus>(() =>
     authService.hasGuestSession() ? "guest" : "checking"
   );
@@ -39,11 +41,11 @@ export function useAuth() {
       setStatus("unauthenticated");
       setError(
         USE_BACKEND_API
-          ? "Nao foi possivel validar sua sessao no servidor."
-          : "Nao foi possivel validar sua sessao local."
+          ? text.validateServerSession
+          : text.validateLocalSession
       );
     }
-  }, []);
+  }, [text.validateLocalSession, text.validateServerSession]);
 
   useEffect(() => {
     if (authService.hasGuestSession()) return; // já restaurado do localStorage
@@ -64,7 +66,7 @@ export function useAuth() {
       if (err instanceof ApiClientError) {
         setError(err.message);
       } else {
-        setError("Erro inesperado ao fazer login.");
+        setError(text.loginUnexpectedError);
       }
 
       setStatus("unauthenticated");
@@ -72,7 +74,7 @@ export function useAuth() {
     } finally {
       setIsSubmitting(false);
     }
-  }, []);
+  }, [text.loginUnexpectedError]);
 
   const logout = useCallback(async () => {
     try {

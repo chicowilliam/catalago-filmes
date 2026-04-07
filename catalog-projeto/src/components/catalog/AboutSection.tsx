@@ -1,3 +1,5 @@
+import { useLanguage } from "@/i18n/LanguageContext";
+
 interface Technology {
   label: string;
   iconClass: string;
@@ -76,45 +78,33 @@ const socialLinks: SocialLink[] = [
 ];
 
 export function AboutSection() {
+  const { text } = useLanguage();
+
   return (
     <section className="about-section">
       <div className="section-headline about-headline section-block">
         <div>
-          <h2 className="section-title">Sobre mim</h2>
+          <h2 className="section-title">{text.aboutMe}</h2>
         </div>
       </div>
 
       <article className="about-summary-card section-block">
-        <p className="about-summary-text">
-          Olá, sou Vinicius William e este projeto marca um passo importante na minha trajetória
-          como desenvolvedor. Nele, busquei aplicar na prática fundamentos modernos de engenharia de
-          software, combinando organização de código, componentização, responsividade e preocupações
-          com segurança para construir uma experiência mais próxima de um produto real.
-        </p>
-        <p className="about-summary-text">
-          A aplicação foi desenvolvida com React e TypeScript no front-end, com uma proposta visual
-          inspirada em plataformas de streaming. Ela pode funcionar de forma standalone com Vite e
-          dados locais, o que a torna adequada para apresentação em portfólio, mas também está
-          preparada para integração com API em cenários mais completos.
-        </p>
-        <p className="about-summary-text">
-          O foco da interface foi transmitir consistência visual, fluidez de navegação e sensação de
-          produto finalizado, com organização por categorias, interações dinâmicas e decisões de UI
-          pensadas para simular padrões encontrados em aplicações reais do mercado.
-        </p>
+        {text.aboutParagraphs.map((paragraph) => (
+          <p key={paragraph.slice(0, 24)} className="about-summary-text">{paragraph}</p>
+        ))}
       </article>
 
       <div className="section-headline about-section-headline section-block">
         <div>
-          <h3 className="section-title">Tecnologias</h3>
+          <h3 className="section-title">{text.technologies}</h3>
         </div>
       </div>
 
-      <div className="tech-groups section-block" aria-label="Tecnologias organizadas por categoria">
+      <div className="tech-groups section-block" aria-label={text.technologiesByCategory}>
         {technologyGroups.map((group) => (
           <div key={group.id} className="tech-group-row">
-            <h4 className="tech-group-title">{group.title}</h4>
-            <div className="tech-badge-row" role="list" aria-label={group.title}>
+            <h4 className="tech-group-title">{text.techGroupTitles[group.id as keyof typeof text.techGroupTitles] ?? group.title}</h4>
+            <div className="tech-badge-row" role="list" aria-label={text.techGroupTitles[group.id as keyof typeof text.techGroupTitles] ?? group.title}>
               {group.items.map((tech, index) => (
                 <span
                   key={`${group.id}-${tech.iconClass}-${index}`}
@@ -133,11 +123,11 @@ export function AboutSection() {
 
       <div className="section-headline social-headline section-block">
         <div>
-          <h3 className="section-title">Redes sociais</h3>
+          <h3 className="section-title">{text.socialNetworks}</h3>
         </div>
       </div>
 
-      <div className="social-badges section-block" aria-label="Links para redes sociais">
+      <div className="social-badges section-block" aria-label={text.socialLinksLabel}>
         {socialLinks.map((social) => (
           <a
             key={social.id}
@@ -145,7 +135,7 @@ export function AboutSection() {
             href={social.href}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={`Abrir ${social.label} em nova aba`}
+            aria-label={text.openSocialInNewTab(social.label)}
           >
             <img src={social.badgeSrc} alt={`Badge ${social.label}`} loading="lazy" />
           </a>
@@ -153,7 +143,7 @@ export function AboutSection() {
         <a
           className="social-badge-link social-text-link"
           href="mailto:viniciuswilliam91@gmail.com"
-          aria-label="Enviar e-mail para Vinicius William"
+          aria-label={text.sendEmail}
         >
           viniciuswilliam91@gmail.com
         </a>

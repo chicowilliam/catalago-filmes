@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface ToastItem {
   id: number;
@@ -13,6 +14,8 @@ interface ToastHostProps {
 }
 
 export function ToastHost({ toasts, onDismiss, className }: ToastHostProps) {
+  const { text } = useLanguage();
+
   return (
     <div className={`toast-host${className ? ` ${className}` : ""}`} aria-live="polite" aria-atomic="true">
       <AnimatePresence>
@@ -26,7 +29,7 @@ export function ToastHost({ toasts, onDismiss, className }: ToastHostProps) {
             exit={{ opacity: 0, y: 16, scale: 0.96 }}
             transition={{ type: "spring", stiffness: 280, damping: 22 }}
             onClick={() => onDismiss(toast.id)}
-            aria-label="Fechar notificação"
+            aria-label={text.closeNotification}
           >
             {toast.message}
           </motion.button>

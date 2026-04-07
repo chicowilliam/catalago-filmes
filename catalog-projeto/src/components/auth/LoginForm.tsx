@@ -1,5 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { LanguageToggle } from "@/components/layout/LanguageToggle";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface LoginFormProps {
   isSubmitting: boolean;
@@ -12,6 +14,7 @@ export function LoginForm({ isSubmitting, error, onSubmit, onGuestAccess }: Logi
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [activeAction, setActiveAction] = useState<"login" | "guest" | null>(null);
+  const { text } = useLanguage();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -36,12 +39,15 @@ export function LoginForm({ isSubmitting, error, onSubmit, onGuestAccess }: Logi
   }
 
   return (
-    <section className="login-screen" aria-label="Tela de login">
+    <section className="login-screen" aria-label={text.loginScreenAria}>
       <form className="login-box" onSubmit={handleSubmit}>
+        <div className="login-box-topbar">
+          <LanguageToggle />
+        </div>
         <div className="login-brand">
           <p className="login-kicker">Catalogo X</p>
-          <h1 className="login-title">Bem-vindo de volta</h1>
-          <p className="login-subtitle">Entre para continuar sua experiência no catálogo.</p>
+          <h1 className="login-title">{text.loginTitle}</h1>
+          <p className="login-subtitle">{text.loginSubtitle}</p>
         </div>
         <input
           id="username"
@@ -49,8 +55,8 @@ export function LoginForm({ isSubmitting, error, onSubmit, onGuestAccess }: Logi
           onChange={(event) => setUsername(event.target.value)}
           className="login-input"
           type="text"
-          placeholder="Usuário"
-          aria-label="Usuário"
+          placeholder={text.username}
+          aria-label={text.username}
           required
           disabled={isSubmitting || activeAction === "guest"}
         />
@@ -61,8 +67,8 @@ export function LoginForm({ isSubmitting, error, onSubmit, onGuestAccess }: Logi
           onChange={(event) => setPassword(event.target.value)}
           className="login-input"
           type="password"
-          placeholder="Senha"
-          aria-label="Senha"
+          placeholder={text.password}
+          aria-label={text.password}
           required
           disabled={isSubmitting || activeAction === "guest"}
         />
@@ -72,7 +78,7 @@ export function LoginForm({ isSubmitting, error, onSubmit, onGuestAccess }: Logi
           type="submit"
           disabled={isSubmitting || activeAction === "guest"}
         >
-          <span className="login-text">Entrar</span>
+          <span className="login-text">{text.login}</span>
           <span className="login-spinner" aria-hidden="true" />
         </button>
 
@@ -82,11 +88,11 @@ export function LoginForm({ isSubmitting, error, onSubmit, onGuestAccess }: Logi
           disabled={isSubmitting || activeAction === "guest"}
           onClick={handleGuestAccess}
         >
-          <span className="login-text">Acessar como visitante</span>
+          <span className="login-text">{text.guestAccess}</span>
           <span className="login-spinner" aria-hidden="true" />
         </button>
 
-        <p className="login-helper">No modo visitante, seus favoritos ficam salvos neste navegador.</p>
+        <p className="login-helper">{text.guestHelper}</p>
 
         <p className="login-error">{error ?? ""}</p>
       </form>

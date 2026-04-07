@@ -1,10 +1,8 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 
+import { useLanguage } from "@/i18n/LanguageContext";
 import type { CatalogItem } from "@/types/catalog";
-
-const PLACEHOLDER_IMAGE =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 450'%3E%3Crect width='300' height='450' fill='%231e1e2e'/%3E%3Ctext x='150' y='225' font-size='16' fill='%23666' text-anchor='middle' dominant-baseline='middle' font-family='sans-serif'%3ESem%20imagem%3C/text%3E%3C/svg%3E";
 
 interface MovieCardProps {
   item: CatalogItem;
@@ -17,6 +15,11 @@ export function MovieCard({
   rating,
   onOpenModal,
 }: MovieCardProps) {
+  const { text } = useLanguage();
+  const placeholderImage = useMemo(
+    () => `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 450'%3E%3Crect width='300' height='450' fill='%231e1e2e'/%3E%3Ctext x='150' y='225' font-size='16' fill='%23666' text-anchor='middle' dominant-baseline='middle' font-family='sans-serif'%3E${encodeURIComponent(text.noImage)}%3C/text%3E%3C/svg%3E`,
+    [text.noImage]
+  );
   const [imgSrc, setImgSrc] = useState(item.image);
   const popDelay = useMemo(() => ((item.id * 37) % 141), [item.id]);
   const synopsis = item.synopsis ?? "";
@@ -28,7 +31,7 @@ export function MovieCard({
       whileTap={{ scale: 0.97 }}
       transition={{ type: "spring", stiffness: 280, damping: 20 }}
       style={{ "--card-pop-delay": `${popDelay}ms` } as React.CSSProperties}
-      aria-label={`Abrir detalhes de ${item.title}`}
+      aria-label={text.openDetailsOf(item.title)}
       role="button"
       tabIndex={0}
       aria-haspopup="dialog"
@@ -49,7 +52,7 @@ export function MovieCard({
             alt={item.title}
             loading="lazy"
             decoding="async"
-            onError={() => setImgSrc(PLACEHOLDER_IMAGE)}
+            onError={() => setImgSrc(placeholderImage)}
           />
         </div>
 
@@ -58,7 +61,7 @@ export function MovieCard({
           <h3 className="movie-title">{item.title}</h3>
 
           {rating > 0 && (
-            <div className="star-row" aria-label={`Avaliação: ${rating} de 5 estrelas`}>
+            <div className="star-row" aria-label={text.ratingSummary(rating)}>
               {"★".repeat(rating)}
               {"☆".repeat(5 - rating)}
             </div>
@@ -71,9 +74,9 @@ export function MovieCard({
               event.stopPropagation();
               onOpenModal(item);
             }}
-            aria-label={`Ver detalhes de ${item.title}`}
+            aria-label={text.viewDetailsOf(item.title)}
           >
-            ▶ Ver detalhes
+            ▶ {text.viewDetails}
           </button>
         </div>
       </div>
@@ -92,7 +95,7 @@ export function MovieCard({
         {truncatedSynopsis && (
           <p className="card-back-synopsis">{truncatedSynopsis}</p>
         )}
-        <span className="card-back-cta">Ver detalhes →</span>
+        <span className="card-back-cta">{text.viewDetails} →</span>
       </div>
     </motion.article>
   );

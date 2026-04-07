@@ -1,4 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { LanguageContext, type LanguageContextValue } from "@/i18n/LanguageContext";
+import { translations } from "@/i18n/translations";
 
 interface Props {
   children: ReactNode;
@@ -9,6 +11,9 @@ interface State {
 }
 
 export class ErrorBoundary extends Component<Props, State> {
+  static contextType = LanguageContext;
+  declare context: LanguageContextValue;
+
   state: State = { hasError: false };
 
   static getDerivedStateFromError(): State {
@@ -20,15 +25,17 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   render() {
+    const text = this.context?.text ?? translations["pt-BR"];
+
     if (this.state.hasError) {
       return (
         <section className="login-screen">
-          <p>Algo deu errado. Tente recarregar a página.</p>
+          <p>{text.errorBoundaryMessage}</p>
           <button
             type="button"
             onClick={() => window.location.reload()}
           >
-            Recarregar
+            {text.reload}
           </button>
         </section>
       );

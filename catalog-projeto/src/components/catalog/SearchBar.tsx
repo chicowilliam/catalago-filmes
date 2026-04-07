@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface SearchBarProps {
   defaultValue: string;
@@ -14,6 +15,7 @@ export function SearchBar({ defaultValue, onSearch, isLoading, placeholder = "Bu
   const [value, setValue] = useState(defaultValue);
   const wrapRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { text } = useLanguage();
 
   useEffect(() => {
     setValue(defaultValue);
@@ -96,23 +98,23 @@ export function SearchBar({ defaultValue, onSearch, isLoading, placeholder = "Bu
               type="search"
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              placeholder={placeholder}
+              placeholder={placeholder || text.searchPlaceholder}
               className="search-input"
-              aria-label="Buscar no catálogo"
+              aria-label={text.searchCatalog}
             />
             {value.length > 0 && (
               <button
                 type="button"
                 className="search-clear-btn"
                 onClick={handleClear}
-                aria-label="Limpar busca"
+                aria-label={text.clearSearch}
               >×</button>
             )}
             <button
               type="button"
               className="search-collapse-btn"
               onClick={handleCollapse}
-              aria-label="Fechar busca"
+              aria-label={text.closeSearch}
             >
               <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
@@ -124,7 +126,7 @@ export function SearchBar({ defaultValue, onSearch, isLoading, placeholder = "Bu
             key="search-btn"
             type="button"
             className="search-toggle-btn"
-            aria-label="Abrir busca"
+            aria-label={text.openSearch}
             onClick={() => setExpanded(true)}
             initial={{ opacity: 0, scale: 0.85 }}
             animate={{ opacity: 1, scale: 1 }}
