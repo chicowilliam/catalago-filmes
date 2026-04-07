@@ -79,7 +79,7 @@ export function AppShell({ children, username, onLogout, nav, searchSlot }: AppS
       </div>
 
       <div className="content-container">
-        <header className="app-header">
+        <header className={`app-header ${isDesktopNavVisible ? "is-visible" : "is-hidden"}`}>
           <div className="header-inner">
             <div className="header-brand">
               <p className="brand-kicker">Streaming Portfolio</p>
@@ -87,7 +87,7 @@ export function AppShell({ children, username, onLogout, nav, searchSlot }: AppS
             </div>
 
             {nav && (
-              <nav className={`header-nav ${isDesktopNavVisible ? "is-visible" : "is-hidden"}`}>
+              <nav className="header-nav">
                 {nav}
               </nav>
             )}

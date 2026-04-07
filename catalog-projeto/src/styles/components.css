@@ -592,9 +592,22 @@
     display: none;
   }
 
+  /* Hamburger compacto no canto direito — só ícone */
   .filter-menu-mobile {
     display: block;
-    width: min(100%, 320px);
+    width: auto;
+  }
+
+  .filter-menu-toggle {
+    min-height: 40px;
+    padding: 8px 10px;
+    width: auto;
+    border-radius: 12px;
+  }
+
+  /* Ocultar o texto "Navegar / Categoria atual" no mobile */
+  .filter-menu-toggle-copy {
+    display: none;
   }
 }
 
