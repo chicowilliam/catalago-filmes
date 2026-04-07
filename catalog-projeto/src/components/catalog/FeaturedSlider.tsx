@@ -3,7 +3,9 @@ import { motion } from "framer-motion";
 
 import type { CatalogItem } from "@/types/catalog";
 
-const MAX_FEATURED_ITEMS = 4;
+const MOBILE_BREAKPOINT = "(max-width: 640px)";
+const DESKTOP_FEATURED_ITEMS = 4;
+const MOBILE_FEATURED_ITEMS = 3;
 const FEATURED_ROTATION_MS = 15000;
 
 interface FeaturedSliderProps {
@@ -13,32 +15,51 @@ interface FeaturedSliderProps {
 
 export function FeaturedSlider({ items, onOpenModal }: FeaturedSliderProps) {
   const [rotationIndex, setRotationIndex] = useState(0);
+  const [maxFeaturedItems, setMaxFeaturedItems] = useState(() => {
+    if (typeof window === "undefined") return DESKTOP_FEATURED_ITEMS;
+    return window.matchMedia(MOBILE_BREAKPOINT).matches ? MOBILE_FEATURED_ITEMS : DESKTOP_FEATURED_ITEMS;
+  });
 
   const itemsWithImage = useMemo(
     () => items.filter((item) => item.image && !item.image.startsWith("data:")),
     [items]
   );
 
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const mediaQuery = window.matchMedia(MOBILE_BREAKPOINT);
+
+    function syncFeaturedCount() {
+      setMaxFeaturedItems(mediaQuery.matches ? MOBILE_FEATURED_ITEMS : DESKTOP_FEATURED_ITEMS);
+    }
+
+    syncFeaturedCount();
+    mediaQuery.addEventListener("change", syncFeaturedCount);
+
+    return () => mediaQuery.removeEventListener("change", syncFeaturedCount);
+  }, []);
+
   const featuredItems = useMemo(() => {
-    if (itemsWithImage.length <= MAX_FEATURED_ITEMS) {
+    if (itemsWithImage.length <= maxFeaturedItems) {
       return itemsWithImage;
     }
 
-    return Array.from({ length: MAX_FEATURED_ITEMS }, (_, offset) => {
+    return Array.from({ length: maxFeaturedItems }, (_, offset) => {
       const index = (rotationIndex + offset) % itemsWithImage.length;
       return itemsWithImage[index];
     });
-  }, [itemsWithImage, rotationIndex]);
+  }, [itemsWithImage, maxFeaturedItems, rotationIndex]);
 
   useEffect(() => {
-    if (itemsWithImage.length <= MAX_FEATURED_ITEMS) return undefined;
+    if (itemsWithImage.length <= maxFeaturedItems) return undefined;
 
     const timer = window.setInterval(() => {
-      setRotationIndex((currentIndex) => (currentIndex + MAX_FEATURED_ITEMS) % itemsWithImage.length);
+      setRotationIndex((currentIndex) => (currentIndex + maxFeaturedItems) % itemsWithImage.length);
     }, FEATURED_ROTATION_MS);
 
     return () => window.clearInterval(timer);
-  }, [itemsWithImage]);
+  }, [itemsWithImage, maxFeaturedItems]);
 
   if (featuredItems.length === 0) return null;
 
