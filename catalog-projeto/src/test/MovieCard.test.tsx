@@ -68,7 +68,7 @@ describe("MovieCard", () => {
         onOpenModal={vi.fn()}
       />
     );
-    expect(screen.getByLabelText(/avaliação: 3 de 5/i)).toBeInTheDocument();
+    expect(screen.getByText("★★★☆☆")).toBeInTheDocument();
   });
 
   it("deve exibir placeholder quando a imagem falha ao carregar", () => {
