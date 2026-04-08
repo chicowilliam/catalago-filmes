@@ -8,13 +8,21 @@ interface SearchBarProps {
   onSearch: (value: string) => Promise<void>;
   isLoading?: boolean;
   placeholder?: string;
+  mobileMode?: boolean;
 }
 
-export function SearchBar({ defaultValue, onSearch, isLoading, placeholder = "Buscar filmes e series" }: SearchBarProps) {
+export function SearchBar({
+  defaultValue,
+  onSearch,
+  isLoading,
+  placeholder = "Buscar filmes e series",
+  mobileMode = false,
+}: SearchBarProps) {
   const [expanded, setExpanded] = useState(false);
   const [value, setValue] = useState(defaultValue);
   const wrapRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const hasMobileSearchHistoryRef = useRef(false);
   const { text } = useLanguage();
 
   useEffect(() => {
@@ -30,6 +38,7 @@ export function SearchBar({ defaultValue, onSearch, isLoading, placeholder = "Bu
 
   // Busca automática ao digitar (debounce 350ms)
   useEffect(() => {
+    if (mobileMode) return;
     if (!expanded) return;
     // só dispara se o valor mudou em relação ao que já está aplicado
     if (value.trim() === defaultValue.trim()) return;
@@ -37,26 +46,59 @@ export function SearchBar({ defaultValue, onSearch, isLoading, placeholder = "Bu
       void onSearch(value.trim());
     }, 350);
     return () => window.clearTimeout(timer);
-  }, [value, expanded, onSearch, defaultValue]);
+  }, [value, expanded, onSearch, defaultValue, mobileMode]);
+
+  useEffect(() => {
+    if (!mobileMode) return;
+    if (!defaultValue.trim()) {
+      hasMobileSearchHistoryRef.current = false;
+    }
+  }, [defaultValue, mobileMode]);
+
+  useEffect(() => {
+    if (!mobileMode) return;
+
+    function handlePopState() {
+      if (!hasMobileSearchHistoryRef.current) return;
+
+      hasMobileSearchHistoryRef.current = false;
+      setExpanded(false);
+      setValue("");
+      void onSearch("");
+    }
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [mobileMode, onSearch]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await onSearch(value.trim());
+    const nextSearch = value.trim();
+    await onSearch(nextSearch);
+
+    if (mobileMode && nextSearch) {
+      if (!hasMobileSearchHistoryRef.current) {
+        window.history.pushState({ catalogMobileSearch: true }, "");
+        hasMobileSearchHistoryRef.current = true;
+      }
+      setExpanded(false);
+    }
   }
 
   function handleClear() {
     setValue("");
     void onSearch("");
+    hasMobileSearchHistoryRef.current = false;
     inputRef.current?.focus();
   }
 
   const handleCollapse = useCallback(() => {
     setExpanded(false);
-    if (value) {
+    if (!mobileMode && value) {
       setValue("");
       void onSearch("");
     }
-  }, [onSearch, value]);
+  }, [mobileMode, onSearch, value]);
 
   // Fecha e limpa ao clicar fora da busca
   useEffect(() => {

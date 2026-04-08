@@ -131,6 +131,14 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
   // ─────────────────────────────────────────────────────────────────────────
 
   function handleTabChange(nextType: CatalogType) {
+    if (nextType === "all" && search.trim()) {
+      void submitSearch("");
+
+      if (nextType === activeType || isWipingRef.current) {
+        return;
+      }
+    }
+
     if (nextType === activeType || isWipingRef.current) return;
 
     const nextIndex    = getTabIndex(nextType);
@@ -171,6 +179,7 @@ export function CatalogPage({ username, onLogout }: CatalogPageProps) {
               onSearch={submitSearch}
               isLoading={isLoading}
               placeholder={text.searchPlaceholder}
+              mobileMode
             />
           }
         />
